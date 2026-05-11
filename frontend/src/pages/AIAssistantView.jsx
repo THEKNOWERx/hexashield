@@ -1,19 +1,21 @@
  
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Terminal, Info } from 'lucide-react';
-import { aiService } from '../services/apiClient';
+import { Send, Bot, User, Sparkles, Terminal, Info, Volume2, Shield, Zap } from 'lucide-react';
+import { nexusService } from '../services/apiClient';
+import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import GlobalHeader from '../components/GlobalHeader';
-
 
 const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
-      content: "Hello! I'm your AI Security Assistant. I can help you analyze scan results, explain complex vulnerabilities, or suggest remediation steps for your project. How can I assist you today?" 
+      content: "أنا المحلل الأمني Nexus. أنا جاهز لتحليل نتائج المسح الأخير، وشرح الثغرات المكتشفة، وتقديم مسارات المعالجة الاستراتيجية. كيف يمكنني مساعدتك؟",
+      type: 'message'
     }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const { speak, stop, isSpeaking } = useVoiceAssistant();
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -25,19 +27,29 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMsg = { role: 'user', content: input };
+    const userMsg = { role: 'user', content: input, type: 'message' };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
     try {
-      const res = await aiService.chat(input, "Current scan context");
-      const assistantMsg = { role: 'assistant', content: res.data.response };
+      const res = await nexusService.chat({ query: input });
+      const data = res.data;
+      
+      const assistantMsg = { 
+        role: 'assistant', 
+        content: data.answer,
+        risk: data.risk_level,
+        remediation: data.recommendation,
+        confidence: data.confidence,
+        type: 'analysis'
+      };
+      
       setMessages(prev => [...prev, assistantMsg]);
+      speak(data.answer);
     } catch (err) {
       console.error("AI Assistant error", err);
-      const errMsg = err.response?.data?.detail || err.message || "Link error: failed to reach the security core.";
-      setMessages(prev => [...prev, { role: 'assistant', content: `[SYSTEM ALERT] ${errMsg}` }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Neural Link Error: Failed to reach the security core.", type: 'error' }]);
     } finally {
       setIsTyping(false);
     }
@@ -86,9 +98,37 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
                     ${msg.role === 'user' ? 'bg-cyber-blue text-white' : 'bg-cyber-surface border border-cyber-border text-cyber-neon'}`}>
                     {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                   </div>
-                  <div className={`p-3 rounded-lg text-sm leading-relaxed shadow-lg
-                    ${msg.role === 'user' ? 'bg-cyber-blue/20 text-blue-100 border border-cyber-blue/30' : 'bg-cyber-surface text-gray-300 border border-cyber-border'}`}>
+                  <div className={`p-4 rounded-xl text-sm leading-relaxed shadow-xl border
+                    ${msg.role === 'user' ? 'bg-cyber-blue/10 text-blue-100 border-cyber-blue/30' : 'bg-cyber-surface/50 text-gray-300 border-cyber-border'}`}>
+                    
                     {msg.content}
+
+                    {msg.type === 'analysis' && (
+                        <div className="mt-4 space-y-4 pt-4 border-t border-white/5">
+                            <div className="flex items-center justify-between">
+                                <span className={`text-[9px] font-black uppercase px-2 py-1 rounded border 
+                                    ${msg.risk === 'CRITICAL' ? 'border-red-500 text-red-500 bg-red-500/10' : 
+                                      msg.risk === 'HIGH' ? 'border-orange-500 text-orange-500 bg-orange-500/10' : 
+                                      'border-blue-500 text-blue-500 bg-blue-500/10'}`}>
+                                    Risk Engagement: {msg.risk}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] text-gray-500 font-mono italic">Confidence Cluster: {msg.confidence}</span>
+                                    <div className="flex gap-0.5">
+                                        {[1,2,3].map(i => <div key={i} className={`w-1 h-3 rounded-full ${i <= 2 ? 'bg-cyber-neon' : 'bg-gray-800'}`} />)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-cyber-blue/5 rounded-xl border border-cyber-blue/10 flex items-start gap-3">
+                                <Zap size={14} className="text-cyber-neon mt-0.5" />
+                                <div>
+                                    <span className="text-[10px] font-black text-gray-500 uppercase block mb-1">Strategic Remediation</span>
+                                    <p className="text-xs text-gray-400 italic font-mono leading-relaxed">{msg.remediation}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                   </div>
                 </div>
               </div>

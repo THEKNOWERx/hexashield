@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import GlobalHeader from '../components/GlobalHeader';
 
-const ReportGeneratorView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
+const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +35,26 @@ const ReportGeneratorView = ({ isMonochrome, onToggleMonochrome, headerTitle, he
     fetchReports();
   }, []);
 
-  const handleDownload = (scanId, format) => {
-    navigate(`/reports/${scanId}`);
+  const handleDownload = async (scanId, format) => {
+    try {
+      const response = await reportsService.download(scanId, format);
+      const blob = new Blob([response.data], { 
+        type: format === 'pdf' ? 'application/pdf' : 'text/html' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const filename = `HexaReport_${scanId}.${format === 'pdf' ? 'pdf' : 'html'}`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download error", err);
+      alert("Unauthorized or server error. Please ensure you are logged in correctly.");
+    }
   };
 
   const handleDelete = async (scanId) => {
@@ -81,8 +99,6 @@ const ReportGeneratorView = ({ isMonochrome, onToggleMonochrome, headerTitle, he
       <GlobalHeader 
         title={headerTitle} 
         subtitle={headerSubtitle} 
-        isMonochrome={isMonochrome} 
-        onToggleMonochrome={onToggleMonochrome} 
       />
 
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
@@ -139,27 +155,32 @@ const ReportGeneratorView = ({ isMonochrome, onToggleMonochrome, headerTitle, he
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                         <a 
-                           href={`http://127.0.0.1:8000/api/reports/download/${report.scan_id}?format=html`}
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           className="p-2 bg-cyber-neon/10 text-cyber-neon rounded-lg hover:bg-cyber-neon/20 transition-colors"
-                           title="Executive Audit Report"
+                      <div className="flex items-center justify-end gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                         {/* 1. Download Now Button */}
+                         <button 
+                           onClick={() => handleDownload(report.scan_id, 'pdf')}
+                           className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all border border-red-500/20"
+                           title="Download Now (PDF)"
                          >
-                           <FileText size={16} />
-                         </a>
+                           <Download size={14} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Download</span>
+                         </button>
+
+                         {/* 2. Read Before Print (View) Button */}
                          <button 
                            onClick={() => navigate(`/reports/${report.scan_id}`)} 
-                           className="p-2 bg-cyber-blue/10 text-cyber-blue rounded-lg hover:bg-cyber-blue/20 transition-colors"
-                           title="View Detailed Analysis"
+                           className="flex items-center gap-2 px-3 py-1.5 bg-cyber-blue/10 text-cyber-blue rounded-lg hover:bg-cyber-blue/20 transition-all border border-cyber-blue/20"
+                           title="Read Full Intelligence"
                          >
-                           <Shield size={16} />
+                           <Shield size={14} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Read/Edit</span>
                          </button>
+
+                         {/* 3. Delete Button */}
                          <button 
                            onClick={() => handleDelete(report.scan_id)}
-                           className="p-2 bg-cyber-alert/10 text-cyber-alert rounded-lg hover:bg-cyber-alert/20 transition-colors"
-                           title="Delete Audit Record"
+                           className="p-2 bg-cyber-alert/10 text-cyber-alert rounded-lg hover:bg-cyber-alert/20 transition-all border border-cyber-alert/20"
+                           title="Delete Record"
                          >
                            <Trash2 size={16} />
                          </button>

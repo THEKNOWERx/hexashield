@@ -27,18 +27,33 @@ def benchmark_fast_scan():
     start_time = time.time()
     
     # Run the scan
-    # Note: Using localhost might result in no open ports if services aren't running,
-    # but we are testing the engine flow and speed.
     try:
         AdvancedScannerService.execute_advanced_scan(target, intensity, scan_id)
         
+        print("[*] Scan initiated. Waiting for completion...", end="", flush=True)
+        
+        # Polling Loop to wait for async completion
+        timeout = 60
+        elapsed = 0
+        while elapsed < timeout:
+            with SessionLocal() as db:
+                scan = db.query(Scan).filter(Scan.id == scan_id).first()
+                if scan and scan.status != "running":
+                    print(f"\n[+] Scan finished with status: {scan.status}")
+                    break
+            time.sleep(1)
+            elapsed += 1
+            print(".", end="", flush=True)
+            
+        if elapsed >= timeout:
+            print("\n[!] Timeout waiting for scan.")
+            return
+
         duration = time.time() - start_time
         print(f"Benchmark completed in {round(duration, 2)}s")
         
         with SessionLocal() as db:
             scan = db.query(Scan).filter(Scan.id == scan_id).first()
-            print(f"Scan Status: {scan.status}")
-            print(f"Final Phase: {scan.phase if hasattr(scan, 'phase') else 'Unknown'}")
             
             # Check results_json
             results = scan.results_json
@@ -46,6 +61,10 @@ def benchmark_fast_scan():
                 import json
                 results = json.loads(results)
             
+            if not results:
+                print("[!] No results found in database.")
+                return
+
             print(f"Ports Found: {len(results.get('ports', []))}")
             if duration < 45:
                 print("[SUCCESS] Speed threshold met (< 45s)")

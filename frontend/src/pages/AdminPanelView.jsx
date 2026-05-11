@@ -1,141 +1,104 @@
- 
 import React, { useState, useEffect } from 'react';
 import { adminService } from '../services/apiClient';
-import { Users, Shield, History, Cpu, Server, Activity, AlertCircle, Settings } from 'lucide-react';
+import { Users, Shield, History, Cpu, Server, Activity, AlertCircle, Settings, Download, Trash2, UserPlus } from 'lucide-react';
 import GlobalHeader from '../components/GlobalHeader';
 
-const AdminPanel = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
+const AdminPanelView = ({ headerTitle = "Admin Control", headerSubtitle = "System management and audit" }) => {
   const [users, setUsers] = useState([]);
   const [systemStats, setSystemStats] = useState({
-     total_scans: 0,
-     active_targets: 0,
-     critical_findings: 0,
-     system_health: 'stable'
+      total_scans: 0,
+      active_targets: 0,
+      critical_findings: 0,
+      system_status: 'Operational',
+      health: {
+        cpu: '0%',
+        memory: '0 GB / 0 GB',
+        load: 'Stable'
+      }
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       try {
-        const [usersRes, statsRes] = await Promise.all([
-          adminService.getUsers(),
-          adminService.getStats()
-        ]);
-        setUsers(usersRes.data);
-        setSystemStats(statsRes.data);
+        const usersRes = await adminService.getUsers();
+        const statsRes = await adminService.getStats();
+        
+        if (isMounted) {
+          if (usersRes && usersRes.data) setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
+          if (statsRes && statsRes.data) {
+            setSystemStats(prev => ({
+              ...prev,
+              ...statsRes.data,
+              health: statsRes.data.health || prev.health
+            }));
+          }
+        }
       } catch (err) {
         console.error("Admin dashboard fetch error", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
     fetchData();
+    return () => { isMounted = false; };
   }, []);
 
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-cyber-black">
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-10 h-10 border-2 border-cyber-blue border-t-transparent rounded-full animate-spin" />
+        <span className="text-[10px] text-gray-700 font-bold uppercase tracking-widest">Synthesizing Admin Layer...</span>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <GlobalHeader 
-        title={headerTitle} 
-        subtitle={headerSubtitle} 
-        isMonochrome={isMonochrome} 
-        onToggleMonochrome={onToggleMonochrome} 
-      />
+    <div className="space-y-12 pb-32 bg-cyber-black text-white p-8">
+      <GlobalHeader title={headerTitle} subtitle={headerSubtitle} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="cyber-panel bg-cyber-blue/5 border-cyber-blue/20 flex items-center gap-4">
-          <div className="w-12 h-12 rounded bg-cyber-blue/10 flex items-center justify-center text-cyber-blue">
-            <Cpu size={24} />
-          </div>
-          <div>
-            <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">CPU Usage</div>
-            <div className="text-xl font-bold font-mono">{systemStats.health?.cpu || '0%'}</div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="p-8 bg-cyber-surface border border-white/5 rounded-2xl">
+           <Cpu className="text-cyber-blue mb-4" />
+           <p className="text-[10px] text-gray-600 uppercase font-bold">CPU Load</p>
+           <p className="text-3xl font-black">{systemStats.health?.cpu || '0%'}</p>
         </div>
-        <div className="cyber-panel bg-cyber-neon/5 border-cyber-neon/20 flex items-center gap-4">
-          <div className="w-12 h-12 rounded bg-cyber-neon/10 flex items-center justify-center text-cyber-neon">
-            <Server size={24} />
-          </div>
-          <div>
-            <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">Memory</div>
-            <div className="text-xl font-bold font-mono">{systemStats.health?.memory || '0 GB / 0 GB'}</div>
-          </div>
+        <div className="p-8 bg-cyber-surface border border-white/5 rounded-2xl">
+           <Server className="text-cyber-neon mb-4" />
+           <p className="text-[10px] text-gray-600 uppercase font-bold">Memory Matrix</p>
+           <p className="text-3xl font-black">{typeof systemStats.health?.memory === 'string' ? systemStats.health.memory.split(' / ')[0] : '0 GB'}</p>
         </div>
-        <div className="cyber-panel bg-red-900/5 border-red-500/20 flex items-center gap-4">
-          <div className="w-12 h-12 rounded bg-red-500/10 flex items-center justify-center text-red-500">
-            <Activity size={24} />
-          </div>
-          <div>
-            <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">System Load</div>
-            <div className="text-xl font-bold font-mono">{systemStats.health?.load || 'Stable'}</div>
-          </div>
+        <div className="p-8 bg-cyber-surface border border-white/5 rounded-2xl">
+           <Activity className="text-cyber-alert mb-4" />
+           <p className="text-[10px] text-gray-600 uppercase font-bold">Status</p>
+           <p className="text-3xl font-black">{systemStats.health?.load || 'Stable'}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* User Management */}
-        <div className="cyber-panel">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold flex items-center gap-2">
-              <Users className="text-cyber-blue" size={18} />
-              Registered Users
-            </h3>
-          </div>
-          <div className="space-y-3 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            {users.map(u => (
-              <div key={u.id} className="p-3 bg-cyber-black/50 border border-cyber-border rounded flex justify-between items-center group hover:border-cyber-blue transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-cyber-surface flex items-center justify-center text-[10px] font-bold text-cyber-blue border border-cyber-blue/20">
-                    {u.username.substring(0, 2).toUpperCase()}
+      <div className="cyber-panel bg-cyber-surface p-10 mt-10">
+         <h2 className="text-xl font-black italic uppercase mb-8 border-b border-white/5 pb-4">Personnel Database</h2>
+         <div className="space-y-4">
+            {Array.isArray(users) && users.length > 0 ? users.map((u, i) => (
+               <div key={u.id || i} className="p-6 bg-black/20 border border-white/5 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center font-bold">{u.username ? u.username.substring(0, 1) : 'U'}</div>
+                     <div>
+                        <p className="font-bold">{u.username || 'System'}</p>
+                        <p className="text-[10px] text-gray-600 uppercase tracking-widest">{u.role || 'User'}</p>
+                     </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-bold">{u.username}</div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-tighter">{u.role}</div>
+                  <div className="text-right">
+                     <p className="text-[10px] text-cyber-neon font-black">{u.status || 'ACTIVE'}</p>
                   </div>
-                </div>
-
-                <div className="text-right">
-                  <div className={`text-[10px] font-bold ${u.status === 'Active' ? 'text-cyber-neon' : 'text-gray-600'}`}>
-                    {u.status?.toUpperCase() || 'OFFLINE'}
-                  </div>
-                  <div className="text-[10px] text-gray-600">{u.last_login}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* System Activity */}
-        <div className="cyber-panel">
-          <h3 className="font-bold flex items-center gap-2 mb-6">
-            <History className="text-cyber-blue" size={18} />
-            System Audit Audit Log
-          </h3>
-          <div className="space-y-4">
-            {[
-              { time: "09:33:14", event: "User 'Admin' authorized deep reconnaissance on internal node cluster", type: "info" },
-              { time: "09:28:44", event: "User 'Analysis' updated vulnerability cross-reference definitions (Mitre v12.1)", type: "success" },
-              { time: "09:22:12", event: "User 'Student' initiated automated security audit on sandbox.hexa-shield.io", type: "info" },
-              { time: "08:52:12", event: "Multiple failed login attempts detected - Anomaly detection active", type: "warning" },
-              { time: "07:15:33", event: "Executive Audit Report 'PRO-GRAD-2026' generated by 'Admin'", type: "success" },
-            ].map((log, i) => (
-              <div key={i} className="flex gap-4 text-[10px] font-mono border-b border-cyber-border/30 pb-3 last:border-0">
-                <span className="text-gray-600">{log.time}</span>
-                <span className={`
-                  ${log.type === 'info' ? 'text-cyber-blue' : ''}
-                  ${log.type === 'success' ? 'text-cyber-neon' : ''}
-                  ${log.type === 'warning' ? 'text-red-500' : ''}
-                `}>
-                  [{log.type.toUpperCase()}] {log.event}
-                </span>
-              </div>
-            ))}
-          </div>
-          <button className="w-full mt-6 py-2 bg-cyber-surface text-gray-400 text-[10px] font-bold border border-cyber-border hover:text-white transition-all">
-            DOWNLOAD FULL AUDIT LOG (CSV)
-          </button>
-        </div>
+               </div>
+            )) : (
+               <p className="text-center py-10 text-gray-700">No records found</p>
+            )}
+         </div>
       </div>
     </div>
   );
 };
 
-export default AdminPanel;
-
+export default AdminPanelView;

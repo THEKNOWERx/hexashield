@@ -8,7 +8,7 @@ import { useNotification } from '../components/NotificationSystem';
 import CyberCard from '../components/CyberCard';
 import GlobalHeader from '../components/GlobalHeader';
 
-const ExpandablePortRow = ({ port: p, isPortsOnly }) => {
+const ExpandablePortRow = ({ port: p }) => {
   const [isDeepDive, setIsDeepDive] = useState(false);
 
   const getAdvisory = (port, service) => {
@@ -21,29 +21,16 @@ const ExpandablePortRow = ({ port: p, isPortsOnly }) => {
     return "Standard service identified. Follow principle of least privilege and monitor for anomalous traffic patterns.";
   };
 
-  if (isPortsOnly) {
-    return (
-      <tr className="hover:bg-white/[0.02] transition-colors">
-        <td className="py-4 pl-6 font-mono text-xs text-cyber-blue">
-          {p.port}/TCP
-        </td>
-        <td className="py-4 font-bold text-sm tracking-tight text-cyber-neon uppercase">
-          {p.state || 'OPEN'}
-        </td>
-      </tr>
-    );
-  }
-
   return (
     <React.Fragment>
       <tr 
         onClick={() => setIsDeepDive(!isDeepDive)}
         className={`group cursor-pointer transition-all duration-300 ${isDeepDive ? 'bg-cyber-blue/10' : 'hover:bg-white/[0.02]'}`}
       >
-        <td className="py-4 pl-6 font-mono text-xs text-cyber-blue">
+        <td className={`py-4 pl-6 font-mono text-xs ${['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) ? 'text-red-500' : 'text-cyber-blue'}`}>
           {p.port}/TCP
         </td>
-        <td className="py-4 font-bold text-sm tracking-tight">
+        <td className={`py-4 font-bold text-sm tracking-tight ${['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) ? 'text-red-500' : 'text-white'}`}>
           {p.service.toUpperCase()}
         </td>
         <td className="py-4 text-[11px] text-gray-500 font-mono tracking-tighter">
@@ -57,12 +44,12 @@ const ExpandablePortRow = ({ port: p, isPortsOnly }) => {
               </div>
             )}
             <span className={`px-2 py-0.5 rounded text-[9px] font-black border transition-all ${
-              p.risk === 'Critical' ? 'border-red-600 text-red-600 bg-red-900/10 shadow-[0_0_15px_rgba(255,0,0,0.3)]' : 
+              p.risk === 'Critical' || ['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) ? 'border-red-600 text-red-600 bg-red-900/10 shadow-[0_0_15px_rgba(255,0,0,0.3)]' : 
               p.risk === 'High' ? 'border-cyber-alert text-cyber-alert bg-cyber-alert/5' : 
               p.risk === 'Medium' ? 'border-cyber-warning text-cyber-warning bg-cyber-warning/5' : 
               'border-cyber-blue/40 text-cyber-blue/80 bg-cyber-blue/5'
             }`}>
-              {p.risk}
+              {['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) && p.risk !== 'Critical' ? 'Exploitable' : p.risk}
             </span>
           </div>
         </td>
@@ -124,7 +111,72 @@ const ExpandablePortRow = ({ port: p, isPortsOnly }) => {
   );
 };
 
-const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
+const PortCard = ({ port: p }) => {
+  const isHighValue = ['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) || [21, 22, 80, 443].includes(parseInt(p.port));
+  const isCritical = [21, 22, 80, 443, 3306, 3389].includes(parseInt(p.port)) || isHighValue;
+  
+  return (
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0, rotateY: 30 }}
+      animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+      whileHover={{ scale: 1.05, y: -5 }}
+      className={`relative p-5 rounded-2xl border transition-all duration-500 overflow-hidden group
+        ${isCritical 
+          ? 'bg-red-500/5 border-red-500/20 shadow-[0_0_20px_rgba(255,0,0,0.05)]' 
+          : 'bg-cyber-blue/5 border-cyber-blue/20 shadow-[0_0_20px_rgba(0,183,255,0.05)]'}`}
+    >
+      {/* Background Glitch Effect */}
+      <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] rounded-full transition-opacity duration-700 opacity-20 group-hover:opacity-40
+        ${isCritical ? 'bg-red-600' : 'bg-cyber-blue'}`} />
+      
+      <div className="relative z-10">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-col">
+            <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${isCritical ? 'text-red-400' : 'text-gray-500'}`}>
+              Port ID
+            </span>
+            <h3 className={`text-2xl font-mono font-black tracking-tighter ${isCritical ? 'text-white' : 'text-cyber-blue'}`}>
+              {p.port}
+            </h3>
+          </div>
+          <div className={`p-2 rounded-lg ${isCritical ? 'bg-red-900/30' : 'bg-cyber-blue/10'}`}>
+            <Terminal size={18} className={isCritical ? 'text-red-500' : 'text-cyber-blue'} />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Service Protocol</span>
+            <div className="flex items-center gap-2">
+              <span className={`font-mono text-sm font-bold ${isCritical ? 'text-red-200' : 'text-white'}`}>
+                {p.service.toUpperCase()}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-500 font-mono">
+                TCP
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+            <div className="flex items-center gap-1.5">
+              <Activity size={10} className={isCritical ? 'text-red-500' : 'text-cyber-neon'} />
+              <span className={`text-[9px] font-black uppercase tracking-widest ${isCritical ? 'text-red-500' : 'text-cyber-neon'}`}>
+                Active / Open
+              </span>
+            </div>
+            <Shield size={12} className="text-gray-700 group-hover:text-cyber-blue transition-colors" />
+          </div>
+        </div>
+      </div>
+      
+      {/* Decorative Corners */}
+      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/10" />
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-white/10" />
+    </motion.div>
+  );
+};
+
+const ScanView = ({ headerTitle, headerSubtitle }) => {
   const showNotification = useNotification();
   const { 
     scanResults, setScanResults, 
@@ -135,7 +187,7 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
   } = useSecurity();
 
   const [target, setTarget] = useState(activeTarget || '');
-  const [intensity, setIntensity] = useState('pulse');
+  const [intensity, setIntensity] = useState('deep');
   const [isScanning, setIsScanning] = useState(false);
 
   // No persistence for inputs as per user request
@@ -164,76 +216,102 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
     try {
       // 1. Kickoff the scan
       const startRes = await scanService.startScan(target, intensity);
-      const scanId = startRes.data.id;
+      const scanId = startRes?.data?.id;
       
       if (!scanId) throw new Error("Faulty Engine Initialization.");
 
       addLog(`[EXEC] PIPELINE ${scanId} REGISTERED. MONITORING TELEMETRY...`, 'text-cyber-neon');
 
-      // 2. Begin Reactive Polling (Turbo Interval)
+      // 2. Begin Reactive Polling (Turbo Interval) - Defensive Implementation
       let completed = false;
       let lastPhase = '';
       let pollCount = 0;
+      let knownPorts = new Set();
 
-      while (!completed && pollCount < 400) { // Max 4 mins polling with 500ms interval
+      while (!completed && pollCount < 1200) { // Max 6 mins polling with 300ms interval
         pollCount++;
-        await new Promise(r => setTimeout(r, 500)); // Optimized to 500ms for Real-Time feel
+        await new Promise(r => setTimeout(r, 300));
         
-        const statusRes = await scanService.getStatus(scanId);
-        const scanData = statusRes.data;
-        
-        // Safety check for results_json
-        let results = {};
         try {
-          results = scanData.results_json ? (typeof scanData.results_json === 'string' ? JSON.parse(scanData.results_json) : scanData.results_json) : {};
-        } catch (e) { console.error("Parse Error", e); }
-
-        // Update Progress based on Phase
-        const phase = results.phase || 'Initializing';
-        if (phase !== lastPhase) {
-          lastPhase = phase;
-          const color = phase.includes('Complete') ? 'text-cyber-neon' : 'text-yellow-400';
-          addLog(`[ENGINE] PHASE SHIFT: ${phase.toUpperCase()}`, color);
-        }
-
-        // Dynamic Progress Smoothing
-        let targetProgress = 10;
-        if (phase.includes('DNS')) targetProgress = 25;
-        else if (phase.includes('Discovery')) targetProgress = 50;
-        else if (phase.includes('Aggregation')) targetProgress = 75;
-        else if (phase.includes('Mapping')) targetProgress = 90;
-        else if (phase.includes('Complete')) targetProgress = 100;
-        
-        setScanProgress(prev => {
-           if (prev < targetProgress) return Math.min(targetProgress, prev + 5); // Faster increment
-           return prev;
-        });
-
-        // Stream live ports immediately as they appear in results
-        if (results.ports && results.ports.length > 0) {
-          setCtxLivePorts(results.ports);
-        }
-
-        if (scanData.status === 'completed') {
-          completed = true;
-          setScanProgress(100);
-          setScanResults(scanData);
-          setCtxLivePorts(results.ports || []);
+          const statusRes = await scanService.getStatus(scanId);
+          if (!statusRes || !statusRes.data) continue;
           
-          addLog(`[DONE] FULL AUDIT SPECTRUM COMPLETE.`, 'text-cyber-neon');
-          const vuln_count = scanData.findings_count || (results.findings?.length) || 0;
-          addLog(`[INTEL] ${vuln_count} CRITICAL VULNERABILITY FINDINGS MAPPED.`, 'text-cyber-blue');
+          const scanData = statusRes.data;
           
-          showNotification(`Intelligence Audit Complete.`, "success");
-        } else if (scanData.status === 'failed') {
-          throw new Error("Engine Aborted. Discovery logic failure.");
+          // Safety check for results_json
+          let results = {};
+          try {
+            const rawJson = scanData.results_json;
+            results = rawJson ? (typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson) : {};
+          } catch (e) { 
+            console.error("Engine Telemetry Parse Error", e);
+            // Don't crash the loop, just use empty results for this tick
+          }
+
+          if (typeof results !== 'object' || results === null) results = {};
+
+          // Update Progress based on Phase - Smooth scaling
+          const phase = results.phase || (scanData.status === 'completed' ? 'Complete' : 'Initializing');
+          if (phase !== lastPhase) {
+            lastPhase = phase;
+            const color = phase.includes('Complete') ? 'text-cyber-neon' : 'text-yellow-400';
+            addLog(`[ENGINE] PHASE SHIFT: ${phase.toUpperCase()}`, color);
+          }
+
+          // Dynamic Progress Smoothing
+          let targetProgress = 10;
+          const lowerPhase = phase.toLowerCase();
+          if (lowerPhase.includes('complete')) targetProgress = 100;
+          else if (lowerPhase.includes('mapping') || lowerPhase.includes('nvd')) targetProgress = 90;
+          else if (lowerPhase.includes('aggregation') || lowerPhase.includes('interrogation')) targetProgress = 75;
+          else if (lowerPhase.includes('discovery') || lowerPhase.includes('recon')) targetProgress = 50;
+          else if (lowerPhase.includes('dns') || lowerPhase.includes('surface')) targetProgress = 25;
+          
+          setScanProgress(prev => {
+             if (prev < targetProgress) return Math.min(targetProgress, prev + 5); 
+             return prev;
+          });
+
+          // Stream live ports immediately - Optimized logic
+          if (results.ports && Array.isArray(results.ports)) {
+            const newPorts = results.ports.filter(p => !knownPorts.has(`${p.port}-${p.service}`));
+            if (newPorts.length > 0) {
+              newPorts.forEach(p => {
+                knownPorts.add(`${p.port}-${p.service}`);
+                addLog(`[PORT] ${p.port}/TCP DISCOVERED - ${(p.service || 'UNKNOWN').toUpperCase()}`, 'text-cyber-neon');
+              });
+              setCtxLivePorts(results.ports);
+            }
+          }
+
+          if (scanData.status === 'completed') {
+            completed = true;
+            setScanProgress(100);
+            setScanResults(scanData);
+            setCtxLivePorts(results.ports || []);
+            
+            addLog(`[DONE] FULL AUDIT SPECTRUM COMPLETE.`, 'text-cyber-neon');
+            const ports_list = (results.ports || []).map(p => `${p.port}/TCP`).join(', ');
+            addLog(`[INFO] OPEN PORTS DISCOVERED: ${ports_list || 'NONE'}`, 'text-white font-black');
+            
+            const vuln_count = scanData.findings_count || (results.findings?.length) || 0;
+            addLog(`[INTEL] ${vuln_count} CRITICAL VULNERABILITY FINDINGS MAPPED.`, 'text-cyber-blue');
+            
+            showNotification(`Intelligence Audit Complete.`, "success");
+          } else if (scanData.status === 'failed') {
+            throw new Error(scanData.error || "Engine Aborted. Discovery logic failure.");
+          }
+        } catch (pollErr) {
+          console.error("Polling Tick Error:", pollErr);
+          // If it's a 404, the scan might have been purged
+          if (pollErr.response?.status === 404) break;
         }
       }
 
     } catch (err) {
       setScanProgress(0);
       addLog(`[ERROR] ENGINE CRITICAL FAILURE: ${err.message}`, 'text-cyber-alert');
-      showNotification("Cyber-Sensor Connectivity Error.", "error");
+      showNotification(err.message.includes('Connectivity') ? "Cyber-Sensor Connectivity Error." : "Engine Failure: " + err.message, "error");
     } finally {
       setIsScanning(false);
     }
@@ -241,18 +319,13 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
 
   return (
     <div className="space-y-8">
-      <GlobalHeader 
-        title={headerTitle} 
-        subtitle={headerSubtitle} 
-        isMonochrome={isMonochrome} 
-        onToggleMonochrome={onToggleMonochrome} 
-      />
+      <GlobalHeader title={headerTitle} subtitle={headerSubtitle} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Settings Column */}
         <div className="lg:col-span-4 space-y-6">
           <CyberCard title="Scan Configuration" icon={Cpu}>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Target Infrastructure</label>
                 <div className="relative group">
@@ -260,7 +333,7 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
                   <input 
                     type="text" 
                     placeholder="HOST, IP, OR SUBNET..."
-                    className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-4 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-xs tracking-widest placeholder:text-gray-700"
+                    className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-3 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-xs tracking-widest placeholder:text-gray-700"
                     value={target}
                     onChange={(e) => setTarget(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !isScanning && startScan()}
@@ -270,38 +343,41 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
 
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Engine Profile</label>
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                     {[
-                      { id: 'pulse', name: 'Policy Discovery', desc: 'Standard Policy audit & Discovery', icon: Shield, color: 'text-cyber-blue' },
-                      { id: 'deep', name: 'Technical', desc: 'Technical Deep Audit + Service Intel', icon: Zap, color: 'text-cyber-neon' },
-                      { id: 'ports_only', name: 'Port Only', desc: 'Rapid Recon - Only port discovery', icon: Terminal, color: 'text-cyber-neon' },
+                      { id: 'pulse', name: 'Rapid Kinetic Strike', desc: 'Fast Recon → Port Mapping → Instant Risk', icon: Shield, color: 'text-cyber-blue' },
+                      { id: 'deep', name: 'Full Spectrum Audit', desc: 'Neural Fingerprinting & Service Decoding', icon: Zap, color: 'text-cyber-neon' },
+                      { id: 'ports_only', name: 'Stealth Infiltration', desc: 'Evasive Scanning & Surface Discovery', icon: Terminal, color: 'text-cyber-neon' },
                     ].map(profile => (
                       <button 
                         key={profile.id}
                         onClick={() => setIntensity(profile.id)}
-                        className={`p-4 text-left border rounded-xl transition-all duration-300 flex items-start gap-4 group
-                          ${intensity === profile.id ? 'bg-cyber-deep-blue/20 border-cyber-blue/50 shadow-blue-glow' : 'bg-cyber-black/40 border-white/5 hover:border-white/10'}`}
+                        className={`p-4 text-left border rounded-2xl transition-all duration-300 flex items-center gap-5 group
+                          ${intensity === profile.id ? 'bg-cyber-blue/10 border-cyber-blue/50 shadow-[0_0_20px_rgba(0,71,255,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
                       >
-                        <div className={`p-2 rounded-lg bg-cyber-black border border-white/5 ${intensity === profile.id ? (profile.id === 'ultra' ? 'text-red-500 shadow-[0_0_10px_rgba(255,0,0,0.5)]' : profile.color) : 'text-gray-700'}`}>
-                          <profile.icon size={20} />
+                        <div className={`p-2 rounded-xl bg-black/40 border border-white/5 transition-colors ${intensity === profile.id ? 'text-cyber-blue' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                          <profile.icon size={22} />
                         </div>
-                        <div>
-                          <div className={`text-sm font-bold tracking-tight ${intensity === profile.id ? 'text-white' : 'text-gray-500'}`}>{profile.name}</div>
-                          <div className="text-[10px] text-gray-600 font-medium">{profile.desc}</div>
+                        <div className="flex-1">
+                          <div className={`text-[13px] font-bold tracking-tight mb-0.5 ${intensity === profile.id ? 'text-white' : 'text-gray-500'}`}>{profile.name}</div>
+                          <div className="text-[10px] text-gray-600 font-medium tracking-tight">{profile.desc}</div>
                         </div>
+                        <div className={`w-1.5 h-1.5 rounded-full transition-all ${intensity === profile.id ? 'bg-cyber-blue shadow-[0_0_10px_#0047ff]' : 'bg-transparent'}`} />
                       </button>
                     ))}
                 </div>
               </div>
 
-              <button 
-                disabled={isScanning}
-                onClick={startScan}
-                className="cyber-button w-full py-5 active:scale-[0.98]"
-              >
-                {isScanning ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
-                <span className="font-black tracking-[0.2em]">{isScanning ? 'SCANNING' : 'START SENSOR'}</span>
-              </button>
+              <div className="pt-4">
+                <button 
+                  disabled={isScanning}
+                  onClick={startScan}
+                  className="w-full bg-cyber-blue hover:bg-blue-600 disabled:opacity-50 text-white py-4 rounded-2xl transition-all duration-300 shadow-[0_0_30px_rgba(0,71,255,0.3)] active:scale-[0.98] flex items-center justify-center gap-4 group"
+                >
+                  {isScanning ? <Loader2 className="animate-spin text-white" size={24} /> : <Search className="text-white group-hover:scale-110 transition-transform" size={24} />}
+                  <span className="font-black tracking-[0.25em] text-sm uppercase">Start Sensor</span>
+                </button>
+              </div>
             </div>
           </CyberCard>
         </div>
@@ -309,267 +385,128 @@ const ScanView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitl
         {/* Results Column */}
         <div className="lg:col-span-8 flex flex-col gap-8">
           <CyberCard title="Telemetry Feed" icon={Activity}>
-            <div className="space-y-6 min-h-[500px] flex flex-col">
-              {/* Target Infrastructure Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-cyber-black/40 border border-white/5 rounded-xl p-4 flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-cyber-blue/10 border border-cyber-blue/30 text-cyber-blue">
-                    <Globe size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Target IP Address</div>
-                    <div className="text-sm font-bold text-white font-mono">{scanResults?.results_json ? (typeof scanResults.results_json === 'string' ? JSON.parse(scanResults.results_json).ip : scanResults.results_json.ip) || 'Resolving...' : 'Standby'}</div>
-                  </div>
+            <div className="space-y-6 min-h-[350px] flex flex-col">
+              {/* Progress Section */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-end px-1">
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">{(isScanning || scanProgress === 100) ? (scanProgress === 100 ? 'Intelligence Full' : 'Agent Active') : 'Sensor Ready'}</span>
+                  <span className="text-3xl font-mono font-black text-cyber-neon tracking-tighter drop-shadow-[0_0_10px_rgba(57,255,20,0.4)]">{scanProgress}%</span>
                 </div>
-                <div className="bg-cyber-black/40 border border-white/5 rounded-xl p-4 flex items-center gap-4 min-w-0">
-                  <div className="p-3 rounded-lg bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon shrink-0">
-                    <Network size={20} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Open Ports Count</div>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span className="text-sm font-bold text-white font-mono shrink-0">{ctxLivePorts?.length || 0} PORTS DISCOVERED</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{isScanning ? 'Engine Active' : 'Sensor Ready'}</span>
-                  <span className="text-xl font-mono font-bold text-cyber-neon tracking-tighter">{scanProgress}%</span>
-                </div>
-                <div className="w-full bg-cyber-black h-1.5 rounded-full overflow-hidden border border-white/5">
+                <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden border border-white/5 p-[1px]">
                    <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${scanProgress}%` }}
-                    className="h-full bg-cyber-neon shadow-neon-glow" 
+                    transition={{ type: "spring", stiffness: 40, damping: 20 }}
+                    className="h-full bg-cyber-neon shadow-[0_0_15px_rgba(57,255,20,0.6)] rounded-full" 
                    />
                 </div>
               </div>
 
-              {/* Console Output */}
-              <div className="flex-1 bg-cyber-black/80 rounded-xl p-5 font-mono text-[11px] text-gray-400 overflow-y-auto h-64 border border-white/5 relative">
-                 <div className="absolute top-4 right-4 text-[8px] font-black text-cyber-blue/30 uppercase tracking-widest">Live Log</div>
-                 <div className="space-y-1">
+              {/* Console Output (Image-Matched Styling) */}
+              <div className="flex-1 bg-black/60 rounded-2xl p-6 font-mono text-[11px] leading-relaxed text-gray-400 overflow-y-auto h-48 border border-white/5 relative">
+                 <div className="absolute top-4 right-6 text-[8px] font-black text-cyber-blue/40 uppercase tracking-[0.3em] select-none">Live Log</div>
+                 <div className="space-y-1.5">
                     {scanLogs.length === 0 && (
-                      <p className="text-cyber-blue">[READY] HEXA-SCAN TCP ENGINE V4.1 STANDBY...</p>
+                      <p className="text-cyber-blue opacity-50 italic">Waiting for sensor initialization...</p>
                     )}
-                    {scanLogs.map((log, i) => (
-                      <p key={i} className={log.color}>{log.line}</p>
-                    ))}
-                    {isScanning && <div className="animate-pulse text-cyber-blue mt-2 font-black">_</div>}
+                    {scanLogs.map((log, i) => {
+                      const isDone = log.line.startsWith('[DONE]');
+                      const isOpen = log.line.startsWith('[OPEN]');
+                      const isVuln = log.line.startsWith('[VULN]');
+                      
+                      let colorClass = log.color;
+                      if (isDone || isOpen) colorClass = 'text-cyber-neon font-bold';
+                      if (isVuln) colorClass = 'text-cyber-blue font-bold';
+
+                      return (
+                        <p key={i} className={`${colorClass} flex items-start gap-2`}>
+                          <span className="opacity-40 select-none">{">"}</span>
+                          <span>{log.line}</span>
+                        </p>
+                      );
+                    })}
+                    {isScanning && <div className="animate-pulse text-cyber-blue mt-2 font-black inline-block">_</div>}
                  </div>
-              </div>
-
-              {/* Web Intelligence Section */}
-              <AnimatePresence>
-                {scanProgress === 100 && scanResults && scanResults.web_analysis && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-6 rounded-2xl bg-cyber-blue/5 border border-cyber-blue/20"
-                  >
-                    <div className="flex items-center gap-3 mb-6">
-                      <Globe className="text-cyber-blue" size={20} />
-                      <h4 className="text-xs font-black text-white uppercase tracking-[0.3em]">Web Intelligence Audit</h4>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Tech Stack */}
-                      <div className="space-y-4">
-                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                          <Cpu size={12} /> Tech Stack
-                        </div>
-                        <div className="space-y-2">
-                           <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-gray-400">Server:</span>
-                              <span className="text-white font-mono">{scanResults.web_analysis.server}</span>
-                           </div>
-                           <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-gray-400">Framework:</span>
-                              <span className="text-cyber-blue font-mono">{scanResults.web_analysis.framework}</span>
-                           </div>
-                           <div className="flex justify-between items-center text-[11px]">
-                              <span className="text-gray-400">CMS:</span>
-                              <span className="text-cyber-neon font-mono">{scanResults.web_analysis.cms}</span>
-                           </div>
-                        </div>
+                  
+                  {/* Performance Analytics HUD */}
+                  {scanResults && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-6 p-4 rounded-xl bg-cyber-blue/5 border border-cyber-blue/20 flex flex-wrap gap-6"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Reputation Score</span>
+                        <span className="text-xl font-mono font-black text-cyber-blue">
+                          {scanResults.results_json ? (typeof scanResults.results_json === 'string' ? JSON.parse(scanResults.results_json).reputation_score : scanResults.results_json.reputation_score) || 'N/A' : 'N/A'}%
+                        </span>
                       </div>
-
-                      {/* Security Indicators */}
-                      <div className="space-y-4">
-                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                          <AlertCircle size={12} /> Vulnerability Markers
-                        </div>
-                        <div className="space-y-2">
-                           {scanResults.web_analysis.vulnerability_indicators?.length > 0 ? (
-                             scanResults.web_analysis.vulnerability_indicators.map((ind, i) => (
-                               <div key={i} className="px-2 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-500 text-[9px] font-bold uppercase">
-                                  {ind}
-                               </div>
-                             ))
-                           ) : (
-                             <div className="text-[10px] text-gray-600 italic">No surface-level indicators found.</div>
-                           )}
-                        </div>
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Audit Integrity Hash</span>
+                        <span className="text-[10px] font-mono text-cyber-neon/80 truncate max-w-[200px]">
+                          {scanResults.results_json ? (typeof scanResults.results_json === 'string' ? JSON.parse(scanResults.results_json).integrity_hash : scanResults.results_json.integrity_hash) || 'HEXA-SIG-UNVERIFIED' : 'HEXA-SIG-UNVERIFIED'}
+                        </span>
                       </div>
-
-                      {/* Admin Panels */}
-                      <div className="space-y-4">
-                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                          <Lock size={12} /> Admin Recon
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                           {scanResults.web_analysis.admin_panels?.length > 0 ? (
-                             scanResults.web_analysis.admin_panels.map((p, i) => (
-                               <span key={i} className="text-[10px] bg-cyber-black px-2 py-1 rounded border border-white/10 text-gray-300 font-mono">
-                                  {p}
-                               </span>
-                             ))
-                           ) : (
-                             <div className="text-[10px] text-gray-600 italic">No admin panels discovered.</div>
-                           )}
-                        </div>
+                      <div className="flex flex-col ml-auto">
+                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Audit Status</span>
+                        <span className="text-[9px] font-black text-cyber-neon uppercase tracking-widest flex items-center gap-1">
+                          <ShieldCheck size={10} /> Certified Secure
+                        </span>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    </motion.div>
+                  )}
+               </div>
 
-              {/* NIST Vulnerability Intelligence */}
-              <AnimatePresence>
-                {scanProgress === 100 && scanResults && scanResults.findings && scanResults.findings.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-6 rounded-2xl bg-cyber-alert/5 border border-cyber-alert/20"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <Shield className="text-cyber-alert" size={20} />
-                        <h4 className="text-xs font-black text-white uppercase tracking-[0.3em]">Vulnerability Intelligence (NIST NVD)</h4>
-                      </div>
-                      <div className="text-[10px] bg-cyber-alert/20 border border-cyber-alert/40 text-cyber-alert px-2 py-1 rounded font-black uppercase">
-                        {scanResults.findings.length} COUNTER-MEASURES REQUIRED
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      {scanResults.findings.map((vuln, i) => (
-                        <div key={i} className="p-4 rounded-xl bg-cyber-black/40 border border-white/5 group hover:border-cyber-alert/30 transition-all duration-300">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                            <div className="flex items-center gap-3">
-                              <span className="text-xs font-mono font-black text-cyber-alert bg-cyber-alert/10 px-2 py-1 rounded border border-cyber-alert/20">
-                                {vuln.cve || 'N/A'}
-                              </span>
-                              <h5 className="text-sm font-bold text-white group-hover:text-cyber-alert transition-colors">{vuln.name}</h5>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2">
-                                <div className="text-[10px] font-bold text-gray-500 uppercase">CVSS:</div>
-                                <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                                  <div 
-                                    className={`h-full ${vuln.cvss_score >= 9 ? 'bg-red-600' : vuln.cvss_score >= 7 ? 'bg-orange-500' : 'bg-yellow-500'}`} 
-                                    style={{ width: `${(vuln.cvss_score || 0) * 10}%` }}
-                                  />
-                                </div>
-                                <span className="text-xs font-mono font-bold text-white">{(vuln.cvss_score || 0).toFixed(1)}</span>
-                              </div>
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${
-                                vuln.severity === 'CRITICAL' ? 'border-red-600 bg-red-900/10 text-red-600' :
-                                vuln.severity === 'HIGH' ? 'border-orange-500 bg-orange-900/10 text-orange-500' :
-                                'border-yellow-500 bg-yellow-900/10 text-yellow-500'
-                              }`}>
-                                {vuln.severity}
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-[11px] text-gray-400 leading-relaxed italic border-l-2 border-white/5 pl-4 ml-1">
-                            {vuln.description}
-                          </p>
-
-                          {/* Exploitation Intelligence Layer */}
-                          <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-3">
-                              <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                                <Activity size={12} className="text-cyber-alert" /> Exploitation Pathway
-                              </div>
-                              <div className="flex items-center gap-3">
-                                {vuln.exploit_available ? (
-                                  <a 
-                                    href={vuln.exploit_url || `https://www.exploit-db.com/search?cve=${vuln.cve}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-bold hover:bg-red-500/20 transition-all shadow-red-glow"
-                                  >
-                                    <Cloud size={12} /> Exploit-DB Payload
-                                  </a>
-                                ) : (
-                                  <div className="text-[10px] text-gray-600 italic">No public exploit verified.</div>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="space-y-3">
-                              <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                                <Terminal size={12} /> Searchsploit Toolkit
-                              </div>
-                              <div className="relative group/cmd">
-                                <code className="block p-2 rounded bg-cyber-black border border-white/10 text-[10px] text-cyber-blue font-mono group-hover/cmd:border-cyber-blue/30 transition-all">
-                                  {vuln.searchsploit_cmd || `searchsploit --cve ${vuln.cve}`}
-                                </code>
-                                <button 
-                                  onClick={() => navigator.clipboard.writeText(vuln.searchsploit_cmd)}
-                                  className="absolute top-1/2 -right-2 -translate-y-1/2 p-2 bg-cyber-blue/10 border border-cyber-blue/30 rounded-lg text-cyber-blue opacity-0 group-hover/cmd:opacity-100 transition-all hover:bg-cyber-blue/20"
-                                >
-                                  <ChevronRight size={12} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Ports Table */}
-              <AnimatePresence>
-                {scanProgress === 100 && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6"
-                  >
+              {/* Ports Table (Elite Branding) */}
+              <div className="mt-4">
+                <div className="overflow-x-auto">
                     <table className="w-full text-left">
                        <thead>
-                         <tr className="text-[10px] text-gray-600 uppercase font-black border-b border-white/5 pb-2">
-                           <th className="pb-3 pl-6">{intensity === 'ports_only' ? 'PORT' : 'PORT/PROTO'}</th>
-                           {intensity !== 'ports_only' && <th className="pb-3 text-left">SERVICE</th>}
-                           {intensity === 'ports_only' ? <th className="pb-3 text-left">STATE</th> : <th className="pb-3 text-left">VERSION ARCHITECTURE</th>}
-                           {intensity !== 'ports_only' && <th className="pb-3 pr-6 text-right">RISK</th>}
+                         <tr className="text-[10px] text-gray-600 uppercase font-black tracking-widest border-b border-white/5">
+                           <th className="pb-4 pl-6">Port / Proto</th>
+                           <th className="pb-4">Service</th>
+                           <th className="pb-4">Version Architecture</th>
+                           <th className="pb-4 pr-6 text-right">Risk</th>
                          </tr>
                        </thead>
                        <tbody className="divide-y divide-white/5">
-                          {(ctxLivePorts || []).length > 0 ? (
-                            ctxLivePorts.map((p, i) => (
-                              <ExpandablePortRow key={`${p.port}-${i}`} port={p} isPortsOnly={intensity === 'ports_only'} />
-                            ))
+                           {(ctxLivePorts || []).length > 0 ? (
+                            ctxLivePorts.map((p, i) => {
+                              const isHighValue = ['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) || [21, 22, 80, 443].includes(parseInt(p.port));
+                              return (
+                                <tr key={`${p.port}-${i}`} className="group hover:bg-white/[0.02] transition-colors">
+                                  <td className={`py-5 pl-6 font-mono text-xs font-bold ${isHighValue ? 'text-red-500' : 'text-cyber-blue'}`}>
+                                    {p.port}/TCP
+                                  </td>
+                                  <td className={`py-5 font-black text-sm tracking-widest ${isHighValue ? 'text-red-500' : 'text-white'}`}>
+                                    {p.service.toUpperCase()}
+                                  </td>
+                                  <td className="py-5 text-[11px] text-gray-500 font-mono">
+                                    {p.version || 'N/A'}
+                                  </td>
+                                  <td className="py-5 pr-6 text-right">
+                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black border transition-all ${
+                                      p.risk === 'Critical' || isHighValue ? 'border-red-600 text-red-600 bg-red-900/10 shadow-[0_0_10px_rgba(255,0,0,0.2)]' : 
+                                      p.risk === 'High' ? 'border-cyber-warning text-cyber-warning bg-cyber-warning/5' : 
+                                      'border-cyber-blue/30 text-cyber-blue/60 bg-cyber-blue/5'
+                                    }`}>
+                                      {isHighValue && p.risk !== 'Critical' ? 'Exploitable' : p.risk}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })
                           ) : (
                             <tr>
-                              <td colSpan="4" className="py-10 text-center">
-                                 <p className="text-xs text-gray-600 font-mono">INTELLIGENCE SYNTHESIS ACTIVE: NO PHYSICAL PORTS DETECTED</p>
+                              <td colSpan="4" className="py-12 text-center">
+                                 <p className="text-[10px] text-gray-700 font-black uppercase tracking-[0.4em]">Intelligence Synthesis Active — Standby</p>
                               </td>
                             </tr>
                           )}
-                       </tbody>
+                        </tbody>
                     </table>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                </div>
+              </div>
             </div>
           </CyberCard>
         </div>

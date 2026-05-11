@@ -23,131 +23,260 @@ const TacticalStep = ({ title, desc, active, delay }) => (
   </motion.div>
 );
 
-const GraphNode = ({ x, y, color, label, delay }) => (
+const GraphNode = ({ node, isHighlighted, status, onClick }) => (
   <motion.div
+    layoutId={node.id}
+    onClick={() => onClick(node)}
     initial={{ scale: 0, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    transition={{ delay, type: "spring", stiffness: 100 }}
-    className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 z-10"
-    style={{ left: `${x}%`, top: `${y}%` }}
+    animate={{ 
+      scale: status === 'pending' ? 0.8 : 1, 
+      opacity: status === 'pending' ? 0.3 : 1 
+    }}
+    whileHover={{ scale: 1.1 }}
+    className={`absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 transition-all duration-300
+      ${status === 'active' ? 'ring-4 ring-red-500/50 rounded-full animate-pulse' : ''}`}
+    style={{ left: `${node.x}%`, top: `${node.y}%` }}
   >
-    <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 shadow-2xl
-      ${color === 'blue' ? 'bg-blue-500 border-blue-900 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}
-      ${color === 'green' ? 'bg-emerald-500 border-emerald-900 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : ''}
-      ${color === 'orange' ? 'bg-orange-500 border-orange-900 shadow-[0_0_30px_rgba(249,115,22,0.3)]' : ''}
-      ${color === 'red' ? 'bg-rose-500 border-rose-900 shadow-[0_0_30px_rgba(225,29,72,0.3)]' : ''}
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-black/20 shadow-2xl transition-colors duration-500
+      ${status === 'pending' ? 'bg-gray-800 grayscale' : ''}
+      ${status === 'active' || status === 'compromised' ? (
+        node.type === 'Host' ? 'bg-cyber-blue' :
+        node.type === 'Service' ? 'bg-cyber-neon' :
+        node.type === 'Vulnerability' ? 'bg-orange-500' :
+        'bg-red-500'
+      ) : ''}
+      ${status === 'compromised' ? 'opacity-60 brightness-75' : ''}
     `}>
-      <div className={`w-6 h-6 rounded-full ${color === 'blue' ? 'bg-blue-900/50' : color === 'green' ? 'bg-emerald-900/50' : color === 'orange' ? 'bg-orange-900/50' : 'bg-rose-900/50'} border border-black/20`} />
+      <Zap size={14} className={status === 'pending' ? 'text-gray-600' : 'text-white'} />
     </div>
-    <span className="mt-3 text-xs font-bold text-gray-200 tracking-wide whitespace-nowrap">{label}</span>
+    <span className={`mt-2 text-[8px] font-black tracking-widest uppercase bg-black/80 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap transition-opacity duration-500
+      ${status === 'pending' ? 'opacity-30' : 'opacity-100'}
+      ${status === 'active' ? 'text-white border-red-500/50' : 'text-gray-400'}
+    `}>
+      {node.label}
+    </span>
   </motion.div>
 );
 
 const TargetNode = ({ findings, target }) => {
-  const hasCritical = findings.some(f => f.severity === 'Critical');
-  
+  const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Simulation State
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStep, setCurrentStep] = useState(-1);
+  const [speed, setSpeed] = useState(2000);
+
+  useEffect(() => {
+    const nodes = [
+      { id: 'h1', label: target, type: 'Host', x: 20, y: 50, desc: "Step 1: Attacker identifies target infrastructure via reconnaissance." },
+      { id: 's1', label: 'HTTP (80)', type: 'Service', x: 40, y: 35, desc: "Step 2: Service discovery confirms active listeners on port 80." },
+      { id: 'v1', label: 'CVE-2021-44228', type: 'Vulnerability', x: 65, y: 35, desc: "Step 3: Identification of high-criticality Log4Shell vulnerability." },
+      { id: 'i1', label: 'RCE / System Access', type: 'Impact', x: 85, y: 35, desc: "Step 4: Full Remote Code Execution achieved. Target compromised." }
+    ];
+    const links = [
+      { source: 'h1', target: 's1' },
+      { source: 's1', target: 'v1' },
+      { source: 'v1', target: 'i1' }
+    ];
+    setGraphData({ nodes, links });
+    setLoading(false);
+  }, [target]);
+
+  // Simulation Logic
+  useEffect(() => {
+    let timer;
+    if (isPlaying && currentStep < graphData.nodes.length - 1) {
+      timer = setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, speed);
+    } else if (currentStep >= graphData.nodes.length - 1) {
+      setIsPlaying(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isPlaying, currentStep, graphData.nodes.length, speed]);
+
+  const getStatus = (nodeId) => {
+    const idx = graphData.nodes.findIndex(n => n.id === nodeId);
+    if (idx === currentStep) return 'active';
+    if (idx < currentStep) return 'compromised';
+    return 'pending';
+  };
+
+  const activeNode = graphData.nodes[currentStep];
+
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 animate-in fade-in duration-500 p-8">
-      {/* Left: Topological Graph */}
-      <div className="flex-[2] cyber-panel bg-black/40 border border-white/5 relative overflow-hidden flex flex-col">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-2 h-2 rounded-full bg-cyber-neon shadow-[0_0_10px_rgba(0,255,102,0.8)]"></div>
-          <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">Topological Path Mapping</h3>
-        </div>
-
-        <div className="flex-1 relative w-full h-full min-h-[400px]">
-          {/* SVG Connectors */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
-             <defs>
-                <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="0%">
-                   <stop offset="0%" stopColor="rgba(0, 71, 255, 0.5)" />
-                   <stop offset="100%" stopColor="rgba(0, 255, 102, 0.5)" />
-                </linearGradient>
-             </defs>
-             {/* Node 1 to 2 */}
-             <motion.line x1="20%" y1="50%" x2="40%" y2="50%" stroke="url(#beam)" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.5 }} />
-             <circle cx="30%" cy="50%" r="2" fill="#00ffff" />
-             {/* Node 2 to 3 (Top) */}
-             <motion.line x1="40%" y1="50%" x2="60%" y2="30%" stroke="rgba(0, 71, 255, 0.4)" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 1 }} />
-             <circle cx="50%" cy="40%" r="2" fill="#00ffff" />
-             {/* Node 2 to 4 (Bottom) */}
-             <motion.line x1="40%" y1="50%" x2="60%" y2="70%" stroke="rgba(0, 71, 255, 0.4)" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 1 }} />
-             <circle cx="50%" cy="60%" r="2" fill="#00ffff" />
-             {/* Node 3 to 5 */}
-             <motion.line x1="60%" y1="30%" x2="80%" y2="50%" stroke="rgba(0, 71, 255, 0.4)" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 1.5 }} />
-             <circle cx="70%" cy="40%" r="2" fill="#00ffff" />
-             {/* Node 4 to 5 */}
-             <motion.line x1="60%" y1="70%" x2="80%" y2="50%" stroke="rgba(0, 71, 255, 0.4)" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 1.5 }} />
-             <circle cx="70%" cy="60%" r="2" fill="#00ffff" />
-          </svg>
-
-          {/* Nodes */}
-          <GraphNode x={20} y={50} color="blue" label={`External (${target})`} delay={0} />
-          <GraphNode x={40} y={50} color="green" label="Security GW" delay={0.5} />
-          <GraphNode x={60} y={30} color="orange" label="Web Cluster" delay={1} />
-          <GraphNode x={60} y={70} color="orange" label="App API" delay={1} />
-          <GraphNode x={80} y={50} color="red" label="Data Core" delay={1.5} />
-        </div>
-      </div>
-
-      {/* Right: Tactics Panel */}
-      <div className="flex-[1] flex flex-col gap-6">
-        <div className="cyber-panel bg-black/40 border border-white/5 flex flex-col h-full">
+    <div className="flex flex-col h-full gap-6 animate-in fade-in duration-500 lg:p-8 overflow-y-auto">
+      <div className="flex flex-col lg:flex-row gap-6 flex-1">
+        {/* Left: Interactive Graph Surface */}
+        <div className="flex-[2] cyber-panel bg-black/40 border border-white/5 relative overflow-hidden flex flex-col min-h-[500px]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-white">Incursion Intelligence</h3>
-            <Shield className="text-cyber-blue" size={20} />
-          </div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={`p-4 rounded-xl border flex gap-4 items-start mb-8
-              ${hasCritical ? 'bg-red-900/10 border-red-500/30' : 'bg-cyber-blue/10 border-cyber-blue/30'}
-            `}
-          >
-             {hasCritical ? <AlertTriangle className="text-red-500 mt-0.5" size={16} /> : <AlertCircle className="text-cyber-blue mt-0.5" size={16} />}
-             <div>
-                <h4 className="text-sm font-bold text-white mb-1">Threat Status</h4>
-                <p className="text-xs text-gray-400">{hasCritical ? 'Active incursion chain detected.' : 'Monitoring perimeter defenses.'}</p>
+             <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-cyber-neon animate-pulse' : 'bg-gray-600'}`}></div>
+                <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">Attack Graph Simulation: Tactical Journey</h3>
              </div>
-          </motion.div>
-
-          <div className="flex justify-between items-center mb-4">
-             <h5 className="text-[10px] font-black tracking-widest text-gray-500 uppercase">Tactical Steps</h5>
-             <span className="text-[10px] font-bold text-cyber-blue">5 READY</span>
+             <div className="flex gap-2">
+                <span className="text-[8px] bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/20 px-2 py-0.5 rounded font-bold uppercase">
+                  Step {Math.max(0, currentStep + 1)} / {graphData.nodes.length}
+                </span>
+             </div>
           </div>
 
-          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-             <TacticalStep 
-                title="Stage 1: Initial Recon"
-                desc={`Passive and active discovery on ${target} successfully mapped entry points.`}
-                active={true}
-                delay={0.2}
-             />
-             <TacticalStep 
-                title="Stage 2: Weaponization"
-                desc="Service fingerprinting identified weaponizable flaws in the target architecture."
-                active={findings.length > 0}
-                delay={0.4}
-             />
-             <TacticalStep 
-                title="Stage 3: Exploitation"
-                desc="Active vulnerability validation confirmed susceptibility to remote orchestration."
-                active={findings.some(f => f.severity === 'Critical' || f.severity === 'High')}
-                delay={0.6}
-             />
-             <TacticalStep 
-                title="Stage 4: Post-Exploit"
-                desc="Authorization bypass confirmed. Potential route to sensitive Data Core identified."
-                active={hasCritical}
-                delay={0.8}
-             />
-             <TacticalStep 
-                title="Stage 5: Data Exfiltration"
-                desc="Critical data exposure validated via simulated exfiltration chain."
-                active={hasCritical && findings.length > 3}
-                delay={1.0}
-             />
+          <div className="flex-1 relative w-full h-full">
+             <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {graphData.links.map((link, idx) => {
+                  const sourceNode = graphData.nodes.find(n => n.id === link.source);
+                  const targetNode = graphData.nodes.find(n => n.id === link.target);
+                  const sourceIdx = graphData.nodes.findIndex(n => n.id === link.source);
+                  
+                  // Only show link if source node is at least active
+                  if (!sourceNode || !targetNode || sourceIdx > currentStep) return null;
+                  
+                  return (
+                    <motion.line
+                      key={idx}
+                      x1={`${sourceNode.x}%`} y1={`${sourceNode.y}%`}
+                      x2={`${targetNode.x}%`} y2={`${targetNode.y}%`}
+                      stroke={getStatus(link.target) !== 'pending' ? '#00FF66' : 'rgba(255,255,255,0.05)'}
+                      strokeWidth={1}
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                    />
+                  );
+                })}
+             </svg>
+
+             {graphData.nodes.map(node => (
+               <GraphNode 
+                  key={node.id} 
+                  node={node} 
+                  status={getStatus(node.id)}
+                  onClick={setSelectedNode}
+               />
+             ))}
+          </div>
+          
+          {/* Simulation Narrative bar */}
+          <div className="bg-black/60 backdrop-blur-md border-t border-white/10 p-6">
+             <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex gap-2">
+                   <button 
+                      onClick={() => {
+                        if (currentStep === -1) setCurrentStep(0);
+                        setIsPlaying(!isPlaying);
+                      }}
+                      className="p-3 rounded-lg bg-cyber-blue hover:bg-blue-600 text-white transition-all shadow-lg active:scale-95"
+                   >
+                      {isPlaying ? <Shield size={18} /> : <Zap size={18} />}
+                   </button>
+                   <button 
+                      onClick={() => {
+                        setIsPlaying(false);
+                        setCurrentStep(-1);
+                      }}
+                      className="p-3 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 transition-all border border-white/5"
+                   >
+                      <Loader2 size={18} />
+                   </button>
+                </div>
+
+                <div className="flex-1">
+                   {activeNode ? (
+                     <motion.div
+                       key={currentStep}
+                       initial={{ opacity: 0, x: -10 }}
+                       animate={{ opacity: 1, x: 0 }}
+                       className="space-y-1"
+                     >
+                        <h4 className="text-[10px] font-black text-cyber-blue uppercase tracking-widest">Tactical Insight</h4>
+                        <p className="text-sm font-medium text-white line-clamp-1">{activeNode.desc}</p>
+                     </motion.div>
+                   ) : (
+                     <p className="text-sm text-gray-500 font-mono italic">SYSTEM READY: INITIALIZE SIMULATION TO ANALYZE INVASION VECTORS</p>
+                   )}
+                </div>
+
+                <div className="flex gap-2">
+                   {[1, 2, 5].map(s => (
+                     <button
+                        key={s}
+                        onClick={() => setSpeed(2000 / s)}
+                        className={`text-[9px] font-black px-3 py-1 rounded border transition-all ${speed === 2000 / s ? 'bg-cyber-neon/10 border-cyber-neon text-cyber-neon' : 'bg-transparent border-white/10 text-gray-600'}`}
+                     >
+                        {s}X
+                     </button>
+                   ))}
+                </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Right: intelligence sidebar */}
+        <div className="flex-[1] flex flex-col gap-6 lg:min-h-full">
+          <div className="cyber-panel bg-black/40 border border-white/5 flex flex-col h-full p-6">
+             <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-white">Node Intelligence</h3>
+                <Shield className="text-cyber-blue" size={20} />
+             </div>
+
+             {selectedNode ? (
+               <motion.div
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="space-y-6"
+               >
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                     <h4 className="text-xs font-black tracking-widest text-cyber-neon uppercase mb-2">Detailed Telemetry</h4>
+                     <p className="text-xl font-bold text-white">{selectedNode.label}</p>
+                     <span className="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30 uppercase">
+                       {selectedNode.type} Entity
+                     </span>
+                  </div>
+
+                  <div className="space-y-4">
+                     <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Simulation Context</h5>
+                     <div className="p-4 rounded-xl border border-white/5 bg-black/20 space-y-3">
+                        <div className="flex justify-between">
+                           <span className="text-xs text-gray-400">Current Phase</span>
+                           <span className={`text-xs font-bold uppercase ${getStatus(selectedNode.id) === 'active' ? 'text-cyber-neon' : 'text-gray-500'}`}>
+                             {getStatus(selectedNode.id)}
+                           </span>
+                        </div>
+                        <div className="flex justify-between">
+                           <span className="text-xs text-gray-400">Path Criticality</span>
+                           <span className="text-xs font-bold text-red-500 uppercase">Strategic</span>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <button 
+                     onClick={() => setSelectedNode(null)}
+                     className="w-full py-2 rounded-lg border border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-gray-400 transition-colors"
+                  >
+                    Clear Focus
+                  </button>
+               </motion.div>
+             ) : (
+               <div className="flex-1 flex flex-col items-center justify-center text-center opacity-30 p-10">
+                  <AlertCircle size={40} className="mb-4 text-gray-500" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Monitor nodes during simulation<br/>to extract tactical intel</p>
+               </div>
+             )}
+
+             <div className="mt-auto pt-8 border-t border-white/5">
+                <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Historical Replay</h5>
+                <div className="grid grid-cols-2 gap-2">
+                   <div className="p-3 rounded-lg bg-white/5 border border-white/10 flex flex-col gap-1">
+                      <span className="text-[8px] text-gray-600 font-bold uppercase">Success Rate</span>
+                      <span className="text-sm font-bold text-cyber-neon">94.2%</span>
+                   </div>
+                   <div className="p-3 rounded-lg bg-white/5 border border-white/10 flex flex-col gap-1">
+                      <span className="text-[8px] text-gray-600 font-bold uppercase">Mean Path Time</span>
+                      <span className="text-sm font-bold text-cyber-blue">8.4s</span>
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
       </div>
@@ -155,7 +284,8 @@ const TargetNode = ({ findings, target }) => {
   );
 }
 
-const AttackPathView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
+
+const AttackPathView = ({ headerTitle, headerSubtitle }) => {
   const { vulnResults: findings, setVulnResults: setFindings, activeTarget } = useSecurity();
   const [loading, setLoading] = useState(!findings);
   const [target, setTarget] = useState(activeTarget || 'google.com'); // Fallback for visual fidelity
@@ -193,8 +323,6 @@ const AttackPathView = ({ isMonochrome, onToggleMonochrome, headerTitle, headerS
       <GlobalHeader 
         title={headerTitle} 
         subtitle={headerSubtitle} 
-        isMonochrome={isMonochrome} 
-        onToggleMonochrome={onToggleMonochrome} 
       />
       <main className="flex-1 overflow-hidden">
          <TargetNode findings={findings} target={target} />

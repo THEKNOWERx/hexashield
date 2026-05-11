@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // Dynamic API resolution to handle various dev environments (8000, 8001, etc.)
 const API_PORT = window.location.port === '5173' || window.location.port === '5174' || window.location.port === '5175' ? '8000' : (window.location.port || '8000');
-const API_BASE_URL = `http://${window.location.hostname}:${API_PORT}/api/`;
+const hostname = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
+const API_BASE_URL = `http://${hostname}:${API_PORT}/api/`;
 
 console.log("[DEBUG] API Base URL set to:", API_BASE_URL);
 
@@ -73,6 +74,7 @@ export const vulnService = {
   getFindings: (scanId) => apiClient.get(`vuln/findings/${scanId}`),
   getAllFindings: () => apiClient.get(`vuln/all`),
   getRecentFindings: (limit = 10) => apiClient.get(`vuln/recent?limit=${limit}`),
+  getDashboardStats: () => apiClient.get('nexus/dashboard'),
   analyze: (ports) => apiClient.get(`vuln/analyze?ports=${ports}`),
 };
 
@@ -86,17 +88,36 @@ export const adminService = {
 };
 
 export const reportsService = {
-  listReports: () => apiClient.get('vuln/all'), 
-  download: (scanId, format) => `${API_BASE_URL}reports/download/${scanId}?format=${format}`,
-  downloadPdf: (scanId) => apiClient.get(`reports/download/${scanId}?format=pdf`, { responseType: 'blob' }),
+  download: (scanId, format) => apiClient.get(`reports/download/${scanId}?format=${format}`, { responseType: 'blob' }),
   delete: (scanId) => apiClient.delete(`reports/${scanId}`),
   getReportDetails: (scanId) => apiClient.get(`reports/details/${scanId}`),
+  updateReport: (scanId, data) => apiClient.patch(`reports/${scanId}`, data),
   purgeAll: () => apiClient.delete(`reports/purge/all`),
+};
+
+export const notificationsService = {
+  getLatest: () => apiClient.get('notifications'),
+  markAsRead: (id) => apiClient.patch(`notifications/read/${id}`),
+  markAllRead: () => apiClient.patch('notifications/read-all'),
+  purgeAll: () => apiClient.delete('notifications/purge'),
 };
 
 export const exploitService = {
   analyze: (findingId) => apiClient.get(`exploit/analyze/${findingId}`),
   run: (findingId, labMode = false) => apiClient.post(`exploit/run/${findingId}?lab_mode=${labMode}`),
+};
+
+export const nexusService = {
+  getDashboard: () => apiClient.get('nexus/dashboard'),
+  getVulnerabilities: () => apiClient.get('nexus/vulnerabilities'),
+  getReportSummary: () => apiClient.get('nexus/report'),
+  triggerExploitation: (findingId) => apiClient.post('nexus/exploitation', { finding_id: findingId }),
+  chat: (payload) => apiClient.post('nexus/chat', payload),
+};
+
+export const attackPathService = {
+  generateGraph: () => apiClient.get('attack-path/latest'),
+  getAnalysis: (scanId) => apiClient.get(`attack-path/${scanId}`),
 };
 
 export default apiClient;

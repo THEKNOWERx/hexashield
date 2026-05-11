@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ChevronRight, Activity, Cpu, Globe, Zap, ShieldCheck, Database, Github, Linkedin } from 'lucide-react';
+import { Shield, ChevronRight, Activity, Cpu, Globe, Zap, ShieldCheck, Database, Github, Linkedin, Lock, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
@@ -139,16 +139,16 @@ const LandingPage = () => {
             </Link>
           </motion.div>
           <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-            <Link to="/tactical-features" className="hover:text-cyber-blue transition-colors">Tactical Features</Link>
-            <Link to="/intelligence-hub" className="hover:text-cyber-blue transition-colors">Intelligence Hub</Link>
-            <Link to="/protocol-specs" className="hover:text-cyber-blue transition-colors">Protocol Spec</Link>
+            <Link to="/nexus/tactical" className="hover:text-cyber-blue transition-colors">Tactical Features</Link>
+            <Link to="/nexus/intelligence" className="hover:text-cyber-blue transition-colors">Intelligence Hub</Link>
+            <Link to="/nexus/protocol" className="hover:text-cyber-blue transition-colors">Protocol Spec</Link>
           </div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
           >
             <Link to="/login" className="cyber-button text-[10px] px-8 py-3">
-              LAUNCH TERMINAL
+              STRIKE TERMINAL
             </Link>
           </motion.div>
         </div>
@@ -263,6 +263,51 @@ const LandingPage = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* NEW: URL Expert Audit Section (Outside Experience) */}
+      <section className="py-32 px-6 relative overflow-hidden bg-black">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-cyber-blue/30 to-transparent"></div>
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+           <div className="flex-1 space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1 bg-cyber-neon/10 border border-cyber-neon/20 rounded-full text-cyber-neon text-[9px] font-black uppercase tracking-widest">
+                 Public Threat Intelligence
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none">
+                 URL EXPERT <br/>
+                 <span className="text-cyber-neon">AUDIT.</span>
+              </h2>
+              <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
+                 Instant, high-fidelity security analysis for any URL or Domain. 
+                 Identify malicious redirects, protocol weaknesses, and reputation scores 
+                 through our neural cross-referencing engine.
+              </p>
+              <div className="flex gap-4">
+                 <Link to="/url-scan" className="px-10 py-4 bg-cyber-neon text-black font-black text-[10px] uppercase tracking-[0.3em] rounded-xl hover:brightness-110 transition-all shadow-[0_0_30px_rgba(57,255,20,0.3)]">
+                    Audit Link Now
+                 </Link>
+                 <div className="hidden sm:flex items-center gap-3 px-6 text-[9px] font-black text-gray-600 uppercase tracking-widest border border-white/5 rounded-xl">
+                    <Activity size={14} className="text-cyber-blue" />
+                    Neural Feed Active
+                 </div>
+              </div>
+           </div>
+           
+           <div className="flex-1 grid grid-cols-2 gap-6 w-full">
+              {[
+                { title: "Reputation HUD", desc: "Global trust analysis", icon: ShieldCheck },
+                { title: "Protocol Audit", desc: "Deep header inspection", icon: Lock },
+                { title: "Redirect Path", desc: "Malicious jump detection", icon: Zap },
+                { title: "Historical Sync", desc: "Past result mapping", icon: History }
+              ].map((card, idx) => (
+                <div key={idx} className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl hover:border-cyber-neon/30 hover:bg-cyber-neon/5 transition-all group">
+                   {card.icon && <card.icon className="text-cyber-blue group-hover:text-cyber-neon mb-4 transition-colors" size={24} />}
+                   <h4 className="text-white font-bold text-sm mb-1">{card.title}</h4>
+                   <p className="text-[10px] text-gray-600 font-medium uppercase tracking-tight">{card.desc}</p>
+                </div>
+              ))}
+           </div>
         </div>
       </section>
 

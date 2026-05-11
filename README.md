@@ -23,7 +23,7 @@ Ensure you have Docker installed, then run:
 ```bash
 docker-compose up --build
 ```
-Access the platform at `http://localhost:5173`.  
+Access the platform at `http://localhost:5174`.  
 Default Admin Credentials: `admin` / `admin123`.
 
 ## 📂 Project Structure

@@ -1,24 +1,14 @@
 import socket
 import json
 import time
-import nmap
-import ctypes
-import platform
-import os
-from typing import Optional, Dict, List
 from database.db import SessionLocal
 from services.vuln_service import VulnService
+from services.scan_engine import hex_scanner
 from models import Scan
 
 class ScanService:
     @staticmethod
-    def _is_admin() -> bool:
-        try:
-            if platform.system() == 'Windows':
-                return ctypes.windll.shell32.IsUserAnAdmin() != 0
-            else:
-                return os.getuid() == 0
-        except Exception: return False
+    # _is_admin and _is_nmap_installed are now handled internally by HexScanner
 
     @staticmethod
     def _shodan_recon(ip: str) -> Dict:
@@ -52,15 +42,7 @@ class ScanService:
         return {"shodan_verified": False}
 
     @staticmethod
-    def _synthesize_discovery(target: str, ip: str) -> List[Dict]:
-        """Synthesizes high-fidelity discovery if Nmap fails."""
-        is_web = any(x in target.lower() for x in ['.com', '.net', '.org', 'www', 'http'])
-        if is_web:
-            return [
-                {"port": 80, "protocol": "tcp", "service": "HTTP", "product": "Apache", "version": "2.4.41", "source": "INFRA_SYNTH", "risk": "Medium"},
-                {"port": 443, "protocol": "tcp", "service": "HTTPS", "product": "nginx", "version": "1.18.0", "source": "INFRA_SYNTH", "risk": "Low"}
-            ]
-        return [{"port": 80, "protocol": "tcp", "service": "HTTP", "source": "INFRA_SYNTH", "risk": "Medium"}]
+    # _is_nmap_installed utility removed (handled by HexScanner core)
 
     @staticmethod
     def scan_ports(target: str, scan_type: str, scan_id: Optional[int] = None):
@@ -75,9 +57,13 @@ class ScanService:
 
         if not scan_id:
             with SessionLocal() as local_db:
+                # [ZEROING LOGIC] Clear all previous historical scans for this specific target
+                # to ensure a fresh "Port Discovery" and exploitation environment.
                 existing = local_db.query(Scan).filter(Scan.target == target).all()
-                for s in existing: local_db.delete(s)
+                for s in existing: 
+                    local_db.delete(s)
                 local_db.commit()
+                
                 new_scan = Scan(target=target, scan_type=f"QUANTUM_{scan_type.upper()}", status="running")
                 local_db.add(new_scan)
                 local_db.commit()
@@ -85,7 +71,6 @@ class ScanService:
                 scan_id = new_scan.id
 
         open_ports = []
-        external_intel = ScanService._shodan_recon(ip)
         
         def save_state(status_data: Dict):
             try:
@@ -98,43 +83,36 @@ class ScanService:
                         s_db.commit()
             except Exception: pass
 
+        # --- PHASE 1: EXTERNAL INTELLIGENCE GATHERING ---
+        save_state({"phase": "Phase 1: External Intelligence Gathering"})
+        external_intel = ScanService._shodan_recon(ip)
+        
+        # --- PHASE 2: DEEP PORT DISCOVERY (ROBUST ENGINE) ---
+        save_state({"phase": "Phase 2: Deep Port Discovery (HexScanner Core)"})
         try:
-            nm = nmap.PortScanner()
-            is_admin = ScanService._is_admin()
-            probe = "-sS" if is_admin else "-sT"
+            # Execute Tiered Scan via Robust Core
+            scan_res = hex_scanner.run_robust_scan(target_clean, timeout=90)
+            open_ports = scan_res.get("ports", [])
             
-            # High-speed discovery flags
-            args = f"{probe} -Pn -n --top-ports 1000 --min-rate 2000 --host-timeout 120s -T5"
-            try:
-                nm.scan(ip, arguments=args)
-                if ip in nm.all_hosts():
-                    for proto in nm[ip].all_protocols():
-                        for port in nm[ip][proto].keys():
-                            svc = nm[ip][proto][port]
-                            open_ports.append({
-                                "port": port, "protocol": proto, 
-                                "service": svc.get('name', 'DISCOVERED').upper(),
-                                "product": svc.get('product', ''),
-                                "version": svc.get('version', ''),
-                                "source": "LOCAL_PROBE", "risk": "Low"
-                            })
-            except Exception:
-                save_state({"phase": "Sensor Mismatch - Falling back to Synthesis"})
+            if scan_res["status"] == "error":
+                save_state({"phase": f"Discovery Engine Error: {scan_res.get('message')}"})
 
-            # Merge External Intel
+            # Merge External Intel for completeness (Non-blocking)
             if external_intel.get("shodan_verified"):
                 for s_svc in external_intel['services']:
                     if not any(p['port'] == s_svc['port'] for p in open_ports):
                         open_ports.append(s_svc)
 
             if not open_ports:
-                open_ports = ScanService._synthesize_discovery(target, ip)
+                save_state({"phase": "Status: No active ports discovered. Target may be hardened or unreachable."})
 
-            save_state({"ports": open_ports, "phase": "Discovery Complete"})
+            save_state({"ports": open_ports, "phase": "Phase 2 Complete: Robust Discovery Finished"})
 
-            # Vulnerability Mapping
-            nmap_raw = nm[ip] if ('nm' in locals() and ip in nm.all_hosts()) else None
-            findings = VulnService.analyze_vulnerabilities(open_ports, nmap_raw)
+            # --- PHASE 3: VULNERABILITY MAPPING & RISK CALCULATION ---
+            save_state({"phase": "Phase 3: Intelligence-Driven Vulnerability Mapping"})
+            
+            # Map discovered ports to vulnerabilities
+            findings = VulnService.analyze_vulnerabilities(open_ports)
             
             with SessionLocal() as final_db:
                 VulnService.persist_findings(scan_id, findings, final_db)
@@ -142,15 +120,19 @@ class ScanService:
                 if f_scan:
                     f_scan.status = "completed"
                     f_scan.results_json = json.dumps({
+                        "id": scan_id,
+                        "status": scan_res["status"],
+                        "target": target,
                         "ports": open_ports,
                         "scan_time_sec": round(time.time() - start_time, 2),
                         "external_intel": external_intel,
                         "phase": "Quantum Audit Complete",
-                        "os": external_intel.get("os") or "Linux/Windows (Hybrid)"
+                        "message": scan_res.get("message", "Scan Successful"),
+                        "engine_log": scan_res.get("engine_log", "")
                     })
                     final_db.commit()
 
-            return {"id": scan_id, "target": target, "status": "Success"}
+            return {"id": scan_id, "target": target, "status": "Success", "ports_found": len(open_ports)}
 
         except Exception as e:
             print(f"[ENGINE ERROR] {e}")

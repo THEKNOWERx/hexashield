@@ -26,6 +26,18 @@ class CacheService:
             'expiry': time.time() + ttl
         }
 
+    @classmethod
+    def get_scan(cls, target: str, mode: str) -> Optional[Dict]:
+        """Strategic cache lookup for full scan results."""
+        key = f"scan:{target}:{mode}"
+        return cls.get(key)
+
+    @classmethod
+    def set_scan(cls, target: str, mode: str, data: Dict, ttl: int = 14400):
+        """Strategic cache storage for scan results (default 4 hours)."""
+        key = f"scan:{target}:{mode}"
+        cls.set(key, data, ttl)
+
     @staticmethod
     def lru_cache_wrapper(ttl: int = 600):
         """Decorator for ultra-fast LRU caching with internal TTL support."""

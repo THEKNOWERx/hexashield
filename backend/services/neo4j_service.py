@@ -20,7 +20,13 @@ class Neo4jService:
         
         if NEO4J_AVAILABLE:
             try:
-                self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+                # Expert Stability Fix: Use strict connection timeouts
+                self.driver = GraphDatabase.driver(
+                    self.uri, 
+                    auth=(self.user, self.password),
+                    connection_timeout=1.0, 
+                    max_transaction_retry_time=1.0
+                )
             except Exception as e:
                 logging.error(f"Neo4j Connection Failed: {e}")
 
@@ -67,23 +73,58 @@ class Neo4jService:
                 MERGE (e:Exploit {edb_id: $edb_id})
                 MERGE (v)-[:WEAPONIZED_BY]->(e)
             """, cve_id=cve_id, edb_id=edb_id)
+            
+        # 5. Derive and link Impact (Task 1)
+        impact_name = "Information Disclosure"
+        if cvss >= 9.0: impact_name = "Total System Compromise"
+        elif cvss >= 7.0: impact_name = "Critical Data Exfiltration"
+        elif cvss >= 5.0: impact_name = "Unauthorized Access"
 
-    def get_most_critical_path(self, host_ip: str):
-        """
-        Expert Graph Query: Find the path with the highest cumulative CVSS to an Exploit.
-        """
-        if not self.driver:
-            return []
+        tx.run("""
+            MATCH (v:Vulnerability {cve_id: $cve_id})
+            MERGE (i:Impact {name: $impact_name})
+            MERGE (v)-[:RESULTS_IN]->(i)
+        """, cve_id=cve_id, impact_name=impact_name)
 
+    def get_shortest_path(self, host_ip: str):
+        """Analytical Graph Query: Finds the most direct path to a Critical Impact."""
+        if not self.driver: return []
         query = """
-        MATCH p=(h:Host {ip: $ip})-[:EXPOSES]->(s)-[:AFFECTED_BY]->(v)-[:WEAPONIZED_BY]->(e)
+        MATCH p=shortestPath((h:Host {ip: $ip})-[*..10]->(i:Impact))
+        WHERE i.name IN ['Total System Compromise', 'Critical Data Exfiltration']
+        RETURN p
+        """
+        with self.driver.session() as session:
+            result = session.run(query, ip=host_ip)
+            return result.single()
+
+    def get_weighted_risk_path(self, host_ip: str):
+        """Graph Intelligence: Calculates the path with maximum cumulative vulnerability risk."""
+        if not self.driver: return []
+        query = """
+        MATCH p=(h:Host {ip: $ip})-[:EXPOSES]->(s)-[:AFFECTED_BY]->(v)-[:RESULTS_IN]->(i)
         RETURN p, v.cvss as score
         ORDER BY score DESC
         LIMIT 1
         """
         with self.driver.session() as session:
             result = session.run(query, ip=host_ip)
-            record = result.single()
-            return record if record else []
+            return result.single()
+
+    def get_full_graph_data(self, host_ip: str):
+        """Serializes the entire local attack surface for frontend visualization."""
+        if not self.driver: return {"nodes": [], "edges": []}
+        query = "MATCH (n)-[r]->(m) WHERE (n:Host {ip: $ip}) OR (n)-[*]->(m) RETURN n, r, m"
+        nodes = []
+        edges = []
+        with self.driver.session() as session:
+            results = session.run(query, ip=host_ip)
+            for record in results:
+                for node in [record['n'], record['m']]:
+                    n_data = {"id": node.id, "labels": list(node.labels), "properties": dict(node)}
+                    if n_data not in nodes: nodes.append(n_data)
+                rel = record['r']
+                edges.append({"id": rel.id, "type": rel.type, "source": rel.start_node.id, "target": rel.end_node.id})
+        return {"nodes": nodes, "edges": edges}
 
 neo4j_service = Neo4jService()

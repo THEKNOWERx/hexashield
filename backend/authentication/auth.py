@@ -36,6 +36,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    from database.db import SessionLocal
+    from models import User
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -43,7 +45,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    return username
+    
+    # Critical fix: Retrieve full user object for notification ownership
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.username == username).first()
+        if user is None:
+            raise credentials_exception
+        return user
 
 def check_role(required_roles: list):
     async def role_checker(token: str = Depends(oauth2_scheme)):

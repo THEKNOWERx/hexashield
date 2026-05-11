@@ -11,39 +11,31 @@ const StatCard = ({ title, value, subtext, icon: Icon, colorClass, trend }) => {
       className="cyber-panel flex flex-col justify-between h-44 group transition-all duration-500 relative overflow-hidden"
     >
       {/* Decorative background glow */}
-      <div className={`absolute -right-12 -top-12 w-32 h-32 rounded-full blur-[60px] opacity-10 transition-opacity group-hover:opacity-20 ${colorClass.replace('text-', 'bg-')}`} />
-      
       <div className="flex justify-between items-start relative z-10">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-cyber-black border border-white/5 shadow-2xl transition-all duration-300 group-hover:border-white/20 ${colorClass}`}>
-          <Icon size={24} />
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-black/40 border border-white/5 transition-all duration-300 group-hover:border-cyber-blue/40 shadow-2xl ${colorClass}`}>
+          <Icon size={28} />
         </div>
         
         <div className="text-right flex flex-col">
-          <span className="text-3xl font-black font-mono tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+          <span className="text-4xl font-black tracking-tighter text-white italic">
             {value}
           </span>
-          {trend && (
-            <span className={`text-[9px] font-black uppercase tracking-widest mt-1 ${trend.positive ? 'text-cyber-neon' : 'text-cyber-alert'}`}>
-              {trend.positive ? '↑' : '↓'} {trend.label}
-            </span>
-          )}
+          <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest mt-1">
+            Live Stream
+          </span>
         </div>
       </div>
 
-      <div className="relative z-10">
-        <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500 mb-1.5 group-hover:text-gray-300 transition-colors">
+      <div className="relative z-10 mt-6">
+        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2 group-hover:text-white transition-colors">
           {title}
         </h4>
-        <div className="flex items-center gap-2">
-           <div className={`w-1 h-1 rounded-full animate-pulse ${colorClass.replace('text-', 'bg-')}`} />
-           <p className="text-[10px] text-gray-500 font-medium font-mono leading-tight">
-             {subtext}
-           </p>
-        </div>
+        <p className="text-[10px] text-gray-600 font-medium leading-tight h-8 overflow-hidden">
+          {subtext}
+        </p>
       </div>
       
-      {/* Bottom accent bar */}
-      <div className={`absolute bottom-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-700 ${colorClass.replace('text-', 'bg-')}`} />
+      <div className={`absolute bottom-0 left-0 h-[3px] w-0 group-hover:w-full transition-all duration-700 ${colorClass.replace('text-', 'bg-')}`} />
     </motion.div>
   );
 };

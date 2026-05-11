@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HexaScan Intelligence Report - {{ scan.target_ip }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --critical: #dc2626;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 20px;
+        }
+        h1 { margin: 0; font-size: 2.5rem; color: var(--accent); }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .meta-item {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .meta-label { color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .meta-value { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        th {
+            background: #334155;
+            text-align: left;
+            padding: 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .risk-Critical { background: var(--critical); color: white; }
+        .risk-High { background: var(--danger); color: white; }
+        .risk-Medium { background: var(--warning); color: #000; }
+        .risk-Low { background: var(--success); color: white; }
+        .risk-Informational { background: #64748b; color: white; }
+        
+        .banner-text {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 5px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>HexaScan Intelligence</h1>
+                <p style="color: var(--text-secondary)">Target: <strong>{{ scan.target_ip }}</strong> ({{ scan.target_hostname or 'Unresolved' }})</p>
+            </div>
+            <div style="text-align: right">
+                <p class="meta-label">Exported At</p>
+                <p class="meta-value">{{ now }}</p>
+            </div>
+        </div>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Scan Profile</div>
+                <div class="meta-value">{{ scan.scan_type.upper() }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Open Ports</div>
+                <div class="meta-value">{{ results|length }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Duration</div>
+                <div class="meta-value">{{ "%.2f"|format((scan.completed_at - scan.started_at).total_seconds()) }}s</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">OS Hint</div>
+                <div class="meta-value" style="color: var(--accent)">{{ scan.host.os_hint or 'Unknown' }}</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Port/Proto</th>
+                    <th>Service</th>
+                    <th>Risk</th>
+                    <th>Latency</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in results %}
+                <tr>
+                    <td>{{ p.port_number }}/{{ p.protocol.upper() }}</td>
+                    <td>
+                        <strong style="color: var(--accent)">{{ p.service_name }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary)">{{ p.service_version or '' }}</span>
+                    </td>
+                    <td><span class="risk-badge risk-{{ p.risk_level }}">{{ p.risk_level }}</span></td>
+                    <td>{{ "%.1f"|format(p.response_time_ms) }}ms</td>
+                    <td>
+                        <span class="banner-text">{{ p.banner or 'No banner grabbed' }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 version: '3.8'
 
+services:
   db:
     image: postgres:15-alpine
     restart: always
@@ -11,6 +12,11 @@ version: '3.8'
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hexa_user -d hexa_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend

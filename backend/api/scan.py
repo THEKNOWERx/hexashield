@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
-from services.advanced_scanner import AdvancedScannerService
+from services.orchestrator import orchestrator
 from authentication.auth import get_current_user, check_role
 from database.db import get_db
 from models import Scan
@@ -12,17 +12,21 @@ async def start_scan(background_tasks: BackgroundTasks, target: str, intensity: 
     """Starts an ULTRA-ADVANCED intelligence audit in the background. Returns immediately."""
     
     # 1. Immediate record creation to prevent UI polling latencies
-    existing = db.query(Scan).filter(Scan.target == target).all()
-    for s in existing: db.delete(s)
-    db.commit()
+    try:
+        existing = db.query(Scan).filter(Scan.target == target).all()
+        for s in existing: db.delete(s)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[API] Cleanup Warning: {e}")
 
-    new_scan = Scan(target=target, scan_type=f"ADVANCED_{intensity.upper()}", status="running")
+    new_scan = Scan(target=target, scan_type=f"ADVANCED_{intensity.upper()}", status="running", user_id=current_user.id)
     db.add(new_scan)
     db.commit()
     db.refresh(new_scan)
     
-    # 2. Trigger Advanced Engine in Background
-    background_tasks.add_task(AdvancedScannerService.execute_advanced_scan, target, intensity, new_scan.id)
+    # 2. Trigger Robust Orchestrator in Background
+    background_tasks.add_task(orchestrator.run_unified_workflow, target, intensity, new_scan.id)
     
     return {
         "message": "ULTRA-ADVANCED Intelligence Engine Engaged.",

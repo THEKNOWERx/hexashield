@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 # Load environment variables from .env file
 load_dotenv()
 
-from api import admin, recon, scan, vuln, ai, reports, exploit, nexus
+from api import admin, recon, scan, vuln, ai, reports, exploit, nexus, notifications, attack_path
 from authentication import auth
 from database.db import get_db, init_db
 from models import User
@@ -111,9 +111,11 @@ api_router.include_router(ai.router)
 api_router.include_router(reports.router)
 api_router.include_router(exploit.router)
 api_router.include_router(nexus.router)
+api_router.include_router(notifications.router)
+api_router.include_router(attack_path.router)
 
 # Finally include the versioned router in the main app
 app.include_router(api_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

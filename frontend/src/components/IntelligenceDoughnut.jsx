@@ -7,11 +7,12 @@ import { Target, Activity } from 'lucide-react';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const IntelligenceDoughnut = ({ findings = [] }) => {
+  const safeFindings = Array.isArray(findings) ? findings : [];
   const counts = {
-    Critical: findings.filter(f => f.severity === 'Critical').length,
-    High: findings.filter(f => f.severity === 'High').length,
-    Medium: findings.filter(f => f.severity === 'Medium').length,
-    Low: findings.filter(f => f.severity === 'Low').length
+    Critical: safeFindings.filter(f => f.severity === 'Critical' || f.severity === 'CRITICAL').length,
+    High: safeFindings.filter(f => f.severity === 'High' || f.severity === 'HIGH').length,
+    Medium: safeFindings.filter(f => f.severity === 'Medium' || f.severity === 'MEDIUM').length,
+    Low: safeFindings.filter(f => f.severity === 'Low' || f.severity === 'LOW').length
   };
 
   const data = {

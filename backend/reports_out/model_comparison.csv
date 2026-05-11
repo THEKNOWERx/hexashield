@@ -1,0 +1,5 @@
+Model,Accuracy,Speed (Training),Complexity,Suitability
+Logistic Regression,0.9450,0.2543s,Low,General
+SVM (RBF Kernel),0.9050,0.3697s,Medium,Experimental
+Random Forest,0.9500,0.5683s,High,Complex Patterns
+Deep Learning (MLP),0.9750,1.6482s,High,Experimental
