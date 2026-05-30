@@ -1,8 +1,0 @@
-INFO:     Started server process [15380]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-[SEED] Default users initialized/updated: admin/admin123, analyst/analyst123
-[DEBUG] Login attempt for user: admin
-[DEBUG] Login successful for user: admin
-INFO:     127.0.0.1:41848 - "POST /token HTTP/1.1" 200 OK

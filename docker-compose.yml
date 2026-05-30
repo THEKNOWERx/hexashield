@@ -5,15 +5,15 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      - POSTGRES_DB=hexa_db
-      - POSTGRES_USER=hexa_user
-      - POSTGRES_PASSWORD=hexa_password
+      - POSTGRES_DB=${POSTGRES_DB:-hexa_db}
+      - POSTGRES_USER=${POSTGRES_USER:-hexa_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hexa_user -d hexa_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hexa_user} -d ${POSTGRES_DB:-hexa_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,14 +22,17 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://hexa_user:hexa_password@db:5432/hexa_db
-      - SECRET_KEY=your_secret_key_here
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-hexa_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hexa_db}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
     depends_on:
       db:
         condition: service_healthy
+    restart: on-failure
 
   frontend:
     build: ./frontend

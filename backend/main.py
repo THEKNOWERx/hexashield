@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-# Load environment variables from .env file
 load_dotenv()
 
 from api import admin, recon, scan, vuln, ai, reports, exploit, nexus, notifications, attack_path
@@ -16,47 +15,47 @@ from authentication import auth
 from database.db import get_db, init_db
 from models import User
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
     init_db()
     try:
         from database.seed import seed
         seed()
-        print("[STARTUP] Database initialized and seeded successfully.")
     except Exception as e:
-        print(f"[STARTUP ERROR] Failed to run seed on startup: {e}")
-    
+        print(f"[STARTUP] Seed skipped: {e}")
     yield
-    # Shutdown logic (if any)
-    print("[SHUTDOWN] Cleaning up resources...")
+
 
 app = FastAPI(
-    title="AI-Assisted Ethical Penetration Testing Platform", 
-    version="1.0.0",
-    lifespan=lifespan
+    title="HexaShield Security Platform",
+    version="2.0.0",
+    lifespan=lifespan,
 )
+
+allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = [o.strip() for o in allowed_origins_raw.split(",") if o.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+api_router = APIRouter(prefix="/api")
+
 
 @app.get("/")
 async def root_api():
     return {"message": "HexaShield Security API is online", "docs": "/docs", "status": "active"}
 
-# Global API Versioning Router
-api_router = APIRouter(prefix="/api")
 
-# CORS Configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Status and Authentication (Inside v1)
 @api_router.get("/health")
-async def root():
-    return {"message": "Cybersecurity Platform API is online", "status": "active"}
+async def health():
+    return {"status": "ok"}
+
 
 @api_router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -70,18 +69,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = auth.create_access_token(
-        data={"sub": user.username, "role": user.role}
-    )
+    access_token = auth.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @api_router.post("/register")
 async def register(user_data: dict, db: Session = Depends(get_db)):
     from sqlalchemy import func
     hashed_pw = auth.get_password_hash(user_data.get("password"))
 
-    # Case-insensitive check for existing username
-    existing_user = db.query(User).filter(func.lower(User.username) == func.lower(user_data.get("username"))).first()
+    existing_user = db.query(User).filter(
+        func.lower(User.username) == func.lower(user_data.get("username"))
+    ).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
 
@@ -89,7 +88,7 @@ async def register(user_data: dict, db: Session = Depends(get_db)):
         username=user_data.get("username"),
         email=user_data.get("email"),
         hashed_password=hashed_pw,
-        role=user_data.get("role", "security_analyst")
+        role=user_data.get("role", "security_analyst"),
     )
 
     db.add(new_user)
@@ -102,7 +101,7 @@ async def register(user_data: dict, db: Session = Depends(get_db)):
 
     return {"message": "User registered successfully", "username": new_user.username}
 
-# Router inclusions
+
 api_router.include_router(admin.router)
 api_router.include_router(recon.router)
 api_router.include_router(scan.router)
@@ -114,8 +113,7 @@ api_router.include_router(nexus.router)
 api_router.include_router(notifications.router)
 api_router.include_router(attack_path.router)
 
-# Finally include the versioned router in the main app
 app.include_router(api_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False, workers=1)

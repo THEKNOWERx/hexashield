@@ -1,41 +1,73 @@
-# HEXASHIELD: AI-Assisted Penetration Testing Platform
+# HexaShield
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232a?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 
-**HexaShield** is a professional, research-grade cybersecurity platform designed for advanced threat analysis and ethical penetration testing. Developed as a graduation project, it integrates AI-driven vulnerability intelligence with modern web architecture to provide a comprehensive security operations center (SOC) experience.
+**HexaShield** is an enterprise-grade cybersecurity platform for AI-assisted vulnerability assessment, port scanning, attack-path visualization, and professional report generation.
 
-## 🚀 Key Features
-- **AI-Driven Analysis**: Automated vulnerability explanations and remediation advice using LLM-inspired logic.
-- **Full-Stack Persistence**: Real-time data tracking via FastAPI and SQLite.
-- **Dynamic Threat Mapping**: Interactive attack path visualization based on live scan findings.
-- **Role-Based Access**: Secure JWT-based authentication for Administrators, Analysts, and Students.
-- **Professional Reporting**: On-demand HTML/JSON report generation following industry standards.
+## Features
 
-## 🛠️ Tech Stack
-- **Frontend**: React (Vite), TailwindCSS, Chart.js, Lucide-React.
-- **Backend**: FastAPI (Python), SQLAlchemy, JWT, Bcrypt.
-- **Methodologies**: OWASP Top 10, NIST CSF, MITRE ATT&CK.
+- AI-driven vulnerability intelligence with OWASP Top 10, NIST CSF, and MITRE ATT&CK mapping
+- Real-time port scanning and service/version detection via the HexaScan engine
+- Interactive attack-path visualization and threat graph
+- Role-Based Access Control (Admin / Analyst / Student)
+- On-demand report generation (HTML, JSON, PDF)
+- Full-stack PostgreSQL persistence with JWT authentication
 
-## 📦 Quick Start
-Ensure you have Docker installed, then run:
+## Tech Stack
+
+- **Frontend**: React 19 (Vite), TailwindCSS 4, Chart.js, Lucide-React
+- **Backend**: FastAPI (Python 3.12+), SQLAlchemy, Passlib/bcrypt, python-jose
+- **Database**: PostgreSQL 15
+- **Infrastructure**: Docker Compose, Nginx
+
+## Quick Start
+
+### Prerequisites
+
+- Docker and Docker Compose
+- `openssl` (for generating secrets)
+
+### 1. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set strong values for every variable:
+
+| Variable | Description |
+|---|---|
+| `POSTGRES_PASSWORD` | PostgreSQL password |
+| `SECRET_KEY` | JWT signing key — generate with `openssl rand -hex 32` |
+| `ADMIN_PASSWORD` | Initial admin account password |
+| `GOOGLE_API_KEY` | Google Generative AI key (optional) |
+
+### 2. Build and run
+
 ```bash
 docker-compose up --build
 ```
-Access the platform at `http://localhost:5174`.  
-Default Admin Credentials: `admin` / `admin123`.
 
-## 📂 Project Structure
-- `/backend`: FastAPI service layer and security engines.
-- `/frontend`: React dashboard and visualization components.
-- `/docs`: Installation, API Reference, and Presentation Guides.
-- `docker-compose.yml`: Full system orchestration.
+### 3. Access
 
-## 📄 Documentation
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8000 |
+| API Docs | http://localhost:8000/docs |
+
+Log in with `admin` and the password you set in `ADMIN_PASSWORD`.
+
+## ML Models
+
+The AI risk-scoring and anomaly-detection models (`risk_model.pkl`, `anomaly_model.pkl`) are **not committed** to the repository. Place them in the `backend/` directory before starting the service, or configure the backend to operate in rules-based fallback mode when they are absent.
+
+See [docs/installation.md](docs/installation.md) for provisioning instructions.
+
+## Documentation
+
 - [Installation Guide](docs/installation.md)
-- [API Documentation](docs/api_documentation.md)
-- [Project Walkthrough](brain/fdb9a8c8-e37e-4fca-a58f-ebb3929dabad/walkthrough.md)
-
----
-*Created as a University Graduation Project in Cybersecurity.*
+- [API Reference](docs/api_documentation.md)
+- [Operations Runbook](docs/operations.md)
