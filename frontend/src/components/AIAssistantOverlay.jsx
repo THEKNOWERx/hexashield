@@ -33,7 +33,7 @@ const AIAssistantOverlay = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.response }]);
     } catch (err) {
       const errMsg = err.response?.data?.detail || err.message || "Failed to reach the security core.";
-      setMessages(prev => [...prev, { role: 'assistant', content: `Neural Link Error: ${errMsg}` }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${errMsg}` }]);
     } finally {
       setIsTyping(false);
     }
@@ -65,11 +65,11 @@ const AIAssistantOverlay = () => {
             <div className="flex items-center justify-between p-4 border-b border-cyber-border">
               <div className="flex items-center gap-2">
                 <Bot className="text-cyber-neon" size={20} />
-                <span className="font-bold tracking-wider uppercase text-sm">Security AI v4.2</span>
+                <span className="font-semibold text-sm">Security AI</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-cyber-neon animate-pulse"></div>
-                <span className="text-[10px] text-gray-400 uppercase">Neural Link Active</span>
+                <div className="w-2 h-2 rounded-full bg-cyber-neon"></div>
+                <span className="text-xs text-gray-400">Online</span>
               </div>
             </div>
 
@@ -84,8 +84,8 @@ const AIAssistantOverlay = () => {
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <div className="flex items-center gap-2">
                         {msg.role === 'assistant' ? <Bot size={14} className="text-cyber-neon" /> : <User size={14} />}
-                        <span className="text-[10px] uppercase font-bold opacity-50">
-                          {msg.role === 'assistant' ? 'AI' : 'Operator'}
+                        <span className="text-xs font-medium opacity-50">
+                          {msg.role === 'assistant' ? 'AI' : 'You'}
                         </span>
                       </div>
                       <button 

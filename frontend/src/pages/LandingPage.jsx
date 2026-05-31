@@ -107,9 +107,9 @@ const LandingPage = () => {
                   animate={{ opacity: [1, 0.5, 1], color: ["#fff", "#0070f3", "#fff"] }} 
                   transition={{ repeat: Infinity, duration: 0.5 }}
                 >
-                  Override Protocol Active
+                  Initializing platform
                 </motion.span>
-                <span className="text-cyber-neon">SYSTEM.BOOT()</span>
+                <span className="text-cyber-neon">Loading…</span>
               </div>
             </motion.div>
           </motion.div>
@@ -138,17 +138,17 @@ const LandingPage = () => {
               <span className="text-2xl font-black tracking-tighter text-white">HEXA<span className="text-cyber-blue">SHIELD</span></span>
             </Link>
           </motion.div>
-          <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-            <Link to="/nexus/tactical" className="hover:text-cyber-blue transition-colors">Tactical Features</Link>
-            <Link to="/nexus/intelligence" className="hover:text-cyber-blue transition-colors">Intelligence Hub</Link>
-            <Link to="/nexus/protocol" className="hover:text-cyber-blue transition-colors">Protocol Spec</Link>
+          <div className="hidden md:flex gap-10 text-[11px] font-semibold tracking-wide text-gray-400">
+            <Link to="/nexus/tactical" className="hover:text-cyber-blue transition-colors">Features</Link>
+            <Link to="/nexus/intelligence" className="hover:text-cyber-blue transition-colors">Platform</Link>
+            <Link to="/nexus/protocol" className="hover:text-cyber-blue transition-colors">Documentation</Link>
           </div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <Link to="/login" className="cyber-button text-[10px] px-8 py-3">
-              STRIKE TERMINAL
+            <Link to="/login" className="cyber-button text-xs px-7 py-3">
+              Sign in
             </Link>
           </motion.div>
         </div>
@@ -161,45 +161,45 @@ const LandingPage = () => {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-cyber-blue/30 bg-cyber-blue/5 text-cyber-blue text-[10px] font-black tracking-widest uppercase"
+              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-cyber-blue/30 bg-cyber-blue/5 text-cyber-blue text-[11px] font-semibold tracking-wide"
             >
               <span className="w-2 h-2 rounded-full bg-cyber-blue animate-pulse"></span>
-              Neural Defense Engine v4.0 Active
+              Enterprise penetration testing platform
             </motion.div>
             
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-7xl md:text-8xl font-black tracking-tight leading-[0.9] text-white"
+              className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] text-white"
             >
-              SECURE THE <br /> 
-              <span className="text-cyber-blue drop-shadow-[0_0_30px_rgba(0,112,255,0.3)]">FRONTIER.</span>
+              Find vulnerabilities <br /> 
+              before <span className="text-cyber-blue">attackers do.</span>
             </motion.h1>
 
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-gray-400 font-medium max-w-xl leading-relaxed"
+              className="text-lg text-gray-400 max-w-xl leading-relaxed"
             >
-              Autonomous penetration testing powered by neural intelligence. 
-              Identify vulnerabilities, map attack surfaces, and orchestrate 
-              remediation before the first breach occurs.
+              HexaShield combines automated reconnaissance, network scanning, and
+              AI-assisted analysis to map your attack surface, prioritize real risks,
+              and guide remediation — all from a single dashboard.
             </motion.p>
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-6 pt-4"
+              className="flex flex-col sm:flex-row gap-4 pt-4"
             >
-              <Link to="/login" className="cyber-button text-xs px-12 py-5 flex items-center justify-center gap-3 group">
-                PLATFORM ACCESS
+              <Link to="/login" className="cyber-button text-sm px-9 py-4 flex items-center justify-center gap-2.5 group">
+                Get started
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link to="/register" className="px-12 py-5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-cyber-blue/50 transition-all flex items-center justify-center text-xs font-black tracking-widest uppercase text-gray-400 hover:text-white">
-                Register Credentials
+              <Link to="/register" className="px-9 py-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-cyber-blue/50 transition-all flex items-center justify-center text-sm font-semibold text-gray-300 hover:text-white">
+                Create account
               </Link>
             </motion.div>
           </div>
@@ -242,9 +242,9 @@ const LandingPage = () => {
       <section className="py-24 border-y border-white/5 bg-white/[0.01]">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
           {[
-            { label: 'Real-time Intelligence', icon: Activity, desc: 'Live monitoring of global threat vectors and zero-day databases.' },
-            { label: 'Neural Mapping', icon: Globe, desc: 'AI-assisted attack path visualization and asset reconnaissance.' },
-            { label: 'Secure Storage', icon: Database, desc: 'Military-grade encryption for all audit logs and finding reports.' },
+            { label: 'Real-time Intelligence', icon: Activity, desc: 'Continuous monitoring of global threat feeds and known CVE databases.' },
+            { label: 'Attack Path Mapping', icon: Globe, desc: 'AI-assisted attack path visualization and asset reconnaissance.' },
+            { label: 'Secure Storage', icon: Database, desc: 'Encrypted storage for all audit logs and finding reports.' },
           ].map((item, i) => (
             <motion.div 
               key={i}
@@ -271,25 +271,25 @@ const LandingPage = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-cyber-blue/30 to-transparent"></div>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
            <div className="flex-1 space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-1 bg-cyber-neon/10 border border-cyber-neon/20 rounded-full text-cyber-neon text-[9px] font-black uppercase tracking-widest">
-                 Public Threat Intelligence
+              <div className="inline-flex items-center gap-2 px-4 py-1 bg-cyber-neon/10 border border-cyber-neon/20 rounded-full text-cyber-neon text-[11px] font-semibold tracking-wide">
+                 Public threat intelligence
               </div>
-              <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none">
-                 URL EXPERT <br/>
-                 <span className="text-cyber-neon">AUDIT.</span>
+              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+                 URL & domain <br/>
+                 <span className="text-cyber-neon">security audit.</span>
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
-                 Instant, high-fidelity security analysis for any URL or Domain. 
-                 Identify malicious redirects, protocol weaknesses, and reputation scores 
-                 through our neural cross-referencing engine.
+                 Instant security analysis for any URL or domain. Identify malicious
+                 redirects, protocol weaknesses, and reputation scores through our
+                 cross-referencing engine.
               </p>
               <div className="flex gap-4">
-                 <Link to="/url-scan" className="px-10 py-4 bg-cyber-neon text-black font-black text-[10px] uppercase tracking-[0.3em] rounded-xl hover:brightness-110 transition-all shadow-[0_0_30px_rgba(57,255,20,0.3)]">
-                    Audit Link Now
+                 <Link to="/url-scan" className="px-8 py-3.5 bg-cyber-neon text-black font-semibold text-sm rounded-xl hover:brightness-110 transition-all">
+                    Audit a link
                  </Link>
-                 <div className="hidden sm:flex items-center gap-3 px-6 text-[9px] font-black text-gray-600 uppercase tracking-widest border border-white/5 rounded-xl">
+                 <div className="hidden sm:flex items-center gap-3 px-6 text-[11px] font-semibold text-gray-500 tracking-wide border border-white/5 rounded-xl">
                     <Activity size={14} className="text-cyber-blue" />
-                    Neural Feed Active
+                    Live feed active
                  </div>
               </div>
            </div>

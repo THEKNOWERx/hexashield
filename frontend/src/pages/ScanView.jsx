@@ -210,7 +210,7 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
     setScanResults(null);
     setScanLogs([]);
 
-    addLog(`[INIT] HEXA-SCAN QUANTUM INTELLIGENCE ENGINE V6.0 STARTING...`, 'text-cyber-blue');
+    addLog(`[INIT] Starting scan engine…`, 'text-cyber-blue');
     addLog(`[INFO] TARGET: ${target}`, 'text-gray-400');
 
     try {
@@ -327,13 +327,13 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
           <CyberCard title="Scan Configuration" icon={Cpu}>
             <div className="space-y-4">
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Target Infrastructure</label>
+                <label className="text-sm font-medium text-gray-300">Target</label>
                 <div className="relative group">
                   <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-cyber-blue group-focus-within:text-cyber-neon transition-colors" size={18} />
                   <input 
                     type="text" 
-                    placeholder="HOST, IP, OR SUBNET..."
-                    className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-3 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-xs tracking-widest placeholder:text-gray-700"
+                    placeholder="Host, IP, or subnet…"
+                    className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-3 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-sm placeholder:text-gray-600"
                     value={target}
                     onChange={(e) => setTarget(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !isScanning && startScan()}
@@ -342,12 +342,12 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Engine Profile</label>
+                <label className="text-sm font-medium text-gray-300">Scan profile</label>
                 <div className="grid grid-cols-1 gap-4">
                     {[
-                      { id: 'pulse', name: 'Rapid Kinetic Strike', desc: 'Fast Recon → Port Mapping → Instant Risk', icon: Shield, color: 'text-cyber-blue' },
-                      { id: 'deep', name: 'Full Spectrum Audit', desc: 'Neural Fingerprinting & Service Decoding', icon: Zap, color: 'text-cyber-neon' },
-                      { id: 'ports_only', name: 'Stealth Infiltration', desc: 'Evasive Scanning & Surface Discovery', icon: Terminal, color: 'text-cyber-neon' },
+                      { id: 'pulse', name: 'Quick Scan', desc: 'Fast recon, port mapping and risk scoring', icon: Shield, color: 'text-cyber-blue' },
+                      { id: 'deep', name: 'Full Audit', desc: 'Service fingerprinting and version detection', icon: Zap, color: 'text-cyber-neon' },
+                      { id: 'ports_only', name: 'Port Discovery', desc: 'Surface discovery and open-port mapping', icon: Terminal, color: 'text-cyber-neon' },
                     ].map(profile => (
                       <button 
                         key={profile.id}
@@ -374,8 +374,8 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                   onClick={startScan}
                   className="w-full bg-cyber-blue hover:bg-blue-600 disabled:opacity-50 text-white py-4 rounded-2xl transition-all duration-300 shadow-[0_0_30px_rgba(0,71,255,0.3)] active:scale-[0.98] flex items-center justify-center gap-4 group"
                 >
-                  {isScanning ? <Loader2 className="animate-spin text-white" size={24} /> : <Search className="text-white group-hover:scale-110 transition-transform" size={24} />}
-                  <span className="font-black tracking-[0.25em] text-sm uppercase">Start Sensor</span>
+                  {isScanning ? <Loader2 className="animate-spin text-white" size={22} /> : <Search className="text-white group-hover:scale-110 transition-transform" size={22} />}
+                  <span className="font-semibold text-sm">{isScanning ? 'Scanning…' : 'Start scan'}</span>
                 </button>
               </div>
             </div>
@@ -384,13 +384,13 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
 
         {/* Results Column */}
         <div className="lg:col-span-8 flex flex-col gap-8">
-          <CyberCard title="Telemetry Feed" icon={Activity}>
+          <CyberCard title="Activity" icon={Activity}>
             <div className="space-y-6 min-h-[350px] flex flex-col">
               {/* Progress Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-end px-1">
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">{(isScanning || scanProgress === 100) ? (scanProgress === 100 ? 'Intelligence Full' : 'Agent Active') : 'Sensor Ready'}</span>
-                  <span className="text-3xl font-mono font-black text-cyber-neon tracking-tighter drop-shadow-[0_0_10px_rgba(57,255,20,0.4)]">{scanProgress}%</span>
+                  <span className="text-sm font-medium text-gray-400">{(isScanning || scanProgress === 100) ? (scanProgress === 100 ? 'Scan complete' : 'Scanning…') : 'Ready'}</span>
+                  <span className="text-2xl font-mono font-bold text-cyber-neon tracking-tight">{scanProgress}%</span>
                 </div>
                 <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden border border-white/5 p-[1px]">
                    <motion.div 
@@ -404,10 +404,10 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
 
               {/* Console Output (Image-Matched Styling) */}
               <div className="flex-1 bg-black/60 rounded-2xl p-6 font-mono text-[11px] leading-relaxed text-gray-400 overflow-y-auto h-48 border border-white/5 relative">
-                 <div className="absolute top-4 right-6 text-[8px] font-black text-cyber-blue/40 uppercase tracking-[0.3em] select-none">Live Log</div>
+                 <div className="absolute top-4 right-6 text-xs font-medium text-cyber-blue/50 select-none">Log</div>
                  <div className="space-y-1.5">
                     {scanLogs.length === 0 && (
-                      <p className="text-cyber-blue opacity-50 italic">Waiting for sensor initialization...</p>
+                      <p className="text-cyber-blue opacity-50 italic">Waiting to start…</p>
                     )}
                     {scanLogs.map((log, i) => {
                       const isDone = log.line.startsWith('[DONE]');
@@ -462,10 +462,10 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                        <thead>
-                         <tr className="text-[10px] text-gray-600 uppercase font-black tracking-widest border-b border-white/5">
+                         <tr className="text-xs text-gray-500 font-semibold border-b border-white/5">
                            <th className="pb-4 pl-6">Port / Proto</th>
                            <th className="pb-4">Service</th>
-                           <th className="pb-4">Version Architecture</th>
+                           <th className="pb-4">Version</th>
                            <th className="pb-4 pr-6 text-right">Risk</th>
                          </tr>
                        </thead>
@@ -499,7 +499,7 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                           ) : (
                             <tr>
                               <td colSpan="4" className="py-12 text-center">
-                                 <p className="text-[10px] text-gray-700 font-black uppercase tracking-[0.4em]">Intelligence Synthesis Active — Standby</p>
+                                 <p className="text-sm text-gray-500">No ports yet — start a scan to see results.</p>
                               </td>
                             </tr>
                           )}

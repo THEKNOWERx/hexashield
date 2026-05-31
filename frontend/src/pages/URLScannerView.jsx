@@ -71,8 +71,8 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
               <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-cyber-blue group-focus-within:text-cyber-neon transition-colors" size={24} />
               <input 
                 type="text" 
-                placeholder="ENTER URL FOR DEEP AUDIT (e.g., https://example.com)" 
-                className="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-16 pr-6 text-white font-mono text-sm tracking-widest focus:border-cyber-blue/50 outline-none transition-all placeholder:text-gray-700"
+                placeholder="Enter a URL to audit (e.g., https://example.com)" 
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-16 pr-6 text-white font-mono text-sm focus:border-cyber-blue/50 outline-none transition-all placeholder:text-gray-700"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !isScanning && handleScan()}
@@ -81,10 +81,10 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
             <button 
               onClick={handleScan}
               disabled={isScanning}
-              className="w-full md:w-auto px-10 py-5 bg-cyber-blue hover:bg-blue-600 disabled:opacity-50 rounded-2xl text-white font-black text-xs uppercase tracking-[0.3em] shadow-[0_0_40px_rgba(0,71,255,0.3)] transition-all flex items-center justify-center gap-3 active:scale-95"
+              className="w-full md:w-auto px-10 py-5 bg-cyber-blue hover:bg-blue-600 disabled:opacity-50 rounded-2xl text-white font-semibold text-sm shadow-[0_0_40px_rgba(0,71,255,0.3)] transition-all flex items-center justify-center gap-3 active:scale-95"
             >
               {isScanning ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
-              {isScanning ? 'Analyzing...' : 'Execute Audit'}
+              {isScanning ? 'Analyzing…' : 'Run Audit'}
             </button>
           </div>
         </div>
@@ -101,7 +101,7 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                 className="h-[400px] border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center text-gray-700"
               >
                 <Globe size={48} className="mb-4 opacity-20" />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em]">Awaiting Target Input</p>
+                <p className="text-sm font-medium">Enter a URL to start</p>
               </motion.div>
             ) : isScanning ? (
               <motion.div 
@@ -111,8 +111,8 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
               >
                 <Loader2 size={48} className="animate-spin text-cyber-blue mb-6" />
                 <div className="space-y-2 text-center">
-                   <p className="text-xs font-black text-white uppercase tracking-widest">Neural Recognition Engine Active</p>
-                   <p className="text-[10px] font-mono text-cyber-blue animate-pulse">Decrypting protocol layers and reputation certificates...</p>
+                   <p className="text-sm font-semibold text-white">Analyzing…</p>
+                   <p className="text-xs font-mono text-cyber-blue animate-pulse">Inspecting protocol layers and certificates…</p>
                 </div>
               </motion.div>
             ) : (
@@ -124,19 +124,19 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                 {/* Reputation HUD */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-cyber-blue/10 border border-cyber-blue/30 p-6 rounded-2xl flex flex-col items-center justify-center">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Safety Score</span>
-                    <span className="text-4xl font-mono font-black text-cyber-neon">{results.reputation.score}%</span>
+                    <span className="text-xs font-medium text-gray-400 mb-2">Safety Score</span>
+                    <span className="text-4xl font-mono font-bold text-cyber-neon">{results.reputation.score}%</span>
                   </div>
                   <div className="bg-cyber-blue/10 border border-cyber-blue/30 p-6 rounded-2xl flex flex-col items-center justify-center">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Protocol Status</span>
+                    <span className="text-xs font-medium text-gray-400 mb-2">Protocol Status</span>
                     <div className="flex items-center gap-2">
                        {results.reputation.ssl_valid ? <Lock size={20} className="text-cyber-neon" /> : <Unlock size={20} className="text-red-500" />}
-                       <span className={`text-xl font-black uppercase ${results.reputation.ssl_valid ? 'text-white' : 'text-red-500'}`}>{results.reputation.ssl_valid ? 'SECURE' : 'INSECURE'}</span>
+                       <span className={`text-xl font-semibold ${results.reputation.ssl_valid ? 'text-white' : 'text-red-500'}`}>{results.reputation.ssl_valid ? 'Secure' : 'Insecure'}</span>
                     </div>
                   </div>
                   <div className="bg-cyber-blue/10 border border-cyber-blue/30 p-6 rounded-2xl flex flex-col items-center justify-center">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Redirect Chain</span>
-                    <span className="text-4xl font-mono font-black text-cyber-blue">{results.reputation.redirects}</span>
+                    <span className="text-xs font-medium text-gray-400 mb-2">Redirect Chain</span>
+                    <span className="text-4xl font-mono font-bold text-cyber-blue">{results.reputation.redirects}</span>
                   </div>
                 </div>
 
@@ -145,7 +145,7 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                        <div className="space-y-4">
-                          <h5 className="text-[10px] font-black text-cyber-blue uppercase tracking-widest border-l-2 border-cyber-blue pl-3">Server Fingerprint</h5>
+                          <h5 className="text-xs font-semibold text-cyber-blue border-l-2 border-cyber-blue pl-3">Server Fingerprint</h5>
                           <div className="space-y-3 font-mono text-[11px]">
                              <div className="flex justify-between border-b border-white/5 pb-2">
                                <span className="text-gray-600">Engine:</span>
@@ -162,7 +162,7 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                           </div>
                        </div>
                        <div className="space-y-4">
-                          <h5 className="text-[10px] font-black text-cyber-neon uppercase tracking-widest border-l-2 border-cyber-neon pl-3">Reputation Profile</h5>
+                          <h5 className="text-xs font-semibold text-cyber-neon border-l-2 border-cyber-neon pl-3">Reputation Profile</h5>
                           <div className="space-y-3 font-mono text-[11px]">
                              <div className="flex justify-between border-b border-white/5 pb-2">
                                <span className="text-gray-600">Category:</span>
@@ -183,8 +183,8 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                     <div className="mt-8 p-4 bg-cyber-alert/5 border border-cyber-alert/20 rounded-xl flex items-center gap-4">
                        <AlertTriangle className="text-cyber-alert" size={24} />
                        <div>
-                          <p className="text-xs font-black text-white uppercase mb-1">Expert Alert</p>
-                          <p className="text-[10px] text-gray-500">Neural analysis detected non-standard HTTP methods enabled (OPTIONS, PUT). Audit required for unauthorized file interaction.</p>
+                          <p className="text-xs font-semibold text-white mb-1">Alert</p>
+                          <p className="text-[10px] text-gray-500">Non-standard HTTP methods enabled (OPTIONS, PUT). Review for unauthorized file interaction.</p>
                        </div>
                     </div>
                   </div>
@@ -203,11 +203,11 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                     <div key={i} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
                        <div className="flex justify-between items-start mb-2">
                           <span className="text-[10px] font-bold text-cyber-blue font-mono">{h.audit_id}</span>
-                          <span className="text-[8px] font-black text-gray-600 uppercase">2m ago</span>
+                          <span className="text-[10px] font-medium text-gray-600">2m ago</span>
                        </div>
-                       <div className="text-xs font-black text-white truncate mb-2">{url}</div>
+                       <div className="text-xs font-semibold text-white truncate mb-2">{url}</div>
                        <div className="flex items-center justify-between">
-                          <span className={`text-[9px] font-black uppercase ${h.reputation.score > 80 ? 'text-cyber-neon' : 'text-cyber-alert'}`}>
+                          <span className={`text-xs font-medium ${h.reputation.score > 80 ? 'text-cyber-neon' : 'text-cyber-alert'}`}>
                             {h.reputation.status} Score: {h.reputation.score}%
                           </span>
                           <RefreshCcw size={12} className="text-gray-700 group-hover:text-cyber-blue transition-colors" />
@@ -215,20 +215,20 @@ const URLScannerView = ({ headerTitle, headerSubtitle }) => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-[10px] text-gray-700 font-bold text-center py-10 uppercase tracking-widest">No previous audits</p>
+                  <p className="text-sm text-gray-600 text-center py-10">No previous audits</p>
                 )}
              </div>
           </CyberCard>
 
-          <CyberCard title="Neural Advisory" icon={Terminal}>
+          <CyberCard title="Advisory" icon={Terminal}>
              <div className="space-y-4">
                 <div className="p-4 bg-black/40 border border-white/5 rounded-xl">
-                   <p className="text-[11px] text-gray-400 font-medium leading-relaxed italic">
-                     "Historical data indicates that targets with safety scores below 75% often exhibit unauthorized redirect patterns within 120ms of initial GET request."
+                   <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                     Targets with safety scores below 75% often exhibit unauthorized redirect patterns shortly after the initial request.
                    </p>
                 </div>
                 <div className="pt-2 border-t border-white/5">
-                   <span className="text-[8px] font-black text-cyber-blue uppercase tracking-widest">System Hash: HEXA-URL-AUDIT-2026</span>
+                   <span className="text-[10px] font-medium text-cyber-blue">URL reputation and protocol inspection</span>
                 </div>
              </div>
           </CyberCard>

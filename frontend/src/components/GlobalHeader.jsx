@@ -38,7 +38,7 @@ const GlobalHeader = ({ title, subtitle }) => {
   };
 
   const handlePurge = async () => {
-    if (!window.confirm("Purge all neural alerts?")) return;
+    if (!window.confirm("Clear all notifications?")) return;
     try {
       await notificationsService.purgeAll();
       setNotifications([]);
@@ -66,35 +66,42 @@ const GlobalHeader = ({ title, subtitle }) => {
   };
 
   return (
-    <header className="flex items-center justify-between mb-4 py-2">
-      <div className="flex-1 max-w-xl mx-8">
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search size={16} className="text-gray-600 transition-colors group-focus-within:text-white" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search queries, nodes, or intel..." 
-            className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:bg-white/[0.05] focus:border-white/10 transition-all"
-          />
-        </div>
+    <header className="flex items-center justify-between gap-6 mb-6">
+      <div className="min-w-0">
+        {title && <h1 className="text-2xl font-semibold text-white tracking-tight truncate">{title}</h1>}
+        {subtitle && <p className="text-sm text-gray-400 mt-0.5 truncate">{subtitle}</p>}
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="relative flex items-center gap-2">
-          <button 
+      <div className="flex items-center gap-3">
+        <div className="relative group hidden md:block w-72">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <Search size={16} className="text-gray-500 transition-colors group-focus-within:text-cyber-blue" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search findings, hosts, or CVEs..."
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:bg-white/[0.06] focus:border-cyber-blue/50 focus:ring-2 focus:ring-cyber-blue/15 transition-all"
+          />
+        </div>
+        <div className="relative flex items-center">
+          <button
             onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className={`relative p-2 transition-colors ${
-              isNotificationsOpen ? 'text-blue-400' : 'text-gray-500 hover:text-white'
+            className={`relative p-2.5 rounded-lg transition-colors ${
+              isNotificationsOpen ? 'text-cyber-blue bg-cyber-blue/10' : 'text-gray-400 hover:text-white hover:bg-white/[0.05]'
             }`}
+            aria-label="Notifications"
           >
-            <Bell size={20} />
-            <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-black" />
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold bg-cyber-alert text-white rounded-full">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           <AnimatePresence>
             {isNotificationsOpen && (
-              <NotificationDropdown 
+              <NotificationDropdown
                 notifications={safeNotifications}
                 onMarkRead={handleMarkRead}
                 onPurge={handlePurge}
@@ -102,18 +109,6 @@ const GlobalHeader = ({ title, subtitle }) => {
               />
             )}
           </AnimatePresence>
-        </div>
-
-        <div className="flex items-center gap-4 pl-6 border-l border-white/5">
-          <div className="text-right hidden sm:block">
-            <p className="text-[10px] font-black text-white uppercase tracking-tight">SOC Admin</p>
-            <p className="text-[8px] text-cyber-neon font-black uppercase tracking-tighter">CLEARED</p>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center p-1 group hover:border-blue-400 transition-all cursor-pointer">
-            <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
-              <User size={18} className="text-gray-500" />
-            </div>
-          </div>
         </div>
       </div>
     </header>

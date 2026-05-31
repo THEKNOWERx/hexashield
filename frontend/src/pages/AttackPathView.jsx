@@ -49,7 +49,7 @@ const GraphNode = ({ node, isHighlighted, status, onClick }) => (
     `}>
       <Zap size={14} className={status === 'pending' ? 'text-gray-600' : 'text-white'} />
     </div>
-    <span className={`mt-2 text-[8px] font-black tracking-widest uppercase bg-black/80 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap transition-opacity duration-500
+    <span className={`mt-2 text-[10px] font-medium bg-black/80 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap transition-opacity duration-500
       ${status === 'pending' ? 'opacity-30' : 'opacity-100'}
       ${status === 'active' ? 'text-white border-red-500/50' : 'text-gray-400'}
     `}>
@@ -114,7 +114,7 @@ const TargetNode = ({ findings, target }) => {
           <div className="flex justify-between items-center mb-6">
              <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-cyber-neon animate-pulse' : 'bg-gray-600'}`}></div>
-                <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">Attack Graph Simulation: Tactical Journey</h3>
+                <h3 className="text-sm font-semibold text-gray-300">Attack Graph Simulation</h3>
              </div>
              <div className="flex gap-2">
                 <span className="text-[8px] bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/20 px-2 py-0.5 rounded font-bold uppercase">
@@ -189,11 +189,11 @@ const TargetNode = ({ findings, target }) => {
                        animate={{ opacity: 1, x: 0 }}
                        className="space-y-1"
                      >
-                        <h4 className="text-[10px] font-black text-cyber-blue uppercase tracking-widest">Tactical Insight</h4>
+                        <h4 className="text-xs font-semibold text-cyber-blue">Insight</h4>
                         <p className="text-sm font-medium text-white line-clamp-1">{activeNode.desc}</p>
                      </motion.div>
                    ) : (
-                     <p className="text-sm text-gray-500 font-mono italic">SYSTEM READY: INITIALIZE SIMULATION TO ANALYZE INVASION VECTORS</p>
+                     <p className="text-sm text-gray-500 italic">Start the simulation to analyze attack vectors.</p>
                    )}
                 </div>
 
@@ -202,7 +202,7 @@ const TargetNode = ({ findings, target }) => {
                      <button
                         key={s}
                         onClick={() => setSpeed(2000 / s)}
-                        className={`text-[9px] font-black px-3 py-1 rounded border transition-all ${speed === 2000 / s ? 'bg-cyber-neon/10 border-cyber-neon text-cyber-neon' : 'bg-transparent border-white/10 text-gray-600'}`}
+                        className={`text-xs font-semibold px-3 py-1 rounded border transition-all ${speed === 2000 / s ? 'bg-cyber-neon/10 border-cyber-neon text-cyber-neon' : 'bg-transparent border-white/10 text-gray-600'}`}
                      >
                         {s}X
                      </button>
@@ -227,52 +227,52 @@ const TargetNode = ({ findings, target }) => {
                  className="space-y-6"
                >
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                     <h4 className="text-xs font-black tracking-widest text-cyber-neon uppercase mb-2">Detailed Telemetry</h4>
+                     <h4 className="text-xs font-semibold text-cyber-neon mb-2">Details</h4>
                      <p className="text-xl font-bold text-white">{selectedNode.label}</p>
-                     <span className="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30 uppercase">
-                       {selectedNode.type} Entity
+                     <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded bg-cyber-blue/20 text-cyber-blue border border-cyber-blue/30">
+                       {selectedNode.type}
                      </span>
                   </div>
 
                   <div className="space-y-4">
-                     <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Simulation Context</h5>
+                     <h5 className="text-xs font-semibold text-gray-500">Context</h5>
                      <div className="p-4 rounded-xl border border-white/5 bg-black/20 space-y-3">
                         <div className="flex justify-between">
                            <span className="text-xs text-gray-400">Current Phase</span>
-                           <span className={`text-xs font-bold uppercase ${getStatus(selectedNode.id) === 'active' ? 'text-cyber-neon' : 'text-gray-500'}`}>
+                           <span className={`text-xs font-semibold ${getStatus(selectedNode.id) === 'active' ? 'text-cyber-neon' : 'text-gray-500'}`}>
                              {getStatus(selectedNode.id)}
                            </span>
                         </div>
                         <div className="flex justify-between">
                            <span className="text-xs text-gray-400">Path Criticality</span>
-                           <span className="text-xs font-bold text-red-500 uppercase">Strategic</span>
+                           <span className="text-xs font-semibold text-red-500">High</span>
                         </div>
                      </div>
                   </div>
                   
                   <button 
                      onClick={() => setSelectedNode(null)}
-                     className="w-full py-2 rounded-lg border border-white/10 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest text-gray-400 transition-colors"
+                     className="w-full py-2 rounded-lg border border-white/10 hover:bg-white/5 text-xs font-medium text-gray-400 transition-colors"
                   >
-                    Clear Focus
+                    Clear
                   </button>
                </motion.div>
              ) : (
                <div className="flex-1 flex flex-col items-center justify-center text-center opacity-30 p-10">
                   <AlertCircle size={40} className="mb-4 text-gray-500" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Monitor nodes during simulation<br/>to extract tactical intel</p>
+                  <p className="text-xs font-medium text-gray-500">Select a node during the simulation<br/>to see details</p>
                </div>
              )}
 
              <div className="mt-auto pt-8 border-t border-white/5">
-                <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Historical Replay</h5>
+                <h5 className="text-xs font-semibold text-gray-500 mb-4">Historical Replay</h5>
                 <div className="grid grid-cols-2 gap-2">
                    <div className="p-3 rounded-lg bg-white/5 border border-white/10 flex flex-col gap-1">
-                      <span className="text-[8px] text-gray-600 font-bold uppercase">Success Rate</span>
+                      <span className="text-xs text-gray-500 font-medium">Success Rate</span>
                       <span className="text-sm font-bold text-cyber-neon">94.2%</span>
                    </div>
                    <div className="p-3 rounded-lg bg-white/5 border border-white/10 flex flex-col gap-1">
-                      <span className="text-[8px] text-gray-600 font-bold uppercase">Mean Path Time</span>
+                      <span className="text-xs text-gray-500 font-medium">Mean Path Time</span>
                       <span className="text-sm font-bold text-cyber-blue">8.4s</span>
                    </div>
                 </div>
@@ -313,7 +313,7 @@ const AttackPathView = ({ headerTitle, headerSubtitle }) => {
     return (
       <div className="h-full w-full flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-cyber-blue" size={40} />
-        <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">MAP-GEN: ANALYZING NETWORK TOPOLOGY...</p>
+        <p className="text-sm font-mono text-gray-500">Analyzing network topology…</p>
       </div>
     );
   }

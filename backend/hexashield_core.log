@@ -304,3 +304,10 @@ Traceback (most recent call last):
     findings = vuln_results.get("vulnerabilities", [])
                ^^^^^^^^^^^^^^^^
 AttributeError: 'list' object has no attribute 'get'
+2026-05-31 02:20:33,540 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-05-31 02:33:13,786 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-05-31 02:45:54,235 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-05-31 03:19:59,537 - NexusOrchestrator - INFO - Initiating Unified Workflow for Target: GOOGLE.COM [ScanID: 6]
+2026-05-31 03:19:59,551 - HexScanner - INFO - Starting DEEP Robust Scan for GOOGLE.COM
+2026-05-31 03:19:59,611 - HexScanner - WARNING - Stage 1 failed or returned 0 ports. Engaging Fast Fallback for GOOGLE.COM
+2026-05-31 03:19:59,626 - NexusOrchestrator - ERROR - Workflow Interrupted: Scan failed: [WinError 2] The system cannot find the file specified / [WinError 2] The system cannot find the file specified

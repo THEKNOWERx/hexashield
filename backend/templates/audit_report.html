@@ -120,7 +120,7 @@
             <div class="finding-id">{{ f.cve_id if f.cve_id else 'HE-ID-' + loop.index|string }}</div>
             <div class="finding-title">
                 {{ f.name }} 
-                <span class="severity-badge {{ 'crit' if f.severity == 'CRITICAL' else 'high' if f.severity == 'HIGH' else 'med' }}">
+                <span class="severity-badge {{ 'crit' if f.severity|lower == 'critical' else 'high' if f.severity|lower == 'high' else 'med' }}">
                     {{ f.severity }}
                 </span>
             </div>

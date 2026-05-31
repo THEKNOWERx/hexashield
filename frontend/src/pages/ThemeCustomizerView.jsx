@@ -42,7 +42,7 @@ const ThemeOption = ({ mode, title, description, isSelected, onSelect, colorClas
         )}
       </div>
 
-      <h3 className={`text-xl font-black uppercase tracking-tighter mb-2 ${isSelected ? 'text-white' : 'text-gray-400'}`}>
+      <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-white' : 'text-gray-400'}`}>
         {title}
       </h3>
       <p className="text-xs text-gray-500 leading-relaxed group-hover:text-gray-300 transition-colors">
@@ -72,38 +72,38 @@ const ThemeCustomizerView = ({ headerTitle, headerSubtitle }) => {
   const themes = [
     {
       mode: 'cyber',
-      title: 'Neural Cyber (Original)',
-      description: 'The standard high-fidelity dark mode. Optimized for low-light SOC environments with vibrant neon highlights.',
+      title: 'Cyber (Default)',
+      description: 'Standard high-fidelity dark mode with neon highlights, optimized for low-light environments.',
       colorClass: 'text-cyber-neon'
     },
     {
       mode: 'red',
-      title: 'Red Protocol (High Alert)',
-      description: 'High-intensity offensive interface. Striking red accents designed for rapid-response and pure aggression.',
+      title: 'Red (High Alert)',
+      description: 'High-intensity interface with striking red accents.',
       colorClass: 'text-red-600'
     },
     {
       mode: 'toxic',
-      title: 'Toxic Matrix (Neon Green)',
-      description: 'An aggressive, high-contrast operational aesthetic using high-frequency neon greens. Extreme visibility.',
+      title: 'Neon Green',
+      description: 'High-contrast aesthetic using bright neon greens for maximum visibility.',
       colorClass: 'text-[#39FF14]'
     },
     {
       mode: 'deep-blue',
-      title: 'Deep Sea (Stealth Blue)',
-      description: 'Sleek, midnight blue aesthetic. Provides a calm but high-intensity stealth look for elite audits.',
+      title: 'Deep Blue',
+      description: 'Sleek midnight blue aesthetic with a calm, focused look.',
       colorClass: 'text-blue-500'
     },
     {
       mode: 'monochrome',
-      title: 'Tactical Grayscale',
-      description: 'High-contrast monochrome filter. Minimalist and focused, perfect for reducing visual fatigue.',
+      title: 'Grayscale',
+      description: 'High-contrast monochrome theme. Minimalist and focused.',
       colorClass: 'text-white'
     },
     {
       mode: 'plasma',
-      title: 'Plasma White (Light Mode)',
-      description: 'A professional white and blue aesthetic. Ideal for presentations and high-glare environments.',
+      title: 'Light Mode',
+      description: 'A clean white and blue aesthetic, ideal for presentations and bright environments.',
       colorClass: 'text-blue-500'
     }
   ];
@@ -115,16 +115,16 @@ const ThemeCustomizerView = ({ headerTitle, headerSubtitle }) => {
       <section>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <Zap size={20} className="text-cyber-blue animate-pulse" />
-            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-gray-500">
-              Appearance Configuration
+            <Zap size={20} className="text-cyber-blue" />
+            <h2 className="text-sm font-semibold text-gray-400">
+              Appearance
             </h2>
           </div>
           <button 
             onClick={() => setThemeMode('cyber')}
-            className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-cyber-neon transition-colors"
+            className="text-xs font-medium text-gray-500 hover:text-cyber-neon transition-colors"
           >
-            Reset to Default
+            Reset to default
           </button>
         </div>
 
@@ -147,21 +147,21 @@ const ThemeCustomizerView = ({ headerTitle, headerSubtitle }) => {
                 <div className="absolute inset-0 bg-cyber-blue/10 animate-pulse" />
             </div>
             <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-widest leading-none mb-2">Neural Synergy Active</h3>
-                <p className="text-xs text-gray-500 max-w-sm">Themes are stored locally in your neural link. Your preferences will persist across all sessions on this tactical node.</p>
+                <h3 className="text-lg font-semibold text-white mb-2">Saved locally</h3>
+                <p className="text-xs text-gray-500 max-w-sm">Your theme is stored in this browser and will persist across sessions on this device.</p>
             </div>
         </div>
         <button 
             onClick={() => window.history.back()}
-            className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all text-white"
+            className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/10 transition-all text-white"
         >
-            Confirm & Exit
+            Done
         </button>
       </div>
 
       <footer className="pt-12 border-t border-white/5 flex flex-col items-center gap-4 text-center">
           <Shield size={24} className="text-gray-800" />
-          <p className="text-[10px] uppercase font-black tracking-[0.4em] text-gray-700">HexaShield Aesthetic Control v2.0</p>
+          <p className="text-xs font-medium text-gray-600">HexaShield · Appearance</p>
       </footer>
     </div>
   );

@@ -89,7 +89,7 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
     return (
         <div className="flex flex-col items-center justify-center h-[50vh] gap-4 opacity-50">
            <Loader2 size={40} className="animate-spin text-cyber-neon" />
-           <p className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">Synthesizing Audit Data...</p>
+           <p className="text-sm font-medium text-gray-400">Loading reports…</p>
         </div>
     );
   }
@@ -105,9 +105,9 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
         <div className="flex flex-col md:flex-row gap-4">
            <button 
              onClick={handleWipeAll}
-             className="px-4 py-2 bg-cyber-alert/10 border border-cyber-alert/30 rounded-lg text-xs font-black text-cyber-alert hover:bg-cyber-alert/20 transition-all uppercase tracking-widest"
+             className="px-4 py-2 bg-cyber-alert/10 border border-cyber-alert/30 rounded-lg text-sm font-medium text-cyber-alert hover:bg-cyber-alert/20 transition-all"
            >
-              Purge Database
+              Delete all
            </button>
            <button className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/10 rounded-lg text-sm text-gray-300 hover:text-white hover:border-white/30 transition-colors">
               <Filter size={16} /> Filters
@@ -123,7 +123,7 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
               <thead className="border-b border-white/5">
                 <tr>
                   <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Report ID</th>
-                  <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Target Infrastructure</th>
+                  <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
                   <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Scan Date</th>
                   <th className="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Findings</th>
                   <th className="text-right py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -150,8 +150,8 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
                       <span className="text-sm text-gray-500 font-mono">{new Date(report.timestamp).toLocaleDateString()}</span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-black tracking-widest text-gray-300 uppercase">
-                        {report.findingCount} DETECTED
+                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                        {report.findingCount} findings
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right">
@@ -163,17 +163,17 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
                            title="Download Now (PDF)"
                          >
                            <Download size={14} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Download</span>
+                           <span className="text-xs font-medium">Download</span>
                          </button>
 
                          {/* 2. Read Before Print (View) Button */}
                          <button 
                            onClick={() => navigate(`/reports/${report.scan_id}`)} 
                            className="flex items-center gap-2 px-3 py-1.5 bg-cyber-blue/10 text-cyber-blue rounded-lg hover:bg-cyber-blue/20 transition-all border border-cyber-blue/20"
-                           title="Read Full Intelligence"
+                           title="View report"
                          >
                            <Shield size={14} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Read/Edit</span>
+                           <span className="text-xs font-medium">View</span>
                          </button>
 
                          {/* 3. Delete Button */}
@@ -197,9 +197,9 @@ const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
               <Shield size={32} className="text-gray-700" />
            </div>
-           <h3 className="text-lg font-bold text-gray-400 mb-2">Inventory Empty</h3>
+           <h3 className="text-lg font-bold text-gray-400 mb-2">No reports yet</h3>
            <p className="text-xs text-gray-600 text-center max-w-[300px] leading-relaxed">
-              No audit intelligence recorded yet. Perform an <span className="text-cyber-blue">Infrastructure Scan</span> or <span className="text-cyber-neon">Reconnaissance</span> to generate findings.
+              Run a <span className="text-cyber-blue">Network Scan</span> or <span className="text-cyber-neon">Reconnaissance</span> to generate findings.
            </p>
         </div>
       )}

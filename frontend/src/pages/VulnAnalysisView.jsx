@@ -11,9 +11,16 @@ import VoiceBriefing from '../components/VoiceBriefing';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
+const normalizeSeverity = (sev) => {
+  if (!sev) return 'Medium';
+  const s = String(sev).toLowerCase();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
 const VulnerabilityCard = ({ vuln, index, onExecute }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const severity = normalizeSeverity(vuln.severity);
+
   const severityColors = {
     Critical: 'text-red-500 border-red-500/30 bg-red-500/5',
     High: 'text-orange-500 border-orange-500/30 bg-orange-500/5',
@@ -38,16 +45,16 @@ const VulnerabilityCard = ({ vuln, index, onExecute }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center gap-6">
-          <div className={`px-3 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-widest ${severityColors[vuln.severity || 'Medium']}`}>
-            {vuln.severity || 'Medium'}
+          <div className={`px-3 py-1 rounded-md border text-xs font-semibold ${severityColors[severity]}`}>
+            {severity}
           </div>
           
           <div className="flex flex-col">
-            <h4 className={`text-lg font-bold tracking-tight transition-colors ${['http', 'https', 'ftp', 'ssh'].some(s => (vuln.service || vuln.name || '').toLowerCase().includes(s)) ? 'text-red-500' : 'text-white group-hover:text-blue-400'}`}>
+            <h4 className={`text-base font-semibold tracking-tight transition-colors ${['http', 'https', 'ftp', 'ssh'].some(s => (vuln.service || vuln.name || '').toLowerCase().includes(s)) ? 'text-red-400' : 'text-white group-hover:text-blue-400'}`}>
               {vuln.name}
             </h4>
-            <span className="text-[10px] font-mono text-gray-800 font-black uppercase tracking-widest mt-1">
-              {index + 1}
+            <span className="text-xs font-mono text-gray-500 mt-0.5">
+              {vuln.cve_id && vuln.cve_id !== 'N/A' ? vuln.cve_id : `Finding #${index + 1}`}
             </span>
           </div>
         </div>
@@ -55,18 +62,18 @@ const VulnerabilityCard = ({ vuln, index, onExecute }) => {
         <div className="flex items-center gap-10">
           <div className="flex flex-col items-end">
              <div className="flex items-center gap-2 mb-1">
-                <div className="w-1 h-1 rounded-full bg-cyber-neon shadow-[0_0_8px_#39FF14]" />
-                <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Verified Sync</span>
+                <div className="w-1 h-1 rounded-full bg-cyber-neon" />
+                <span className="text-xs font-medium text-gray-500">Verified</span>
              </div>
             <div className="flex items-center gap-3">
-              <span className={`text-3xl font-black font-mono leading-none tracking-tighter ${cvssScore >= 9 ? 'text-red-500' : cvssScore >= 7 ? 'text-orange-500' : 'text-blue-500'}`}>
+              <span className={`text-2xl font-bold font-mono leading-none tracking-tight ${cvssScore >= 9 ? 'text-red-500' : cvssScore >= 7 ? 'text-orange-500' : 'text-blue-500'}`}>
                 {cvssScore.toFixed(1)}
               </span>
               <div className="w-1.5 h-10 bg-gray-900/50 rounded-full overflow-hidden flex flex-col justify-end border border-white/5">
                 <motion.div 
                    initial={{ height: 0 }}
                    animate={{ height: `${progressPercent}%` }}
-                   className={`w-full rounded-full ${severityGlow[vuln.severity || 'Medium']} shadow-[0_0_15px_rgba(0,0,0,0.5)]`} 
+                   className={`w-full rounded-full ${severityGlow[severity]}`} 
                 />
               </div>
             </div>
@@ -90,11 +97,11 @@ const VulnerabilityCard = ({ vuln, index, onExecute }) => {
                   {/* Summary Block */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                       <div className="w-1.5 h-1.5 rounded-full border border-blue-500/50 animate-pulse" />
-                       <h5 className="text-[9px] font-black uppercase text-gray-400 tracking-[0.3em]">Description & Impact</h5>
+                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500/60" />
+                       <h5 className="text-xs font-semibold text-gray-300 tracking-wide">Description & Impact</h5>
                     </div>
-                    <p className="text-[13px] text-gray-500 leading-relaxed max-w-4xl italic font-medium">
-                      {vuln.description || "Sophisticated vulnerability identified in the processing layer that could lead to unauthorized system orchestration or data exfiltration."}
+                    <p className="text-sm text-gray-400 leading-relaxed max-w-4xl">
+                      {vuln.description || "Vulnerability identified in the processing layer that could lead to unauthorized access or data exposure."}
                     </p>
                     
                     <div className="pt-2">
@@ -107,21 +114,21 @@ const VulnerabilityCard = ({ vuln, index, onExecute }) => {
                     {/* Left: Vector & Remediation */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <div className="p-8 rounded-3xl bg-black/40 border border-white/5 space-y-4 hover:border-red-500/20 transition-all group/v">
-                          <div className="flex items-center gap-3 text-red-500/60">
+                          <div className="flex items-center gap-3 text-red-500/70">
                              <ShieldAlert size={16} />
-                             <h6 className="text-[9px] font-black uppercase tracking-[0.2em]">Attack Vector</h6>
+                             <h6 className="text-xs font-semibold tracking-wide">Attack Vector</h6>
                           </div>
-                          <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
-                            {vuln.vector || "Remote exploitation via malformed HTTP headers leading to memory corruption."}
+                          <p className="text-sm text-gray-400 leading-relaxed">
+                            {vuln.vector || "Remote exploitation via malformed input leading to memory corruption."}
                           </p>
                        </div>
                        <div className="p-8 rounded-3xl bg-black/40 border border-white/5 space-y-4 hover:border-cyber-neon/20 transition-all group/r">
-                          <div className="flex items-center gap-3 text-cyber-neon/60">
+                          <div className="flex items-center gap-3 text-cyber-neon/70">
                              <CheckCircle size={16} />
-                             <h6 className="text-[9px] font-black uppercase tracking-[0.2em]">Remediation</h6>
+                             <h6 className="text-xs font-semibold tracking-wide">Remediation</h6>
                           </div>
-                          <p className="text-[11px] text-gray-600 leading-relaxed font-medium">
-                            {vuln.remediation || "Update service binary to v2.4.1+ and enforce strict egress filtering."}
+                          <p className="text-sm text-gray-400 leading-relaxed">
+                            {vuln.remediation || "Update the affected component to the latest patched version and apply egress filtering."}
                           </p>
                        </div>
                     </div>
@@ -131,30 +138,30 @@ const VulnerabilityCard = ({ vuln, index, onExecute }) => {
                        <div className="absolute top-6 right-8 opacity-5">
                           <Cpu size={48} className="text-blue-500" />
                        </div>
-                       <h6 className="text-[10px] font-black uppercase text-blue-500 tracking-[0.3em] mb-8">Framework Intelligence</h6>
+                       <h6 className="text-xs font-semibold text-blue-400 tracking-wide mb-8">Framework Intelligence</h6>
                        
                        <div className="space-y-6">
                           <div className="flex items-center justify-between py-3 border-b border-white/5">
-                             <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">OWASP TOP 10</span>
-                             <span className="text-[11px] font-mono font-black text-white">{vuln.owasp || "A03:2021-Injection"}</span>
+                             <span className="text-xs font-medium text-gray-500">OWASP Top 10</span>
+                             <span className="text-sm font-mono font-semibold text-white">{vuln.owasp || vuln.owasp_category || "A03:2021-Injection"}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-white/5">
-                             <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">MITRE TECHNIQUE</span>
-                             <span className="text-[11px] font-mono font-black text-gray-400">{vuln.mitre || "T1190"}</span>
+                             <span className="text-xs font-medium text-gray-500">MITRE Technique</span>
+                             <span className="text-sm font-mono font-semibold text-gray-300">{vuln.mitre || vuln.mitre_id || "T1190"}</span>
                           </div>
                           <div className="flex items-center justify-between py-3 border-b border-white/5">
-                             <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">ATTACK STAGE</span>
-                             <span className="text-[11px] font-black text-cyber-neon uppercase tracking-widest">{vuln.stage || "Initial Access"}</span>
+                             <span className="text-xs font-medium text-gray-500">Attack Stage</span>
+                             <span className="text-sm font-semibold text-cyber-neon">{vuln.stage || "Initial Access"}</span>
                           </div>
                        </div>
 
                         <div className="mt-8 flex items-center gap-3">
                            <button 
                              onClick={(e) => { e.stopPropagation(); onExecute(vuln); }}
-                             className="flex-1 bg-cyber-blue hover:bg-blue-600 text-white py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_rgba(0,113,255,0.4)] active:scale-95 group/x"
+                             className="flex-1 bg-cyber-blue hover:bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-2.5 transition-all active:scale-[0.99] group/x"
                            >
-                              <Zap size={14} className="group-hover/x:animate-pulse" />
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Execute Exploit</span>
+                              <Zap size={14} />
+                              <span className="text-sm font-semibold">Run exploit check</span>
                            </button>
                            <button className="p-3.5 rounded-xl bg-white/5 border border-white/5 text-gray-600 hover:text-white transition-all">
                               <Share2 size={16} />
@@ -205,63 +212,56 @@ const Vulnerability = () => {
 
   if (loading) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center gap-6 text-blue-500 font-mono">
-        <Loader2 className="animate-spin" size={64} strokeWidth={1} />
-        <span className="animate-pulse uppercase tracking-[0.5em] text-[10px] font-black">Syncing Intelligence...</span>
+      <div className="h-full w-full flex flex-col items-center justify-center gap-4 text-gray-500">
+        <Loader2 className="animate-spin text-cyber-blue" size={40} strokeWidth={1.5} />
+        <span className="text-sm font-medium">Loading vulnerabilities…</span>
       </div>
     );
   }
 
+  const norm = (v) => normalizeSeverity(v.severity);
   const stats = [
-    { label: 'CRITICAL', count: (vulnerabilities || []).filter(v => v.severity === 'Critical').length, color: 'text-red-500', bg: 'stat-card-critical' },
-    { label: 'HIGH PRIORITY', count: (vulnerabilities || []).filter(v => v.severity === 'High').length, color: 'text-orange-500', bg: 'stat-card-high' },
-    { label: 'MEDIUM RISK', count: (vulnerabilities || []).filter(v => v.severity === 'Medium').length, color: 'text-blue-400', bg: 'stat-card-medium' },
-    { label: 'TOTAL FINDINGS', count: (vulnerabilities || []).length, color: 'text-blue-400', bg: 'stat-card-total' }
+    { label: 'Critical', count: (vulnerabilities || []).filter(v => norm(v) === 'Critical').length, color: 'text-red-500', bg: 'stat-card-critical' },
+    { label: 'High', count: (vulnerabilities || []).filter(v => norm(v) === 'High').length, color: 'text-orange-500', bg: 'stat-card-high' },
+    { label: 'Medium', count: (vulnerabilities || []).filter(v => norm(v) === 'Medium').length, color: 'text-blue-400', bg: 'stat-card-medium' },
+    { label: 'Total Findings', count: (vulnerabilities || []).length, color: 'text-white', bg: 'stat-card-total' }
   ];
 
   return (
-    <div className="max-w-[1500px] mx-auto space-y-8 pb-20 px-8">
-      <GlobalHeader title="Vulnerability Intelligence" />
+    <div className="max-w-[1500px] mx-auto space-y-8 pb-20">
+      <GlobalHeader title="Vulnerabilities" subtitle="Findings and remediation guidance." />
 
-      {/* Branding Header */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-4">
-           <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">
-             Vulnerability <span className="text-[#FF003C] drop-shadow-[0_0_30px_rgba(255,0,60,0.4)]">Intelligence</span>
-           </h2>
-           <div className="px-3 py-1 bg-cyber-neon/10 border border-cyber-neon/30 rounded text-[9px] font-black text-cyber-neon tracking-widest uppercase flex items-center gap-2">
-              <CheckCircle size={10} /> 100% Accuracy Verified
-           </div>
-        </div>
-        <p className="text-[10px] text-gray-500 uppercase tracking-[0.4em] font-black opacity-80 pl-1">
-          Synchronized PostgreSQL Audit Layer — Professional High-Fidelity Results.
-        </p>
+      <div className="flex items-center gap-3">
+         <div className="px-2.5 py-1 bg-cyber-neon/10 border border-cyber-neon/30 rounded-md text-xs font-semibold text-cyber-neon flex items-center gap-1.5">
+            <CheckCircle size={12} /> Verified
+         </div>
+         <span className="text-sm text-gray-500">Prioritized by CVSS and exploitability.</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <div key={i} className={`stat-card ${stat.bg} group flex flex-col items-center justify-center py-4 rounded-2.5xl`}>
-            <div className={`text-2xl font-black font-mono tracking-tighter mb-0.5 ${stat.color} drop-shadow-[0_0_20px_rgba(0,0,0,0.5)]`}>
-              {stat.count < 10 ? `0${stat.count}` : stat.count}
+          <div key={i} className="stat-card flex flex-col gap-1 py-5">
+            <div className={`text-3xl font-bold font-mono tracking-tight ${stat.color}`}>
+              {stat.count}
             </div>
-            <div className="text-[7px] font-black text-gray-600 uppercase tracking-[0.4em]">{stat.label}</div>
+            <div className="text-sm font-medium text-gray-400">{stat.label}</div>
           </div>
         ))}
       </div>
 
       {/* Feed Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 text-gray-700 pl-2">
-           <Zap size={14} className="text-[#39FF14]" />
-           <h3 className="text-[11px] font-black uppercase tracking-[0.5em]">Intelligence Feed</h3>
+      <div className="space-y-5">
+        <div className="flex items-center gap-2.5 text-gray-300">
+           <Zap size={16} className="text-cyber-neon" />
+           <h3 className="text-base font-semibold">Findings</h3>
         </div>
 
         {(!vulnerabilities || vulnerabilities.length === 0) ? (
-          <div className="py-48 text-center border-2 border-dashed border-white/5 rounded-[3rem] bg-black/20">
-             <ShieldAlert size={80} className="mx-auto text-gray-900 mb-8" />
-             <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-sm">No active threats detected — Sector Secure.</p>
-             <button onClick={() => navigate('/scan')} className="mt-10 px-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-white hover:bg-cyber-blue hover:text-white hover:border-transparent transition-all">
-                Initiate New Scan
+          <div className="py-32 text-center border border-dashed border-white/[0.08] rounded-2xl bg-white/[0.01]">
+             <ShieldAlert size={56} className="mx-auto text-gray-700 mb-5" />
+             <p className="text-gray-400 font-medium text-base">No findings yet — run a scan to get started.</p>
+             <button onClick={() => navigate('/scan')} className="mt-6 px-6 py-2.5 bg-cyber-blue rounded-lg text-sm font-semibold text-white hover:bg-blue-600 transition-all">
+                Start a scan
              </button>
           </div>
         ) : (

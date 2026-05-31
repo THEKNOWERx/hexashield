@@ -9,7 +9,7 @@ from schemas.nexus_schemas import ScanRequest, ExploitationRequest
 from authentication.auth import get_current_user, check_role
 from services.ai_risk_engine import ai_risk_engine
 
-router = APIRouter(tags=["Nexus API"])
+router = APIRouter(prefix="/nexus", tags=["Nexus API"])
 
 @router.post("/scan", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(check_role(["admin", "security_analyst"]))])
 async def start_nexus_scan(request: ScanRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
@@ -67,7 +67,7 @@ async def get_nexus_dashboard_telemetry(db: Session = Depends(get_db)):
     return {
         "total_scans": db.query(Scan).count(),
         "total_findings": db.query(Finding).count(),
-        "critical_count": db.query(Finding).filter(Finding.severity == "CRITICAL").count(),
+        "critical_count": db.query(Finding).filter(Finding.severity.in_(["Critical", "CRITICAL"])).count(),
         "ai_accuracy": round(ai_risk_engine.accuracy * 100, 2),
         "system_status": "Hardened",
         "tier": "Production-Grade"

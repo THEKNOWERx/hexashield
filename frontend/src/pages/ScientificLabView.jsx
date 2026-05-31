@@ -29,7 +29,7 @@ const MetricGauge = ({ label, value, color }) => (
         <span className="text-xl font-black text-white leading-none">{Math.round(value)}%</span>
       </div>
     </div>
-    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{label}</span>
+    <span className="text-xs font-medium text-gray-500">{label}</span>
   </div>
 );
 
@@ -56,7 +56,7 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
      return (
        <div className="h-screen w-full flex flex-col items-center justify-center gap-6">
          <Microscope className="animate-pulse text-cyber-blue" size={64} strokeWidth={1} />
-         <p className="text-[10px] font-black text-cyber-blue uppercase tracking-[0.5em] animate-pulse">Initializing Lab Environment</p>
+         <p className="text-sm font-medium text-cyber-blue">Loading lab environment…</p>
        </div>
      );
   }
@@ -66,11 +66,11 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
   return (
     <div className="space-y-12 pb-20">
       <div className="flex flex-col">
-        <h2 className="text-6xl font-black tracking-tighter text-white uppercase italic flex items-center gap-4">
+        <h2 className="text-4xl font-semibold tracking-tight text-white flex items-center gap-4">
            AI <span className="text-cyber-neon drop-shadow-[0_0_20px_rgba(57,255,20,0.5)]">Scientific</span> Lab
         </h2>
-        <p className="text-[11px] text-gray-600 uppercase tracking-[0.4em] font-black mt-2">
-           Random Forest Ensemble Classification & Academic Scenario Synthesis.
+        <p className="text-sm text-gray-500 font-medium mt-2">
+           Random Forest classification and academic scenario generation.
         </p>
       </div>
 
@@ -80,7 +80,7 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
           <CyberCard className="bg-[#050505] border-cyber-neon/20 shadow-neon-glow/5">
             <div className="flex items-center gap-3 mb-10">
               <Binary className="text-cyber-neon" size={20} />
-              <h3 className="text-xs font-black text-white uppercase tracking-widest leading-none">Model Intelligence Performance</h3>
+              <h3 className="text-sm font-semibold text-white leading-none">Model Performance</h3>
             </div>
 
             <div className="grid grid-cols-2 gap-y-10">
@@ -91,15 +91,15 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
             </div>
 
             <div className="mt-12 pt-8 border-t border-white/5 space-y-4">
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+              <div className="flex justify-between items-center text-xs font-medium">
                 <span className="text-gray-600">Estimators</span>
                 <span className="text-white">500 Trees</span>
               </div>
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+              <div className="flex justify-between items-center text-xs font-medium">
                 <span className="text-gray-600">Normalization</span>
                 <span className="text-cyber-neon">CVSS Scalar</span>
               </div>
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+              <div className="flex justify-between items-center text-xs font-medium">
                 <span className="text-gray-600">Ground Truth</span>
                 <span className="text-white">NVD 2024.1</span>
               </div>
@@ -112,7 +112,7 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
                 <GraduationCap className="text-cyber-blue" size={18} />
               </div>
               <div>
-                <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2">Academic Context</h4>
+                <h4 className="text-sm font-semibold text-white mb-2">Academic Context</h4>
                 <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
                   {data?.scientific_context || "Model trained on peer-reviewed security datasets to predict exploit impact based on NVD descriptions and CVSS metrics."}
                 </p>
@@ -126,9 +126,9 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
           <div className="flex items-center justify-between">
              <div className="flex items-center gap-3">
                <Rocket className="text-cyber-blue" size={20} />
-               <h3 className="text-xs font-black text-white uppercase tracking-widest leading-none">AI Generated Training Scenarios</h3>
+               <h3 className="text-sm font-semibold text-white leading-none">AI Generated Training Scenarios</h3>
              </div>
-             <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-gray-500 uppercase tracking-widest">
+             <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-500">
                {data?.scenarios?.length || 0} Ready
              </div>
           </div>
@@ -148,17 +148,17 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
                       <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-cyber-blue/10 transition-colors">
                         <Target className="text-gray-600 group-hover:text-cyber-blue transition-colors" size={20} />
                       </div>
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border ${scenario.difficulty === 'Master' ? 'border-red-500/30 text-red-500 bg-red-500/5' : 'border-cyber-blue/30 text-cyber-blue bg-cyber-blue/5'}`}>
-                        {scenario.difficulty.toUpperCase()}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${scenario.difficulty === 'Master' ? 'border-red-500/30 text-red-500 bg-red-500/5' : 'border-cyber-blue/30 text-cyber-blue bg-cyber-blue/5'}`}>
+                        {scenario.difficulty}
                       </span>
                    </div>
-                   <h4 className="text-white font-bold tracking-tight mb-2 group-hover:text-cyber-blue transition-colors">
+                   <h4 className="text-white font-semibold tracking-tight mb-2 group-hover:text-cyber-blue transition-colors">
                      {scenario.title}
                    </h4>
                    <p className="text-[11px] text-gray-500 leading-relaxed mb-6 line-clamp-2">
                      {scenario.objective}
                    </p>
-                   <div className="flex items-center text-[9px] font-black text-cyber-blue uppercase tracking-widest group-hover:gap-2 transition-all">
+                   <div className="flex items-center text-xs font-medium text-cyber-blue group-hover:gap-2 transition-all">
                       <span>Access Lab</span>
                       <ChevronRight size={12} />
                    </div>
@@ -170,7 +170,7 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
           <div className="pt-8 border-t border-white/5">
              <div className="flex items-center gap-3 mb-6">
                <Cpu className="text-gray-600" size={18} />
-               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Classification Intelligence Feed</h3>
+               <h3 className="text-sm font-semibold text-gray-400 leading-none">Classification Feed</h3>
              </div>
              <div className="space-y-3">
                {data?.classifications?.slice(0, 5).map((item, idx) => (
@@ -178,15 +178,15 @@ const ScientificLabView = ({ isMonochrome, onToggleMonochrome, headerTitle, head
                     <div className="flex items-center gap-4">
                        <div className="w-1.5 h-1.5 rounded-full bg-cyber-neon shadow-neon-glow" />
                        <div className="flex flex-col">
-                          <span className="text-[11px] font-black text-white">{item.name}</span>
-                          <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{item.mitre_id || 'T1190'}</span>
+                          <span className="text-[11px] font-semibold text-white">{item.name}</span>
+                          <span className="text-[9px] text-gray-600 font-medium">{item.mitre_id || 'T1190'}</span>
                        </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-[10px] font-black text-cyber-neon font-mono uppercase tracking-tighter">
+                       <div className="text-[10px] font-semibold text-cyber-neon font-mono">
                           {item.ai_intel.prediction}
                        </div>
-                       <div className="text-[8px] text-gray-700 font-bold uppercase tracking-widest">
+                       <div className="text-[8px] text-gray-700 font-medium">
                           {item.ai_intel.confidence}% Confidence
                        </div>
                     </div>

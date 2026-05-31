@@ -60,42 +60,6 @@ def seed():
         db.commit()
         print("[SEED] Authorized lab scopes synchronized.")
 
-        # Check if scans exist
-        scan_exists = db.query(Scan).first()
-        if not scan_exists:
-            print("[SEED] Seeding mock intelligence data...")
-            mock_scan = Scan(
-                target="demo.hexa-shield.io",
-                scan_type="full",
-                status="completed",
-                timestamp=datetime.utcnow(),
-                findings_count=2
-            )
-            db.add(mock_scan)
-            db.commit()
-            db.refresh(mock_scan)
-
-            f1 = Finding(
-                scan_id=mock_scan.id,
-                name="Exposed SSH Port",
-                severity="Medium",
-                cvss=5.5,
-                description="SSH service is exposed to the public internet on port 22.",
-                remediation="Restrict SSH access to trusted IPs using a firewall."
-            )
-            f2 = Finding(
-                scan_id=mock_scan.id,
-                name="Outdated Nginx Version",
-                severity="High",
-                cvss=7.5,
-                description="The server is running an outdated version of Nginx vulnerable to known exploits.",
-                remediation="Upgrade Nginx to the latest stable version."
-            )
-            db.add(f1)
-            db.add(f2)
-            db.commit()
-            print("[SEED] Mock scan and findings seeded.")
-
     except Exception as e:
         import traceback
         print(f"[SEED ERROR] Failed to seed database: {e}")
@@ -103,6 +67,13 @@ def seed():
         db.rollback()
     finally:
         db.close()
+
+    # Build the realistic engagement dataset (idempotent; runs when no findings).
+    try:
+        from database.realistic_seed import seed_realistic
+        seed_realistic()
+    except Exception as e:
+        print(f"[SEED ERROR] Realistic intelligence seed failed: {e}")
 
 if __name__ == "__main__":
     seed()

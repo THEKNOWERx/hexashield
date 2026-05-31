@@ -7,8 +7,8 @@ const TacticalFeed = ({ events }) => {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity size={14} className="text-cyber-blue animate-pulse" />
-          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Tactical Intel Stream</span>
+          <Activity size={14} className="text-cyber-blue" />
+          <span className="text-sm font-semibold text-gray-400">Activity Feed</span>
         </div>
         <div className="flex gap-1">
           <div className="w-1 h-1 rounded-full bg-cyber-neon" />
@@ -36,14 +36,14 @@ const TacticalFeed = ({ events }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black text-gray-700 uppercase tabular-nums tracking-widest">{event.time || '10:45:00'}</span>
-                    <span className={`text-[8px] font-black uppercase px-2 py-1 rounded border ${
+                    <span className="text-xs font-medium text-gray-600 tabular-nums">{event.time || '10:45:00'}</span>
+                    <span className={`text-xs font-medium px-2 py-1 rounded border ${
                       event.severity === 'Critical' ? 'border-cyber-alert/40 text-cyber-alert' : 'border-white/5 text-gray-500'
                     }`}>
                       {event.severity === 'Critical' ? 'Critical' : 'Advisory'}
                     </span>
                   </div>
-                  <h4 className="text-[12px] font-black text-white mb-1.5 line-clamp-1 group-hover:text-cyber-blue transition-colors uppercase italic tracking-tight">{event.name}</h4>
+                  <h4 className="text-sm font-semibold text-white mb-1.5 line-clamp-1 group-hover:text-cyber-blue transition-colors">{event.name}</h4>
                   <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed font-medium">{event.description}</p>
                 </div>
               </div>
@@ -52,7 +52,7 @@ const TacticalFeed = ({ events }) => {
         ) : (
           <div className="flex flex-col items-center justify-center h-full opacity-10 gap-6">
             <Cpu size={48} className="text-white" />
-            <p className="text-[10px] font-black tracking-[0.5em] uppercase">Search Active...</p>
+            <p className="text-sm font-medium">No recent activity</p>
           </div>
         )}
       </div>

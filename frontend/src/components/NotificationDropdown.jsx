@@ -32,15 +32,15 @@ const NotificationDropdown = ({ notifications, onMarkRead, onPurge, onClose }) =
     >
       <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Neural Alerts</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-cyber-blue/20 text-cyber-blue text-[8px] font-black">
-            {safeNotifications.filter(n => n && !n.is_read).length} NEW
+          <span className="text-sm font-semibold text-white">Notifications</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-cyber-blue/20 text-cyber-blue text-[10px] font-semibold">
+            {safeNotifications.filter(n => n && !n.is_read).length} new
           </span>
         </div>
         <button 
           onClick={onPurge}
           className="p-1.5 rounded-lg hover:bg-white/5 text-gray-500 hover:text-cyber-alert transition-colors"
-          title="Purge Alerts"
+          title="Clear all"
         >
           <Trash2 size={14} />
         </button>
@@ -62,13 +62,13 @@ const NotificationDropdown = ({ notifications, onMarkRead, onPurge, onClose }) =
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-0.5">
-                      <h4 className="text-[11px] font-bold text-white truncate">{n?.title || 'System Alert'}</h4>
+                      <h4 className="text-[11px] font-bold text-white truncate">{n?.title || 'Notification'}</h4>
                       <span className="text-[8px] font-mono text-gray-600 shrink-0">
                         {n?.timestamp ? new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                       </span>
                     </div>
                     <p className="text-[10px] text-gray-500 leading-relaxed line-clamp-2">
-                      {n?.message || 'No details encoded.'}
+                      {n?.message || 'No details available.'}
                     </p>
                   </div>
                 </div>
@@ -80,7 +80,7 @@ const NotificationDropdown = ({ notifications, onMarkRead, onPurge, onClose }) =
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3">
               <Info size={16} className="text-gray-700" />
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-gray-600">No Intelligence Threats Detected</p>
+            <p className="text-xs font-medium text-gray-600">No notifications</p>
           </div>
         )}
       </div>
@@ -88,9 +88,9 @@ const NotificationDropdown = ({ notifications, onMarkRead, onPurge, onClose }) =
       <div className="p-3 border-t border-white/5 bg-white/[0.01] text-center">
         <button 
           onClick={onClose}
-          className="text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
+          className="text-xs font-medium text-gray-500 hover:text-white transition-colors"
         >
-          Dismiss Grid
+          Close
         </button>
       </div>
     </motion.div>

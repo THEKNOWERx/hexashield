@@ -274,8 +274,8 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
                   <Activity className="text-red-500 animate-pulse" size={20} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Live Breach Simulation</h3>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">Sector: {targetData?.target || 'Operational Node'}</p>
+                  <h3 className="text-xl font-semibold text-white tracking-tight">Live Breach Simulation</h3>
+                  <p className="text-xs text-gray-500 font-medium">Target: {targetData?.target || 'Operational Node'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-6">
@@ -283,15 +283,15 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
                     <div className="flex gap-2">
                        <button 
                           onClick={() => startSimulation(false)}
-                          className="flex items-center gap-3 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                          className="flex items-center gap-3 px-6 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl text-sm font-semibold transition-all"
                        >
-                          <Play size={14} /> Start Operation
+                          <Play size={14} /> Start
                        </button>
                        <button 
                           onClick={() => startSimulation(true)}
-                          className="flex items-center gap-3 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+                          className="flex items-center gap-3 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-all shadow-[0_0_20px_rgba(220,38,38,0.4)]"
                        >
-                          <Video size={14} /> Record & Execute
+                          <Video size={14} /> Record & Run
                        </button>
                     </div>
                  )}
@@ -310,13 +310,13 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
                 <div className="flex items-center justify-between px-8 py-5 border-b border-white/5 bg-black/60 relative z-20">
                     <div className="flex items-center gap-3">
                         <Terminal size={14} className="text-cyber-blue" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Strike Intelligence Terminal</span>
+                        <span className="text-sm font-semibold text-gray-400">Terminal</span>
                     </div>
                     
                     {isRecording && (
                        <div className="flex items-center gap-2 px-4 py-1.5 bg-red-500/10 border border-red-500/30 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                           <div className="w-2 h-2 rounded-full bg-red-600 animate-flicker" />
-                          <span className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em]">REC ACTIVE</span>
+                          <span className="text-xs font-semibold text-red-500">Recording</span>
                        </div>
                     )}
 
@@ -353,7 +353,7 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
 
                 {/* Packet Relay (Moved further right and down for optimal visibility) */}
                 <div className="absolute bottom-6 right-6 w-48 h-64 bg-black/80 border border-white/5 rounded-3xl backdrop-blur-md z-30 p-4 flex flex-col items-center justify-between shadow-2xl">
-                    <div className="text-[7px] font-black text-gray-500 uppercase tracking-widest text-center mt-2">Relay Monitor</div>
+                    <div className="text-[7px] font-semibold text-gray-500 uppercase tracking-widest text-center mt-2">Relay Monitor</div>
                     
                     <div className="flex flex-col items-center gap-2">
                         <Cpu size={16} className="text-cyber-blue" />
@@ -382,12 +382,12 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
             <div className="p-6 border-t border-white/5 bg-black/60 flex items-center justify-between">
                 <div className="flex gap-10">
                     <div className="flex flex-col gap-1">
-                       <span className="text-[8px] text-gray-600 font-black uppercase">Operation Phase</span>
-                       <span className="text-xs font-black text-white uppercase tracking-widest">{phase}</span>
+                       <span className="text-[8px] text-gray-600 font-semibold uppercase">Operation Phase</span>
+                       <span className="text-xs font-semibold text-white">{phase}</span>
                     </div>
                     <div className="flex flex-col gap-1">
-                       <span className="text-[8px] text-gray-600 font-black uppercase">Traffic Throughput</span>
-                       <span className="text-xs font-black text-cyber-neon uppercase tracking-widest">{isSimulating ? '1.2 MB/s' : '0.0 MB/s'}</span>
+                       <span className="text-[8px] text-gray-600 font-semibold uppercase">Traffic Throughput</span>
+                       <span className="text-xs font-semibold text-cyber-neon">{isSimulating ? '1.2 MB/s' : '0.0 MB/s'}</span>
                     </div>
                 </div>
                 <div className="flex gap-2">

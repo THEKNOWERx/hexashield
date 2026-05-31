@@ -37,7 +37,7 @@ const Login = () => {
     try {
       const res = await authService.login(username.trim(), password);
       localStorage.setItem('access_token', res.data.access_token);
-      showNotification("Welcome back, Commander.", "success");
+      showNotification("Signed in successfully.", "success");
       navigate('/dashboard');
     } catch (err) {
       if (!err.response) {
@@ -56,118 +56,108 @@ const Login = () => {
     <div className="min-h-screen bg-cyber-black flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyber-blue/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyber-blue/[0.07] blur-[140px] rounded-full" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-cyber-neon/[0.05] blur-[140px] rounded-full" />
       </div>
 
-      <div className="w-full max-w-lg relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+      <div className="w-full max-w-md relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center mb-10"
+          className="flex flex-col items-center mb-8"
         >
-          <div className="p-4 bg-cyber-blue/10 rounded-2xl border border-cyber-blue/20 mb-4 shadow-blue-glow">
-            <Shield className="text-cyber-blue" size={48} />
+          <div className="p-3 bg-cyber-blue/10 rounded-2xl border border-cyber-blue/20 mb-4">
+            <Shield className="text-cyber-blue" size={36} />
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-white">HEXA<span className="text-cyber-blue">SHIELD</span></h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Hexa<span className="text-cyber-blue">Shield</span></h1>
           <div className="flex items-center gap-2 mt-2">
-            <div className={`w-1.5 h-1.5 rounded-full ${backendStatus === 'online' ? 'bg-cyber-neon shadow-[0_0_5px_#39ff14]' : backendStatus === 'offline' ? 'bg-cyber-alert shadow-[0_0_5px_#ff003c]' : 'bg-gray-600 animate-pulse'}`} />
-            <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">
-              {backendStatus === 'online' ? 'Neural Link Established' : backendStatus === 'offline' ? 'Neural Link Offline' : 'Initializing Link...'}
+            <div className={`w-1.5 h-1.5 rounded-full ${backendStatus === 'online' ? 'bg-cyber-neon' : backendStatus === 'offline' ? 'bg-cyber-alert' : 'bg-gray-600 animate-pulse'}`} />
+            <p className="text-xs font-medium text-gray-500">
+              {backendStatus === 'online' ? 'Server online' : backendStatus === 'offline' ? 'Server offline' : 'Connecting…'}
             </p>
           </div>
         </motion.div>
 
-        <CyberCard className="!p-8 border-cyber-blue/20">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-white tracking-tight">Console Authorization</h2>
-            <p className="text-xs text-gray-500 font-medium">Please provide your security credentials to access the node.</p>
+        <CyberCard className="!p-8">
+          <div className="mb-7">
+            <h2 className="text-lg font-semibold text-white tracking-tight">Sign in</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Enter your credentials to access the platform.</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="p-3 bg-cyber-alert/5 border border-cyber-alert/20 rounded-xl text-cyber-alert text-[10px] font-black uppercase tracking-widest"
+                className="p-3 bg-cyber-alert/[0.08] border border-cyber-alert/20 rounded-lg text-cyber-alert text-sm font-medium"
               >
                 {error}
               </motion.div>
             )}
-            
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Operator Username</label>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Username</label>
               <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-cyber-blue transition-colors" size={18} />
-                <input 
-                  type="text" 
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyber-blue transition-colors" size={18} />
+                <input
+                  type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="cyber-input w-full py-4 pl-12"
-                  placeholder="analyst_zero"
+                  className="cyber-input w-full py-3 pl-11"
+                  placeholder="admin"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Neural Key</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Password</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-cyber-blue transition-colors" size={18} />
-                <input 
-                  type={showPassword ? "text" : "password"} 
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyber-blue transition-colors" size={18} />
+                <input
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="cyber-input w-full py-4 pl-12 pr-12"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  className="cyber-input w-full py-3 pl-11 pr-11"
+                  placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-700 hover:text-cyber-blue transition-colors focus:outline-none"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyber-blue transition-colors focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
-              className="cyber-button w-full py-5 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+              className="cyber-button w-full py-3.5 flex items-center justify-center gap-2.5 active:scale-[0.99] disabled:opacity-50"
             >
-              <span className="font-black tracking-[0.2em]">{loading ? 'AUTHENTICATING' : 'AUTHORIZE ACCESS'}</span>
+              <span className="font-semibold">{loading ? 'Signing in…' : 'Sign in'}</span>
               {!loading && <ArrowRight size={18} />}
             </button>
           </form>
 
-          <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-            <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">
-              No Profile Found? <Link to="/register" className="text-cyber-blue font-black hover:underline underline-offset-4">Register New Access</Link>
+          <div className="mt-6 p-3.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <p className="text-xs text-gray-500">
+              <span className="font-semibold text-gray-400">Demo access:</span> username <code className="text-cyber-blue">admin</code> · password <code className="text-cyber-blue">admin123</code>
             </p>
-            <Link to="/" className="text-[10px] font-black text-gray-700 hover:text-white transition-colors uppercase tracking-[0.25em]">
-              Return to Landing
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between">
+            <Link to="/" className="text-sm font-medium text-gray-500 hover:text-white transition-colors">
+              ← Back to home
             </Link>
+            <p className="text-sm text-gray-500">
+              No account? <Link to="/register" className="text-cyber-blue font-semibold hover:underline underline-offset-4">Register</Link>
+            </p>
           </div>
         </CyberCard>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 flex items-center justify-center gap-6"
-        >
-          <div className="flex items-center gap-2">
-            <Activity size={14} className="text-cyber-neon" />
-            <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">Uptime 99.9%</span>
-          </div>
-          <div className="w-1 h-1 rounded-full bg-gray-800" />
-          <div className="flex items-center gap-2">
-            <Cpu size={14} className="text-cyber-blue" />
-            <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">V4 Protocol</span>
-          </div>
-        </motion.div>
       </div>
     </div>
   );

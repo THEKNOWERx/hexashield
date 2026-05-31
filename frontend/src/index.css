@@ -2,31 +2,29 @@
 @import "tailwindcss";
 
 :root {
-  /* 60% - PRIMARY NEUTRAL (Backgrounds) */
-  --color-cyber-black: #050505; 
-  
-  /* 30% - SECONDARY (Surfaces, Panels, Sidebar) */
-  --color-cyber-surface: #0E0E0E;
-  --color-cyber-dark: #0A0A0A;
-  --color-cyber-border: rgba(255, 255, 255, 0.04);
-  
-  /* 10% - ACCENT (Tactical, Actions, Highlights) */
-  --color-cyber-blue: #0066FF;
-  --color-cyber-neon: #39FF14;
-  --color-cyber-alert: #FF003C;
-  --color-cyber-warning: #FFB800;
+  /* Base — layered slate surfaces (premium enterprise dark) */
+  --color-cyber-black: #090B11;
+  --color-cyber-surface: #11141C;
+  --color-cyber-dark: #151922;
+  --color-cyber-border: rgba(148, 163, 184, 0.12);
+
+  /* Accent + semantic palette (refined, restrained) */
+  --color-cyber-blue: #4F83F1;
+  --color-cyber-neon: #10B981;
+  --color-cyber-alert: #F05252;
+  --color-cyber-warning: #F59E0B;
 }
 
 @theme {
-  --color-cyber-black: #050505;
-  --color-cyber-surface: #0E0E0E;
-  --color-cyber-dark: #0A0A0A;
-  --color-cyber-blue: #0066FF;
-  --color-cyber-neon: #39FF14;
-  --color-cyber-border: rgba(255, 255, 255, 0.04);
-  --color-cyber-alert: #FF003C;
-  --color-cyber-warning: #FFB800;
-  
+  --color-cyber-black: #090B11;
+  --color-cyber-surface: #11141C;
+  --color-cyber-dark: #151922;
+  --color-cyber-blue: #4F83F1;
+  --color-cyber-neon: #10B981;
+  --color-cyber-border: rgba(148, 163, 184, 0.12);
+  --color-cyber-alert: #F05252;
+  --color-cyber-warning: #F59E0B;
+
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 }
@@ -34,92 +32,154 @@
 @layer base {
   body {
     @apply bg-cyber-black text-white font-sans antialiased;
-    background-color: #050505 !important;
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px) !important;
-    background-size: 40px 40px !important;
+    background-color: #090B11 !important;
+    /* Soft radial depth instead of a harsh full-bleed grid */
+    background-image:
+      radial-gradient(1100px 560px at 82% -12%, rgba(79, 131, 241, 0.07), transparent 62%),
+      radial-gradient(820px 460px at -12% 112%, rgba(16, 185, 129, 0.035), transparent 60%) !important;
     background-attachment: fixed;
   }
+  h1, h2, h3, h4, h5 { letter-spacing: -0.015em; }
 }
 
 @layer components {
   .cyber-panel {
-    @apply bg-cyber-dark border border-cyber-border rounded-xl p-8 backdrop-blur-3xl overflow-hidden transition-all duration-300;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    @apply bg-cyber-dark border border-cyber-border rounded-2xl p-8 overflow-hidden transition-all duration-200;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.55);
   }
 
   .cyber-panel:hover {
-    @apply border-white/10;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+    border-color: rgba(148, 163, 184, 0.22);
   }
 
   .cyber-button {
-    @apply bg-cyber-blue hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-3 text-xs uppercase tracking-widest;
+    @apply bg-cyber-blue text-white font-semibold py-3 px-6 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.14) inset, 0 6px 16px -4px rgba(79, 131, 241, 0.45);
   }
+  .cyber-button:hover { filter: brightness(1.08); }
 
   .cyber-button-neon {
-    @apply bg-cyber-neon hover:bg-green-400 text-black font-bold py-3 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-3 text-xs uppercase tracking-widest;
+    @apply bg-cyber-neon text-black font-semibold py-3 px-6 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm;
   }
+  .cyber-button-neon:hover { filter: brightness(1.06); }
 
   .cyber-input {
-    @apply bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:bg-white/10 focus:border-cyber-blue focus:ring-0 focus:outline-none transition-all text-sm text-white placeholder:text-gray-600;
+    @apply bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 focus:bg-white/[0.06] focus:border-cyber-blue/70 focus:ring-2 focus:ring-cyber-blue/20 focus:outline-none transition-all text-sm text-white placeholder:text-gray-600;
   }
 
-  .scanlines {
-    display: block !important;
-    @apply pointer-events-none fixed inset-0 z-50;
-    background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.02) 50%);
-    background-size: 100% 2px;
-    opacity: 0.2;
-  }
+  .scanlines { display: none !important; }
 
   .stat-card {
-    @apply bg-cyber-dark border border-cyber-border rounded-2xl p-8 relative overflow-hidden transition-all duration-300;
+    @apply bg-cyber-dark border border-cyber-border rounded-2xl p-7 relative overflow-hidden transition-all duration-200;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -14px rgba(0, 0, 0, 0.5);
   }
 
   .stat-card:hover {
-    @apply border-cyber-blue/30;
-    transform: translateY(-4px);
+    border-color: rgba(148, 163, 184, 0.24);
+    transform: translateY(-2px);
   }
 }
 
 /* DATA DENSITY UTILITIES */
 .pro-table th {
-  @apply bg-white/[0.03] text-gray-400 font-bold text-[10px] uppercase tracking-widest py-5 px-8 border-b border-white/5;
+  @apply bg-white/[0.02] text-gray-400 font-semibold text-[11px] uppercase tracking-wider py-4 px-6 border-b border-white/[0.06];
 }
 
 .pro-table td {
-  @apply py-5 px-8 border-b border-white/[0.02] text-xs font-medium text-gray-300;
+  @apply py-4 px-6 border-b border-white/[0.04] text-sm font-medium text-gray-300;
 }
 
 /* CUSTOM SCROLLBAR (DARK PRO) */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
 
-/* CYBER ANIMATIONS & UTILITIES */
-.shadow-blue-glow {
-    box-shadow: 0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.1);
-}
-
-.shadow-neon-glow {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), 0 0 40px rgba(0, 255, 136, 0.1);
-}
+/* GLOWS & UTILITIES (toned down) */
+.shadow-blue-glow { box-shadow: 0 0 0 1px rgba(79, 131, 241, 0.16), 0 10px 34px -10px rgba(79, 131, 241, 0.22); }
+.shadow-neon-glow { box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.16), 0 10px 34px -10px rgba(16, 185, 129, 0.18); }
 
 .bg-grid-pattern {
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
+
+/* ============================================================
+   THEME MODES — override accent + surface tokens
+   Default (cyber) uses :root values. Each mode retints the app.
+   ============================================================ */
+.red-mode {
+  --color-cyber-black: #0C0809;
+  --color-cyber-surface: #16100F;
+  --color-cyber-dark: #1B1312;
+  --color-cyber-border: rgba(248, 113, 113, 0.14);
+  --color-cyber-blue: #F0556B;
+  --color-cyber-neon: #FBBF24;
+}
+
+.toxic-mode {
+  --color-cyber-black: #070D0A;
+  --color-cyber-surface: #0E1713;
+  --color-cyber-dark: #121C17;
+  --color-cyber-border: rgba(52, 211, 153, 0.16);
+  --color-cyber-blue: #22D3A0;
+  --color-cyber-neon: #A3E635;
+}
+
+.deep-blue-mode {
+  --color-cyber-black: #070A14;
+  --color-cyber-surface: #0E1322;
+  --color-cyber-dark: #11182B;
+  --color-cyber-border: rgba(96, 165, 250, 0.16);
+  --color-cyber-blue: #5B9DFF;
+  --color-cyber-neon: #38BDF8;
+}
+
+.monochrome-mode {
+  --color-cyber-black: #0A0A0B;
+  --color-cyber-surface: #141416;
+  --color-cyber-dark: #18181B;
+  --color-cyber-border: rgba(212, 212, 216, 0.14);
+  --color-cyber-blue: #A1A1AA;
+  --color-cyber-neon: #E4E4E7;
+}
+
+.plasma-mode {
+  --color-cyber-black: #F4F5F7;
+  --color-cyber-surface: #FFFFFF;
+  --color-cyber-dark: #FFFFFF;
+  --color-cyber-border: rgba(15, 23, 42, 0.10);
+  --color-cyber-blue: #4F46E5;
+  --color-cyber-neon: #059669;
+  --color-cyber-alert: #DC2626;
+  --color-cyber-warning: #D97706;
+  color: #0F172A;
+}
+
+/* Body background overrides must live in @layer base so their !important
+   declarations can beat the base body rule (layered !important > unlayered). */
+@layer base {
+  .red-mode body,
+  .toxic-mode body,
+  .deep-blue-mode body,
+  .monochrome-mode body {
+    background-color: var(--color-cyber-black) !important;
+    background-image:
+      radial-gradient(1100px 560px at 82% -12%, color-mix(in srgb, var(--color-cyber-blue) 8%, transparent), transparent 62%),
+      radial-gradient(820px 460px at -12% 112%, color-mix(in srgb, var(--color-cyber-neon) 5%, transparent), transparent 60%) !important;
+  }
+
+  .plasma-mode body {
+    background-color: #F4F5F7 !important;
+    background-image:
+      radial-gradient(1100px 560px at 82% -12%, rgba(79, 70, 229, 0.08), transparent 62%),
+      radial-gradient(820px 460px at -12% 112%, rgba(5, 150, 105, 0.06), transparent 60%) !important;
+    color: #0F172A !important;
+  }
+}
+

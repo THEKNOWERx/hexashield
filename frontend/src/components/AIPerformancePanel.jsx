@@ -10,7 +10,7 @@ const AIPerformancePanel = ({ stats }) => {
          <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <div className="flex items-center gap-2">
                <Cpu className="text-cyber-blue" size={14} />
-               <span className="text-[10px] font-black uppercase tracking-widest text-white italic">Neural Precision Map</span>
+               <span className="text-sm font-semibold text-white">Precision Map</span>
             </div>
             <ShieldCheck className="text-cyber-neon" size={14} />
          </div>
@@ -26,13 +26,13 @@ const AIPerformancePanel = ({ stats }) => {
                     { label: 'True Positive', val: '97.2%', bg: 'bg-cyber-neon/10' },
                   ].map((cell, i) => (
                     <div key={i} className={`${cell.bg} flex flex-col items-center justify-center border border-white/5 relative group-hover:border-cyber-blue/30 transition-all`}>
-                        <span className="text-[7px] font-black text-gray-500 uppercase absolute top-2">{cell.label}</span>
-                        <span className="text-xl font-black text-white italic tracking-tighter">{cell.val}</span>
+                        <span className="text-[7px] font-semibold text-gray-500 uppercase absolute top-2">{cell.label}</span>
+                        <span className="text-xl font-bold text-white tracking-tight">{cell.val}</span>
                     </div>
                   ))}
                </div>
             </div>
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[8px] font-black text-cyber-blue uppercase tracking-widest bg-black/80 px-3 py-1 rounded-full backdrop-blur-md">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-medium text-cyber-blue bg-black/80 px-3 py-1 rounded-full backdrop-blur-md">
                Confusion Matrix Summary
             </div>
          </div>
@@ -43,7 +43,7 @@ const AIPerformancePanel = ({ stats }) => {
          <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <div className="flex items-center gap-2">
                <Activity className="text-cyber-neon" size={14} />
-               <span className="text-[10px] font-black uppercase tracking-widest text-white italic">Validation Dynamics</span>
+               <span className="text-sm font-semibold text-white">Validation Metrics</span>
             </div>
             <BarChart3 className="text-cyber-blue" size={14} />
          </div>

@@ -53,14 +53,14 @@ const Register = () => {
           <div className="p-4 bg-cyber-blue/10 rounded-2xl border border-cyber-blue/20 mb-4 shadow-blue-glow">
             <UserPlus className="text-cyber-blue" size={48} />
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-white">HEXA<span className="text-cyber-blue">SHIELD</span></h1>
-          <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] mt-2">Create Security Profile</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Hexa<span className="text-cyber-blue">Shield</span></h1>
+          <p className="text-sm font-medium text-gray-500 mt-2">Create your account</p>
         </motion.div>
 
         <CyberCard className="!p-8 border-cyber-blue/20">
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-white tracking-tight">Initialize Credentials</h2>
-            <p className="text-xs text-gray-500 font-medium">Map your analyst identity to the platform node.</p>
+            <h2 className="text-xl font-semibold text-white tracking-tight">Sign up</h2>
+            <p className="text-sm text-gray-500">Enter your details to get started.</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-6">
@@ -68,7 +68,7 @@ const Register = () => {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="p-3 bg-cyber-alert/5 border border-cyber-alert/20 rounded-xl text-cyber-alert text-[10px] font-black uppercase tracking-widest"
+                className="p-3 bg-cyber-alert/5 border border-cyber-alert/20 rounded-xl text-cyber-alert text-sm font-medium"
               >
                 {error}
               </motion.div>
@@ -76,7 +76,7 @@ const Register = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Username</label>
+                <label className="text-sm font-medium text-gray-300">Username</label>
                 <div className="relative group">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-cyber-blue transition-colors" size={17} />
                   <input 
@@ -84,14 +84,14 @@ const Register = () => {
                     value={formData.username}
                     onChange={(e) => setFormData({...formData, username: e.target.value})}
                     className="cyber-input w-full py-4 pl-12"
-                    placeholder="analyst_zero"
+                    placeholder="yourname"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Email Address</label>
+                <label className="text-sm font-medium text-gray-300">Email Address</label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-cyber-blue transition-colors" size={17} />
                   <input 
@@ -99,7 +99,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="cyber-input w-full py-4 pl-12"
-                    placeholder="analyst@domain.io"
+                    placeholder="you@example.com"
                     required
                   />
                 </div>
@@ -108,7 +108,7 @@ const Register = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Operational Role</label>
+                <label className="text-sm font-medium text-gray-300">Role</label>
                 <select 
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
@@ -121,7 +121,7 @@ const Register = () => {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Master Key</label>
+                <label className="text-sm font-medium text-gray-300">Password</label>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-cyber-blue transition-colors" size={17} />
                   <input 
@@ -149,13 +149,13 @@ const Register = () => {
               className="cyber-button w-full py-5 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
             >
               <ShieldAlert size={18} />
-              <span className="font-black tracking-[0.2em]">{loading ? 'INITIALIZING' : 'INITIALIZE PROFILE'}</span>
+              <span className="font-semibold">{loading ? 'Creating account…' : 'Create account'}</span>
             </button>
           </form>
 
           <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-            <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">
-              Already Registered? <Link to="/login" className="text-cyber-blue font-black hover:underline underline-offset-4">Sign to Console</Link>
+            <p className="text-sm font-medium text-gray-500">
+              Already have an account? <Link to="/login" className="text-cyber-blue font-semibold hover:underline underline-offset-4">Sign in</Link>
             </p>
           </div>
         </CyberCard>
@@ -168,7 +168,7 @@ const Register = () => {
         >
           <div className="flex items-center gap-2">
             <Activity size={14} className="text-cyber-neon" />
-            <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">Uptime 99.9%</span>
+            <span className="text-xs font-medium text-gray-600">Uptime 99.9%</span>
           </div>
           <div className="w-1 h-1 rounded-full bg-gray-800" />
           <div className="flex items-center gap-2">

@@ -116,8 +116,8 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
             <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-cyber-blue animate-pulse" size={20} />
             <input
               type="text"
-              placeholder="ENTER DOMAIN, URL, OR IP..."
-              className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-4 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-sm tracking-widest placeholder:text-gray-700 uppercase"
+              placeholder="Enter domain, URL, or IP…"
+              className="w-full bg-cyber-black/50 border border-cyber-border rounded-xl py-4 pl-12 pr-4 focus:border-cyber-blue outline-none transition-all font-mono text-sm placeholder:text-gray-600"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleDiscovery()}
@@ -129,7 +129,7 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
             className="cyber-button px-10 py-4 h-full w-full md:w-auto"
           >
             {isScanning ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
-            <span className="font-black tracking-[0.2em]">{isScanning ? 'ANALYZING' : 'INITIATE'}</span>
+            <span className="font-semibold">{isScanning ? 'Analyzing…' : 'Start'}</span>
           </button>
         </div>
         {error && (
@@ -151,10 +151,10 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
           {/* DIGITAL PERIMETER SUMMARY HUD */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {[
-               { label: 'Security Shield', value: reconResults.headers.waf_status || 'NONE', icon: Shield, color: 'text-cyber-neon' },
-               { label: 'DNS Density', value: `${dnsRecords.length} Records`, icon: Database, color: 'text-cyber-blue' },
-               { label: 'Digital Footprint', value: `${subdomains.length} Surfaces`, icon: Target, color: 'text-white' },
-               { label: 'SSL Integrity', value: sslInfo.expired ? 'EXPIRED' : 'VALID', icon: ShieldCheck, color: sslInfo.expired ? 'text-red-500' : 'text-cyber-neon' },
+               { label: 'Firewall', value: reconResults.headers.waf_status || 'None', icon: Shield, color: 'text-cyber-neon' },
+               { label: 'DNS Records', value: `${dnsRecords.length} records`, icon: Database, color: 'text-cyber-blue' },
+               { label: 'Subdomains', value: `${subdomains.length} found`, icon: Target, color: 'text-white' },
+               { label: 'SSL', value: sslInfo.expired ? 'Expired' : 'Valid', icon: ShieldCheck, color: sslInfo.expired ? 'text-red-500' : 'text-cyber-neon' },
              ].map((stat, i) => (
                <motion.div 
                  key={i}
@@ -165,9 +165,9 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                >
                  <div className="flex items-center gap-2 opacity-50">
                     <stat.icon size={12} />
-                    <span className="text-[8px] font-black uppercase tracking-widest">{stat.label}</span>
+                    <span className="text-xs font-medium">{stat.label}</span>
                  </div>
-                 <div className={`text-sm font-black font-mono tracking-tighter ${stat.color}`}>
+                 <div className={`text-sm font-semibold font-mono ${stat.color}`}>
                     {stat.value}
                  </div>
                </motion.div>
@@ -215,9 +215,9 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                   ))}
                   <button 
                     onClick={() => setIsMapOpen(true)}
-                    className="w-full mt-4 py-3 bg-cyber-blue/10 border border-cyber-blue/30 text-cyber-blue rounded-xl text-[10px] font-black uppercase"
+                    className="w-full mt-4 py-3 bg-cyber-blue/10 border border-cyber-blue/30 text-cyber-blue rounded-xl text-xs font-semibold"
                   >
-                    VIEW ON MAP
+                    View on map
                   </button>
                 </div>
               )}

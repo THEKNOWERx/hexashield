@@ -96,7 +96,7 @@ export const reportsService = {
 };
 
 export const notificationsService = {
-  getLatest: () => apiClient.get('notifications'),
+  getLatest: () => apiClient.get('notifications/'),
   markAsRead: (id) => apiClient.patch(`notifications/read/${id}`),
   markAllRead: () => apiClient.patch('notifications/read-all'),
   purgeAll: () => apiClient.delete('notifications/purge'),

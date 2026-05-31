@@ -8,7 +8,7 @@ const NexusChat = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'أنا المحلل الأمني Nexus. كيف يمكنني مساعدتك في تأمين منظومتك اليوم؟', type: 'message' }
+        { role: 'assistant', content: "Hi, I'm your security assistant. How can I help you secure your systems today?", type: 'message' }
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const { speak, stop, isSpeaking } = useVoiceAssistant();
@@ -89,8 +89,8 @@ const NexusChat = () => {
                                     <Cpu size={16} className="text-cyber-blue" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-black tracking-widest text-white uppercase">Nexus Intelligence</h3>
-                                    <p className="text-[9px] text-cyber-neon font-bold uppercase tracking-tighter">AI SOC Analyst Enabled</p>
+                                    <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
+                                    <p className="text-xs text-cyber-neon font-medium">Security analyst</p>
                                 </div>
                             </div>
                             {isSpeaking && (
@@ -114,18 +114,18 @@ const NexusChat = () => {
                                         {msg.type === 'analysis' && (
                                             <div className="mt-4 space-y-3 pt-3 border-t border-white/10">
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border 
+                                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border 
                                                         ${msg.risk === 'CRITICAL' ? 'border-red-500 text-red-500 bg-red-500/10' : 
                                                           msg.risk === 'HIGH' ? 'border-orange-500 text-orange-500 bg-orange-500/10' : 
                                                           'border-blue-500 text-blue-500 bg-blue-500/10'}`}>
                                                         Risk: {msg.risk}
                                                     </span>
-                                                    <span className="text-[9px] text-gray-500 font-mono italic">Confidence: {msg.confidence}</span>
+                                                    <span className="text-xs text-gray-500 font-mono">Confidence: {msg.confidence}</span>
                                                 </div>
                                                 <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex items-start gap-2">
                                                     <Zap size={12} className="text-cyber-neon shrink-0 mt-0.5" />
                                                     <p className="text-[10px] text-gray-400">
-                                                        <span className="text-gray-500 font-bold">REMEDIATION:</span> {msg.remediation}
+                                                        <span className="text-gray-500 font-semibold">Remediation:</span> {msg.remediation}
                                                     </p>
                                                 </div>
                                             </div>
@@ -151,7 +151,7 @@ const NexusChat = () => {
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="اسأل المحلل الأمني..."
+                                placeholder="Ask the security assistant…"
                                 className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-cyber-blue transition-all"
                             />
                             <button

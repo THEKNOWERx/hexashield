@@ -9,7 +9,7 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
-      content: "أنا المحلل الأمني Nexus. أنا جاهز لتحليل نتائج المسح الأخير، وشرح الثغرات المكتشفة، وتقديم مسارات المعالجة الاستراتيجية. كيف يمكنني مساعدتك؟",
+      content: "Hi, I'm your security assistant. I can analyze your latest scan results, explain detected vulnerabilities, and suggest remediation steps. How can I help?",
       type: 'message'
     }
   ]);
@@ -49,7 +49,7 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
       speak(data.answer);
     } catch (err) {
       console.error("AI Assistant error", err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Neural Link Error: Failed to reach the security core.", type: 'error' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Error: failed to reach the security service.", type: 'error' }]);
     } finally {
       setIsTyping(false);
     }
@@ -106,14 +106,14 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
                     {msg.type === 'analysis' && (
                         <div className="mt-4 space-y-4 pt-4 border-t border-white/5">
                             <div className="flex items-center justify-between">
-                                <span className={`text-[9px] font-black uppercase px-2 py-1 rounded border 
+                                <span className={`text-xs font-semibold px-2 py-1 rounded border 
                                     ${msg.risk === 'CRITICAL' ? 'border-red-500 text-red-500 bg-red-500/10' : 
                                       msg.risk === 'HIGH' ? 'border-orange-500 text-orange-500 bg-orange-500/10' : 
                                       'border-blue-500 text-blue-500 bg-blue-500/10'}`}>
-                                    Risk Engagement: {msg.risk}
+                                    Risk: {msg.risk}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[9px] text-gray-500 font-mono italic">Confidence Cluster: {msg.confidence}</span>
+                                    <span className="text-xs text-gray-500 font-mono">Confidence: {msg.confidence}</span>
                                     <div className="flex gap-0.5">
                                         {[1,2,3].map(i => <div key={i} className={`w-1 h-3 rounded-full ${i <= 2 ? 'bg-cyber-neon' : 'bg-gray-800'}`} />)}
                                     </div>
@@ -123,8 +123,8 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
                             <div className="p-4 bg-cyber-blue/5 rounded-xl border border-cyber-blue/10 flex items-start gap-3">
                                 <Zap size={14} className="text-cyber-neon mt-0.5" />
                                 <div>
-                                    <span className="text-[10px] font-black text-gray-500 uppercase block mb-1">Strategic Remediation</span>
-                                    <p className="text-xs text-gray-400 italic font-mono leading-relaxed">{msg.remediation}</p>
+                                    <span className="text-xs font-semibold text-gray-500 block mb-1">Remediation</span>
+                                    <p className="text-xs text-gray-400 font-mono leading-relaxed">{msg.remediation}</p>
                                 </div>
                             </div>
                         </div>
@@ -185,7 +185,7 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
                   onClick={() => { setInput(q); }}
                   className="w-full text-left p-2.5 text-xs text-gray-400 hover:text-white hover:bg-cyber-surface rounded-lg border border-transparent hover:border-cyber-border transition-all"
                 >
-                  â†’ {q}
+                  {q}
                 </button>
               ))}
             </div>
@@ -194,24 +194,24 @@ const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubt
           <div className="cyber-panel">
             <h4 className="font-bold mb-4 flex items-center gap-2 text-cyber-blue text-sm">
               <Sparkles size={16} />
-              Neural Deep Interrogation
+              Deep Analysis
             </h4>
             <button 
               onClick={runDeepInterrogation}
               disabled={analyzing}
-              className="w-full py-3 bg-cyber-blue text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-[0_0_20px_rgba(0,71,255,0.3)] disabled:opacity-50"
+              className="w-full py-3 bg-cyber-blue text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-all shadow-[0_0_20px_rgba(0,71,255,0.3)] disabled:opacity-50"
             >
-              {analyzing ? 'Synthesizing...' : 'Run Advanced Interrogation'}
+              {analyzing ? 'Analyzing…' : 'Run deep analysis'}
             </button>
             
             {deepAnalysis && (
               <div className="mt-6 space-y-4">
                  <div className="p-3 bg-cyber-neon/10 border border-cyber-neon/20 rounded-lg">
-                    <span className="text-[10px] font-black text-cyber-neon uppercase tracking-widest block mb-1">Risk Posture</span>
+                    <span className="text-xs font-semibold text-cyber-neon block mb-1">Risk Posture</span>
                     <span className="text-sm font-bold text-white">{deepAnalysis.analysis_metadata.risk_posture}</span>
                  </div>
                  <div className="space-y-2">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest block">Detected Chains</span>
+                    <span className="text-xs font-semibold text-gray-500 block">Detected Chains</span>
                     {deepAnalysis.chained_attacks.map((chain, idx) => (
                       <div key={idx} className="p-2 bg-red-500/10 border border-red-500/20 rounded text-[9px] text-red-100 font-bold">
                         {chain.name}

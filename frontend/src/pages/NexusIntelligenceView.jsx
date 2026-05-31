@@ -43,19 +43,19 @@ const NexusIntelligenceView = ({ initialTab = 'intelligence', headerTitle, heade
       }`}
     >
       <Icon size={18} className={activeTab === id ? 'text-cyber-blue' : ''} />
-      <span className="text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
+      <span className="text-sm font-medium">{label}</span>
     </button>
   );
 
   return (
     <div className="space-y-8 pb-20">
-      <GlobalHeader title="Nexus Command" subtitle="Unified Tactical Intelligence & Protocol Management" />
+      <GlobalHeader title="Platform" subtitle="Unified intelligence and protocols." />
 
       {/* Mode Selector */}
       <div className="flex flex-wrap gap-4 p-2 bg-cyber-black/40 border border-white/5 rounded-2xl w-fit">
-        <TabButton id="tactical" label="Tactical Features" icon={Zap} />
-        <TabButton id="intelligence" label="Intelligence Hub" icon={Activity} />
-        <TabButton id="protocol" label="Protocol Spec" icon={BookOpen} />
+        <TabButton id="tactical" label="Features" icon={Zap} />
+        <TabButton id="intelligence" label="Intelligence" icon={Activity} />
+        <TabButton id="protocol" label="Protocols" icon={BookOpen} />
       </div>
 
       <AnimatePresence mode="wait">
@@ -74,8 +74,8 @@ const NexusIntelligenceView = ({ initialTab = 'intelligence', headerTitle, heade
                   {vulnerabilities.slice(0, 5).map((v, i) => (
                     <div key={i} className="p-4 bg-cyber-black/60 border border-white/5 rounded-xl flex items-center justify-between group hover:border-cyber-blue/30 transition-all">
                       <div className="flex flex-col">
-                        <span className="text-[8px] text-cyber-blue font-black tracking-widest uppercase mb-1">{v.severity}</span>
-                        <span className="text-sm font-bold text-white uppercase">{v.name}</span>
+                        <span className="text-[10px] text-cyber-blue font-medium mb-1">{v.severity}</span>
+                        <span className="text-sm font-semibold text-white">{v.name}</span>
                       </div>
                       <button className="p-2 rounded-lg bg-cyber-blue/10 text-cyber-blue opacity-0 group-hover:opacity-100 transition-all">
                         <ChevronRight size={14} />
@@ -89,10 +89,10 @@ const NexusIntelligenceView = ({ initialTab = 'intelligence', headerTitle, heade
               <div className="space-y-6">
                 <div className="p-6 bg-cyber-blue/5 border border-cyber-blue/20 rounded-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-cyber-blue/10 blur-3xl rounded-full" />
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Neural Scanner Status</h4>
+                  <h4 className="text-sm font-semibold text-white mb-4">Scanner Status</h4>
                   <div className="flex items-center gap-4">
-                     <div className="w-3 h-3 rounded-full bg-cyber-neon animate-pulse" />
-                     <span className="text-xl font-mono font-black text-white">ORCHESTRATOR_IDLE</span>
+                     <div className="w-3 h-3 rounded-full bg-cyber-neon" />
+                     <span className="text-xl font-mono font-semibold text-white">Idle</span>
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2">Ready for deployment on critical infrastructure.</p>
                 </div>
@@ -112,30 +112,62 @@ const NexusIntelligenceView = ({ initialTab = 'intelligence', headerTitle, heade
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="p-6 bg-cyber-black border border-white/5 rounded-2xl space-y-2 group hover:border-cyber-blue/30 transition-all">
-                  <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Total Intelligence Scans</span>
-                  <div className="text-4xl font-black font-mono text-white tracking-tighter">{data?.total_scans || 0}</div>
-                  <div className="text-[8px] text-cyber-blue font-black uppercase">Capacity: Production-Grade</div>
+                  <span className="text-xs font-medium text-gray-600">Total Scans</span>
+                  <div className="text-4xl font-bold font-mono text-white tracking-tight">{data?.total_scans || 0}</div>
+                  <div className="text-[10px] text-cyber-blue font-medium">Production-grade</div>
                </div>
                <div className="p-6 bg-cyber-black border border-white/5 rounded-2xl space-y-2 group hover:border-red-500/30 transition-all">
-                  <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Critical Vulnerabilities</span>
-                  <div className="text-4xl font-black font-mono text-red-500 tracking-tighter">{data?.critical_count || 0}</div>
-                  <div className="text-[8px] text-red-400 font-black uppercase">Immediate Remediation Required</div>
+                  <span className="text-xs font-medium text-gray-600">Critical Vulnerabilities</span>
+                  <div className="text-4xl font-bold font-mono text-red-500 tracking-tight">{data?.critical_count || 0}</div>
+                  <div className="text-[10px] text-red-400 font-medium">Immediate remediation required</div>
                </div>
                <div className="p-6 bg-cyber-black border border-white/5 rounded-2xl space-y-2 group hover:border-cyber-neon/30 transition-all">
-                  <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">System Defense Tier</span>
-                  <div className="text-4xl font-black font-mono text-cyber-neon tracking-tighter">{data?.system_status || 'SECURE'}</div>
-                  <div className="text-[8px] text-cyber-neon font-black uppercase">Neural Firewall Pulse Active</div>
+                  <span className="text-xs font-medium text-gray-600">System Defense Tier</span>
+                  <div className="text-4xl font-bold font-mono text-cyber-neon tracking-tight">{data?.system_status || 'SECURE'}</div>
+                  <div className="text-[10px] text-cyber-neon font-medium">Firewall active</div>
                </div>
             </div>
 
-            <CyberCard title="Global Threat Map" icon={Globe}>
-              <div className="h-64 flex flex-col items-center justify-center bg-cyber-black/60 rounded-2xl border border-white/5 relative overflow-hidden">
-                 <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-                 <div className="relative z-10 space-y-4 text-center">
-                    <Activity className="text-cyber-blue mx-auto animate-pulse" size={40} />
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">Streaming Neural Intelligence...</p>
-                 </div>
-              </div>
+            <CyberCard title="Threat Distribution" icon={Globe}>
+              {vulnerabilities.length > 0 ? (
+                <div className="space-y-4">
+                  {(() => {
+                    const order = ['Critical', 'High', 'Medium', 'Low'];
+                    const colors = {
+                      Critical: 'bg-cyber-alert',
+                      High: 'bg-cyber-warning',
+                      Medium: 'bg-cyber-blue',
+                      Low: 'bg-cyber-neon',
+                    };
+                    const counts = vulnerabilities.reduce((acc, v) => {
+                      const sev = (v.severity || 'Low').toString();
+                      acc[sev] = (acc[sev] || 0) + 1;
+                      return acc;
+                    }, {});
+                    const total = vulnerabilities.length;
+                    return order.map((sev) => {
+                      const count = counts[sev] || 0;
+                      const pct = total ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={sev} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-medium text-gray-300">{sev}</span>
+                            <span className="font-mono text-gray-500">{count} · {pct}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-cyber-black/80 overflow-hidden">
+                            <div className={`h-full rounded-full ${colors[sev]}`} style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                  <p className="text-[10px] text-gray-500 pt-2">Based on {vulnerabilities.length} findings across the latest assessments.</p>
+                </div>
+              ) : (
+                <div className="h-48 flex items-center justify-center">
+                  <p className="text-sm text-gray-600">No findings available.</p>
+                </div>
+              )}
             </CyberCard>
           </motion.div>
         )}

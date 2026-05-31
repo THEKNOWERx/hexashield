@@ -117,8 +117,8 @@ const AttackPathVisualizer = ({ scanId }) => {
     return () => simulation.stop();
   }, [data]);
 
-  if (loading) return <div className="h-64 flex items-center justify-center text-gray-500 animate-pulse uppercase text-[10px] font-black italic">Orchestrating Path Intelligence...</div>;
-  if (!data) return <div className="h-64 flex items-center justify-center text-cyber-alert uppercase text-[10px] font-black italic">Failure to Derive Tactical Graph</div>;
+  if (loading) return <div className="h-64 flex items-center justify-center text-gray-500 text-sm">Building attack graph…</div>;
+  if (!data) return <div className="h-64 flex items-center justify-center text-cyber-alert text-sm">Unable to build attack graph</div>;
 
   return (
     <div ref={containerRef} className="relative w-full h-[600px] border border-white/5 rounded-3xl overflow-hidden bg-black/20">
@@ -128,15 +128,15 @@ const AttackPathVisualizer = ({ scanId }) => {
       <div className="absolute top-6 left-6 p-6 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl max-w-xs shadow-2xl">
          <div className="flex items-center gap-3 mb-4">
             <Activity size={18} className="text-cyber-blue" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white">Neural Attack Graph</span>
+            <span className="text-sm font-semibold text-white">Attack Graph</span>
          </div>
          <div className="space-y-3">
-            <p className="text-[10px] text-gray-400 leading-relaxed italic">
-               {data.summary.ai_insight}
+            <p className="text-xs text-gray-400 leading-relaxed">
+               {data.summary?.ai_insight || 'No analysis available for this graph.'}
             </p>
             <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-               <span className="text-[9px] font-black text-gray-500 uppercase">Risk Level</span>
-               <span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded text-[9px] font-black uppercase">{data.summary.highest_risk}</span>
+               <span className="text-xs font-medium text-gray-500">Risk Level</span>
+               <span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded text-xs font-medium">{data.summary?.highest_risk || 'N/A'}</span>
             </div>
          </div>
       </div>
@@ -154,20 +154,20 @@ const AttackPathVisualizer = ({ scanId }) => {
 
            <div className="flex items-center gap-4 mb-6">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedNode.color || '#39ff14' }} />
-              <h4 className="text-sm font-black uppercase text-white">{selectedNode.label}</h4>
+              <h4 className="text-sm font-semibold text-white">{selectedNode.label}</h4>
            </div>
 
            <div className="space-y-6">
               <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
-                 <span className="block text-[8px] font-black text-gray-500 uppercase tracking-widest mb-2">Node Classification</span>
-                 <span className="text-xs font-black text-cyber-blue uppercase">{selectedNode.type} Intelligence</span>
+                 <span className="block text-xs font-medium text-gray-500 mb-2">Node Classification</span>
+                 <span className="text-xs font-semibold text-cyber-blue">{selectedNode.type}</span>
               </div>
 
               {selectedNode.cvss && (
                 <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Risk Projection</span>
-                      <span className="text-[10px] font-black text-cyber-alert uppercase">{selectedNode.risk}</span>
+                      <span className="text-xs font-medium text-gray-500">Risk Projection</span>
+                      <span className="text-xs font-semibold text-cyber-alert">{selectedNode.risk}</span>
                    </div>
                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <div className="h-full bg-cyber-alert" style={{ width: `${selectedNode.cvss * 10}%` }} />
@@ -177,15 +177,15 @@ const AttackPathVisualizer = ({ scanId }) => {
 
               {selectedNode.mitre && (
                 <div className="p-4 bg-cyber-blue/10 border border-cyber-blue/30 rounded-xl">
-                   <span className="block text-[8px] font-black text-cyber-blue uppercase tracking-widest mb-1">MITRE ATT&CK Matrix</span>
-                   <span className="text-xs font-black text-white">{selectedNode.mitre}</span>
+                   <span className="block text-xs font-medium text-cyber-blue mb-1">MITRE ATT&CK</span>
+                   <span className="text-xs font-semibold text-white">{selectedNode.mitre}</span>
                 </div>
               )}
 
               {selectedNode.source && (
                 <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                   <span className="block text-[8px] font-black text-orange-500 uppercase tracking-widest mb-1">Exploit-DB Record</span>
-                   <span className="text-[10px] font-black text-white font-mono">{selectedNode.source}</span>
+                   <span className="block text-xs font-medium text-orange-500 mb-1">Exploit-DB Record</span>
+                   <span className="text-[10px] font-semibold text-white font-mono">{selectedNode.source}</span>
                 </div>
               )}
            </div>
@@ -195,7 +195,7 @@ const AttackPathVisualizer = ({ scanId }) => {
              <div className="mt-12 pt-8 border-t border-white/5">
                 <div className="flex items-center gap-3 mb-6">
                    <Zap size={16} className="text-cyber-neon" />
-                   <span className="text-[10px] font-black uppercase text-cyber-neon tracking-widest">Tactical Preview</span>
+                   <span className="text-sm font-semibold text-cyber-neon">Preview</span>
                 </div>
                 <div className="bg-black/60 rounded-xl p-4 font-mono text-[10px] text-cyber-neon border border-cyber-neon/20 leading-relaxed">
                    # PREVIEW ONLY - NON-EXECUTABLE<br/>
