@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { reconService } from '../services/apiClient';
 import { useSecurity } from '../context/SecurityContext';
-import { Search, Globe, Fingerprint, Play, Loader2, Target, Wifi, MapPin, Database, Shield, Zap, Activity, ShieldCheck, Server, AlertCircle, Info, Cpu } from 'lucide-react';
+import { Search, Globe, Fingerprint, Play, Loader2, Target, Wifi, MapPin, Database, Shield, Zap, Activity, ShieldCheck, Server, AlertCircle, Info, Cpu, Users, Building2, FileText, KeyRound, LogIn, Mail, ExternalLink, Eye } from 'lucide-react';
 import CyberCard from '../components/CyberCard';
 import GlobalHeader from '../components/GlobalHeader';
 import MapModal from '../components/MapModal';
@@ -18,6 +18,43 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
+
+  // Open-source intelligence panel state
+  const [osintCategory, setOsintCategory] = useState('all');
+  const [osintLoading, setOsintLoading] = useState(false);
+  const [osintData, setOsintData] = useState(null);
+  const [osintError, setOsintError] = useState(null);
+
+  const OSINT_CATEGORIES = [
+    { id: 'all', label: 'Overview', icon: Eye },
+    { id: 'people', label: 'People & Profiles', icon: Users },
+    { id: 'company', label: 'Company Intelligence', icon: Building2 },
+    { id: 'documents', label: 'Exposed Documents', icon: FileText },
+    { id: 'credentials', label: 'Credentials & Leaks', icon: KeyRound },
+    { id: 'surfaces', label: 'Login Surfaces', icon: LogIn },
+    { id: 'email', label: 'Email Footprint', icon: Mail },
+  ];
+
+  const gatherOsint = async (category = osintCategory) => {
+    if (!target.trim()) {
+      setOsintError('Enter a target above first.');
+      return;
+    }
+    setOsintCategory(category);
+    setOsintLoading(true);
+    setOsintError(null);
+    setOsintData(null);
+    try {
+      const res = await reconService.osint(target.trim(), category);
+      setOsintData(res.data);
+      setActiveTarget(target.trim());
+    } catch (err) {
+      setOsintError(err.response?.data?.detail || err.message || 'Intelligence gathering failed.');
+    } finally {
+      setOsintLoading(false);
+    }
+  };
+
 
   // No persistence for inputs as per user request
   useEffect(() => {
@@ -137,6 +174,106 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
             [ERROR] {error}
           </div>
         )}
+      </CyberCard>
+
+      {/* Open-Source Intelligence */}
+      <CyberCard title="Open-Source Intelligence" icon={Eye}>
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500">
+            Surface publicly available information about a company, person, or domain. Choose what to look for and run the gather.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {OSINT_CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              const active = osintCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setOsintCategory(cat.id)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all
+                    ${active
+                      ? 'bg-cyber-blue/10 border-cyber-blue/50 text-white'
+                      : 'bg-white/[0.02] border-white/5 text-gray-400 hover:border-white/10'}`}
+                >
+                  <Icon size={14} className={active ? 'text-cyber-blue' : 'text-gray-500'} />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => gatherOsint()}
+              disabled={osintLoading}
+              className="cyber-button px-8 py-3 disabled:opacity-50 flex items-center gap-2"
+            >
+              {osintLoading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
+              <span className="font-semibold">{osintLoading ? 'Gathering…' : 'Gather intelligence'}</span>
+            </button>
+            {osintData && (
+              <span className="text-xs text-gray-500 font-mono">
+                {osintData.summary?.results || 0} records · {osintData.summary?.sources || 0} sources
+              </span>
+            )}
+          </div>
+
+          {osintError && (
+            <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-xl text-red-400 text-xs font-mono">
+              [ERROR] {osintError}
+            </div>
+          )}
+
+          {osintData && (
+            osintData.groups.length === 0 ? (
+              <div className="text-center py-10 text-gray-500 text-sm">
+                No public records surfaced for this selection.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {osintData.groups.map((group, gi) => (
+                  <motion.div
+                    key={gi}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: gi * 0.05 }}
+                    className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-white">{group.title}</h4>
+                      <span className="text-[10px] font-mono text-gray-500">{group.items.length}</span>
+                    </div>
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {group.items.map((item, ii) => (
+                        item.url ? (
+                          <a
+                            key={ii}
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex items-start gap-2 p-2 rounded-lg hover:bg-white/[0.03] transition-colors"
+                          >
+                            <ExternalLink size={12} className="mt-0.5 text-gray-600 group-hover:text-cyber-blue flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-xs text-gray-300 group-hover:text-white truncate">{item.title}</p>
+                              {item.source && <p className="text-[10px] text-cyber-blue/60 font-mono truncate">{item.source}</p>}
+                            </div>
+                          </a>
+                        ) : (
+                          <div key={ii} className="flex items-center gap-2 p-2 rounded-lg">
+                            <Mail size={12} className="text-gray-600 flex-shrink-0" />
+                            <p className="text-xs text-gray-300 font-mono truncate">{item.title}</p>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )
+          )}
+        </div>
       </CyberCard>
 
       {!reconResults && !isScanning && (

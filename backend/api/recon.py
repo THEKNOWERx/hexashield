@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from services.recon_service import ReconService
+from services.osint_service import OsintService
 from authentication.auth import get_current_user, check_role
 
 router = APIRouter(prefix="/recon", tags=["recon"], dependencies=[Depends(check_role(["admin", "security_analyst", "analyst"]))])
@@ -23,3 +24,8 @@ async def get_dns_info(domain: str, current_user: dict = Depends(get_current_use
 async def get_headers(target: str, current_user: dict = Depends(get_current_user)):
     """Fingerprint technology stack via HTTP headers."""
     return ReconService.fingerprint_headers(target)
+
+@router.get("/osint")
+async def gather_osint(target: str, category: str = "all", current_user: dict = Depends(get_current_user)):
+    """Aggregate open-source intelligence about a target across public indexes."""
+    return OsintService.run(target, category)

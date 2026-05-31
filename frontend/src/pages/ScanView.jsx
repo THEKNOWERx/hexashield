@@ -218,9 +218,9 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
       const startRes = await scanService.startScan(target, intensity);
       const scanId = startRes?.data?.id;
       
-      if (!scanId) throw new Error("Faulty Engine Initialization.");
+      if (!scanId) throw new Error("Failed to start scan.");
 
-      addLog(`[EXEC] PIPELINE ${scanId} REGISTERED. MONITORING TELEMETRY...`, 'text-cyber-neon');
+      addLog(`[INFO] Scan #${scanId} started — monitoring progress…`, 'text-cyber-blue');
 
       // 2. Begin Reactive Polling (Turbo Interval) - Defensive Implementation
       let completed = false;
@@ -254,18 +254,17 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
           const phase = results.phase || (scanData.status === 'completed' ? 'Complete' : 'Initializing');
           if (phase !== lastPhase) {
             lastPhase = phase;
-            const color = phase.includes('Complete') ? 'text-cyber-neon' : 'text-yellow-400';
-            addLog(`[ENGINE] PHASE SHIFT: ${phase.toUpperCase()}`, color);
+            const color = phase.includes('Complete') ? 'text-cyber-neon' : (phase.includes('Failed') ? 'text-cyber-alert' : 'text-yellow-400');
+            addLog(`[PHASE] ${phase}`, color);
           }
 
           // Dynamic Progress Smoothing
           let targetProgress = 10;
           const lowerPhase = phase.toLowerCase();
           if (lowerPhase.includes('complete')) targetProgress = 100;
-          else if (lowerPhase.includes('mapping') || lowerPhase.includes('nvd')) targetProgress = 90;
-          else if (lowerPhase.includes('aggregation') || lowerPhase.includes('interrogation')) targetProgress = 75;
-          else if (lowerPhase.includes('discovery') || lowerPhase.includes('recon')) targetProgress = 50;
-          else if (lowerPhase.includes('dns') || lowerPhase.includes('surface')) targetProgress = 25;
+          else if (lowerPhase.includes('vulnerability')) targetProgress = 80;
+          else if (lowerPhase.includes('port discovery')) targetProgress = 50;
+          else if (lowerPhase.includes('initializing')) targetProgress = 20;
           
           setScanProgress(prev => {
              if (prev < targetProgress) return Math.min(targetProgress, prev + 5); 
@@ -278,7 +277,7 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
             if (newPorts.length > 0) {
               newPorts.forEach(p => {
                 knownPorts.add(`${p.port}-${p.service}`);
-                addLog(`[PORT] ${p.port}/TCP DISCOVERED - ${(p.service || 'UNKNOWN').toUpperCase()}`, 'text-cyber-neon');
+                addLog(`[OPEN] ${p.port}/tcp — ${p.service || 'unknown'}`, 'text-cyber-neon');
               });
               setCtxLivePorts(results.ports);
             }
@@ -290,14 +289,14 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
             setScanResults(scanData);
             setCtxLivePorts(results.ports || []);
             
-            addLog(`[DONE] FULL AUDIT SPECTRUM COMPLETE.`, 'text-cyber-neon');
-            const ports_list = (results.ports || []).map(p => `${p.port}/TCP`).join(', ');
-            addLog(`[INFO] OPEN PORTS DISCOVERED: ${ports_list || 'NONE'}`, 'text-white font-black');
+            addLog(`[DONE] Scan complete.`, 'text-cyber-neon');
+            const ports_list = (results.ports || []).map(p => `${p.port}/tcp`).join(', ');
+            addLog(`[INFO] Open ports: ${ports_list || 'none'}`, 'text-white font-semibold');
             
             const vuln_count = scanData.findings_count || (results.findings?.length) || 0;
-            addLog(`[INTEL] ${vuln_count} CRITICAL VULNERABILITY FINDINGS MAPPED.`, 'text-cyber-blue');
+            addLog(`[VULN] ${vuln_count} finding(s) recorded.`, 'text-cyber-blue');
             
-            showNotification(`Intelligence Audit Complete.`, "success");
+            showNotification(`Scan complete — ${(results.ports || []).length} open port(s).`, "success");
           } else if (scanData.status === 'failed') {
             throw new Error(scanData.error || "Engine Aborted. Discovery logic failure.");
           }
@@ -310,8 +309,8 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
 
     } catch (err) {
       setScanProgress(0);
-      addLog(`[ERROR] ENGINE CRITICAL FAILURE: ${err.message}`, 'text-cyber-alert');
-      showNotification(err.message.includes('Connectivity') ? "Cyber-Sensor Connectivity Error." : "Engine Failure: " + err.message, "error");
+      addLog(`[ERROR] Scan failed: ${err.message}`, 'text-cyber-alert');
+      showNotification("Scan failed: " + err.message, "error");
     } finally {
       setIsScanning(false);
     }
@@ -345,9 +344,9 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                 <label className="text-sm font-medium text-gray-300">Scan profile</label>
                 <div className="grid grid-cols-1 gap-4">
                     {[
-                      { id: 'pulse', name: 'Quick Scan', desc: 'Fast recon, port mapping and risk scoring', icon: Shield, color: 'text-cyber-blue' },
-                      { id: 'deep', name: 'Full Audit', desc: 'Service fingerprinting and version detection', icon: Zap, color: 'text-cyber-neon' },
-                      { id: 'ports_only', name: 'Port Discovery', desc: 'Surface discovery and open-port mapping', icon: Terminal, color: 'text-cyber-neon' },
+                      { id: 'fast', name: 'Quick Scan', desc: 'Curated top ports with service banners', icon: Shield, color: 'text-cyber-blue' },
+                      { id: 'deep', name: 'Full Audit', desc: 'Full well-known range and version detection', icon: Zap, color: 'text-cyber-neon' },
+                      { id: 'ultra', name: 'Port Discovery', desc: 'Fast surface discovery of open ports', icon: Terminal, color: 'text-cyber-neon' },
                     ].map(profile => (
                       <button 
                         key={profile.id}
@@ -428,33 +427,41 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                     {isScanning && <div className="animate-pulse text-cyber-blue mt-2 font-black inline-block">_</div>}
                  </div>
                   
-                  {/* Performance Analytics HUD */}
-                  {scanResults && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-6 p-4 rounded-xl bg-cyber-blue/5 border border-cyber-blue/20 flex flex-wrap gap-6"
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Reputation Score</span>
-                        <span className="text-xl font-mono font-black text-cyber-blue">
-                          {scanResults.results_json ? (typeof scanResults.results_json === 'string' ? JSON.parse(scanResults.results_json).reputation_score : scanResults.results_json.reputation_score) || 'N/A' : 'N/A'}%
-                        </span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Audit Integrity Hash</span>
-                        <span className="text-[10px] font-mono text-cyber-neon/80 truncate max-w-[200px]">
-                          {scanResults.results_json ? (typeof scanResults.results_json === 'string' ? JSON.parse(scanResults.results_json).integrity_hash : scanResults.results_json.integrity_hash) || 'HEXA-SIG-UNVERIFIED' : 'HEXA-SIG-UNVERIFIED'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col ml-auto">
-                        <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Audit Status</span>
-                        <span className="text-[9px] font-black text-cyber-neon uppercase tracking-widest flex items-center gap-1">
-                          <ShieldCheck size={10} /> Certified Secure
-                        </span>
-                      </div>
-                    </motion.div>
-                  )}
+                  {/* Scan Summary */}
+                  {scanResults && (() => {
+                    let rj = {};
+                    try {
+                      const raw = scanResults.results_json;
+                      rj = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {};
+                    } catch { rj = {}; }
+                    const openCount = (rj.ports || ctxLivePorts || []).length;
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-6 p-4 rounded-xl bg-cyber-blue/5 border border-cyber-blue/20 flex flex-wrap gap-6"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-medium text-gray-500">Resolved IP</span>
+                          <span className="text-sm font-mono text-cyber-blue">{rj.resolved_ip || activeTarget || '—'}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-medium text-gray-500">Open ports</span>
+                          <span className="text-sm font-mono text-cyber-neon">{openCount}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-medium text-gray-500">Findings</span>
+                          <span className="text-sm font-mono text-white">{scanResults.findings_count ?? (rj.findings?.length ?? 0)}</span>
+                        </div>
+                        <div className="flex flex-col ml-auto">
+                          <span className="text-[10px] font-medium text-gray-500">Status</span>
+                          <span className="text-xs font-semibold text-cyber-neon flex items-center gap-1">
+                            <ShieldCheck size={12} /> Complete
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })()}
                </div>
 
               {/* Ports Table (Elite Branding) */}
@@ -472,25 +479,26 @@ const ScanView = ({ headerTitle, headerSubtitle }) => {
                        <tbody className="divide-y divide-white/5">
                            {(ctxLivePorts || []).length > 0 ? (
                             ctxLivePorts.map((p, i) => {
-                              const isHighValue = ['http', 'https', 'ftp', 'ssh'].some(s => p.service.toLowerCase().includes(s)) || [21, 22, 80, 443].includes(parseInt(p.port));
+                              const svc = (p.service || '').toLowerCase();
+                              const isHighValue = ['http', 'https', 'ftp', 'ssh', 'telnet', 'smb'].some(s => svc.includes(s)) || [21, 22, 23, 80, 443, 445, 3306, 3389].includes(parseInt(p.port));
+                              const riskLabel = isHighValue ? 'Review' : 'Open';
                               return (
                                 <tr key={`${p.port}-${i}`} className="group hover:bg-white/[0.02] transition-colors">
-                                  <td className={`py-5 pl-6 font-mono text-xs font-bold ${isHighValue ? 'text-red-500' : 'text-cyber-blue'}`}>
-                                    {p.port}/TCP
+                                  <td className={`py-5 pl-6 font-mono text-xs font-semibold ${isHighValue ? 'text-cyber-warning' : 'text-cyber-blue'}`}>
+                                    {p.port}/tcp
                                   </td>
-                                  <td className={`py-5 font-black text-sm tracking-widest ${isHighValue ? 'text-red-500' : 'text-white'}`}>
-                                    {p.service.toUpperCase()}
+                                  <td className={`py-5 font-medium text-sm ${isHighValue ? 'text-cyber-warning' : 'text-white'}`}>
+                                    {p.service || 'unknown'}
                                   </td>
                                   <td className="py-5 text-[11px] text-gray-500 font-mono">
-                                    {p.version || 'N/A'}
+                                    {[p.product, p.version].filter(Boolean).join(' ') || '—'}
                                   </td>
                                   <td className="py-5 pr-6 text-right">
-                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black border transition-all ${
-                                      p.risk === 'Critical' || isHighValue ? 'border-red-600 text-red-600 bg-red-900/10 shadow-[0_0_10px_rgba(255,0,0,0.2)]' : 
-                                      p.risk === 'High' ? 'border-cyber-warning text-cyber-warning bg-cyber-warning/5' : 
-                                      'border-cyber-blue/30 text-cyber-blue/60 bg-cyber-blue/5'
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-semibold border transition-all ${
+                                      isHighValue ? 'border-cyber-warning/40 text-cyber-warning bg-cyber-warning/5' : 
+                                      'border-cyber-neon/30 text-cyber-neon/80 bg-cyber-neon/5'
                                     }`}>
-                                      {isHighValue && p.risk !== 'Critical' ? 'Exploitable' : p.risk}
+                                      {riskLabel}
                                     </span>
                                   </td>
                                 </tr>

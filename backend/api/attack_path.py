@@ -10,12 +10,17 @@ router = APIRouter(prefix="/attack-path", tags=["AI Attack Surface"])
 @router.get("/latest")
 async def get_latest_attack_path(db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """Expert Endpoint: Performs analysis on the MOST RECENT audit."""
-    scan = db.query(Scan).order_by(Scan.id.desc()).first()
+    scan = (
+        db.query(Scan).filter(Scan.findings_count > 0).order_by(Scan.id.desc()).first()
+        or db.query(Scan).order_by(Scan.id.desc()).first()
+    )
     if not scan:
-        return {"graph": {"nodes": [], "links": []}, "predictive_analysis": {}}
+        return {"graph": {"nodes": [], "links": []}, "predictive_analysis": {}, "metrics": {}}
     
     # Run the Intelligence Engine
-    return attack_path_service.generate_graph(scan)
+    result = attack_path_service.generate_graph(scan)
+    result["scan_id"] = scan.id
+    return result
 
 @router.get("/{scan_id}")
 async def get_attack_path(scan_id: int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):

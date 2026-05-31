@@ -16,3 +16,7 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime artifacts
+backend/scan_id.tmp
+*.tmp

@@ -58,13 +58,17 @@ export const reconService = {
   getIpInfo: (target) => apiClient.get(`recon/ip/${target}`),
   getDnsInfo: (domain) => apiClient.get(`recon/dns/${domain}`),
   getHeaders: (target) => apiClient.get(`recon/headers/${target}`),
+  osint: (target, category = 'all') => apiClient.get(
+    `recon/osint?target=${encodeURIComponent(target)}&category=${category}`,
+    { timeout: 40000 }
+  ),
 };
 
 export const scanService = {
   startScan: (target, intensity) => apiClient.post(
-    `scan/start?target=${target}&intensity=${intensity}`,
+    `scan/start?target=${encodeURIComponent(target)}&intensity=${intensity}`,
     null,
-    { timeout: 180000 } // 3 minutes — Nmap scans can take up to 90s
+    { timeout: 180000 } // up to 3 minutes for deep scans
   ),
   getStatus: (id) => apiClient.get(`scan/status/${id}`),
   deleteScan: (id) => apiClient.delete(`scan/${id}`),
