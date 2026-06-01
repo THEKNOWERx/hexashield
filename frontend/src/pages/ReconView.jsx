@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { reconService } from '../services/apiClient';
 import { useSecurity } from '../context/SecurityContext';
-import { Search, Globe, Fingerprint, Play, Loader2, Target, Wifi, MapPin, Database, Shield, Zap, Activity, ShieldCheck, Server, AlertCircle, Info, Cpu, Users, Building2, FileText, KeyRound, LogIn, Mail, ExternalLink, Eye } from 'lucide-react';
+import { Search, Globe, Fingerprint, Play, Loader2, Target, Wifi, Database, Shield, Zap, Activity, ShieldCheck, Server, AlertCircle, Info, Cpu, Users, Building2, FileText, KeyRound, LogIn, Mail, ExternalLink, Eye } from 'lucide-react';
 import CyberCard from '../components/CyberCard';
 import GlobalHeader from '../components/GlobalHeader';
-import MapModal from '../components/MapModal';
 import { Bar, Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, Title, Tooltip as ChartTooltip, Legend, Filler } from 'chart.js';
 
@@ -17,7 +16,6 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
   const [target, setTarget] = useState(activeTarget || '');
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState(null);
-  const [isMapOpen, setIsMapOpen] = useState(false);
 
   // Open-source intelligence panel state
   const [osintCategory, setOsintCategory] = useState('all');
@@ -288,7 +286,7 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
           {/* DIGITAL PERIMETER SUMMARY HUD */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {[
-               { label: 'Firewall', value: reconResults.headers.waf_status || 'None', icon: Shield, color: 'text-cyber-neon' },
+               { label: 'Firewall', value: reconResults.headers?.waf_status || 'None', icon: Shield, color: 'text-cyber-neon' },
                { label: 'DNS Records', value: `${dnsRecords.length} records`, icon: Database, color: 'text-cyber-blue' },
                { label: 'Subdomains', value: `${subdomains.length} found`, icon: Target, color: 'text-white' },
                { label: 'SSL', value: sslInfo.expired ? 'Expired' : 'Valid', icon: ShieldCheck, color: sslInfo.expired ? 'text-red-500' : 'text-cyber-neon' },
@@ -318,56 +316,24 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
             <CyberCard title="Target Intelligence" icon={Globe}>
               <div className="space-y-3">
                 {[
+                  { label: 'Target Domain', value: geo.target, icon: Globe },
                   { label: 'Asset Hostname', value: geo.hostname, icon: Globe, highlight: true },
                   { label: 'Resolved IP', value: geo.ip, icon: Wifi },
                   { label: 'Operating System', value: geo.os_guess, icon: Cpu },
+                  { label: 'Organization', value: geo.org, icon: Building2 },
+                  { label: 'ISP Provider (ICM)', value: geo.isp, icon: Server },
                   { label: 'Network ASN', value: geo.asn, icon: Database },
-                ].map(({ label, value, icon: Icon, highlight }) => value && (
+                  { label: 'Country', value: geo.country, icon: Globe },
+                  { label: 'City', value: geo.city, icon: Target },
+                ].map(({ label, value, icon: Icon, highlight }) => value && value !== "N/A" && (
                   <div key={label} className={`flex justify-between items-center py-2 border-b border-white/5 last:border-0 ${highlight ? 'bg-cyber-blue/5 -mx-2 px-2 rounded-lg' : ''}`}>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 flex-shrink-0">
                       <Icon size={10} className={highlight ? 'text-cyber-neon' : ''} /> {label}
                     </span>
-                    <span className={`font-mono text-xs truncate max-w-[180px] ${highlight ? 'text-white font-black' : 'text-cyber-blue'}`}>{value}</span>
+                    <span className={`font-mono text-xs truncate max-w-[180px] ${highlight ? 'text-white font-black' : 'text-cyber-blue'}`} title={value}>{value}</span>
                   </div>
                 ))}
               </div>
-
-              {geo.city && (
-                <div className="mt-4 p-4 bg-cyber-deep-blue/20 border border-cyber-blue/20 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="text-cyber-neon" size={16} />
-                    <span className="text-[10px] font-black text-cyber-neon uppercase tracking-widest">Geolocation</span>
-                  </div>
-                  {[
-                    { label: 'Exact Address', value: geo.exact_address, icon: Target, isPrimary: true },
-                    { label: 'City', value: geo.city },
-                    { label: 'Country', value: geo.country },
-                    { label: 'Coords', value: `${geo.lat}, ${geo.lon}` },
-                    { label: 'ISP', value: geo.isp },
-                  ].filter(r => r.value).map(({ label, value, isPrimary }) => (
-                    <div key={label} className={`flex flex-col space-y-1 py-1 ${isPrimary ? 'pb-2 border-b border-white/5' : ''}`}>
-                      <span className={`text-[9px] font-bold uppercase tracking-widest ${isPrimary ? 'text-cyber-neon' : 'text-gray-500'}`}>{label}</span>
-                      <span className={`font-mono text-[10px] ${isPrimary ? 'text-white font-black leading-relaxed' : 'text-gray-300'}`}>{value}</span>
-                    </div>
-                  ))}
-                  <button 
-                    onClick={() => setIsMapOpen(true)}
-                    className="w-full mt-4 py-3 bg-cyber-blue/10 border border-cyber-blue/30 text-cyber-blue rounded-xl text-xs font-semibold"
-                  >
-                    View on map
-                  </button>
-                </div>
-              )}
-
-              <MapModal 
-                isOpen={isMapOpen} 
-                onClose={() => setIsMapOpen(false)} 
-                lat={geo.lat} 
-                lon={geo.lon} 
-                city={geo.city} 
-                country={geo.country}
-                title={geo.exact_address}
-              />
             </CyberCard>
 
             {/* Domain Infrastructure Mapping */}
@@ -387,14 +353,14 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                       <span className="text-[10px] text-white font-black truncate">{geo.hostname?.split('.')[0] || 'Unknown'}</span>
                    </div>
                 </div>
-                {whoisInfo.name_servers && (
+                {Array.isArray(whoisInfo.name_servers) && whoisInfo.name_servers.length > 0 && (
                    <div className="p-3 border border-cyber-blue/10 rounded-xl">
                       <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest block mb-2">Authoritative Nameservers</span>
                       <div className="space-y-1">
                          {whoisInfo.name_servers.slice(0, 3).map((ns, idx) => (
                            <div key={idx} className="text-[9px] font-mono text-cyber-blue flex items-center gap-2">
                               <div className="w-1 h-1 rounded-full bg-cyber-blue" />
-                              {ns.toLowerCase()}
+                              {(ns || '').toString().toLowerCase()}
                            </div>
                          ))}
                       </div>
@@ -405,7 +371,7 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
 
             {/* WHOIS Registry Info */}
             <CyberCard title="Registry Intelligence" icon={Fingerprint}>
-              {whoisInfo && !whoisInfo.error ? (
+              {whoisInfo && typeof whoisInfo === 'object' && !whoisInfo.error ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
                      <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Organization</span>
@@ -415,8 +381,8 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                     {[
                       { label: 'Registrar', value: whoisInfo.registrar },
                       { label: 'Status', value: whoisInfo.status },
-                      { label: 'Created', value: whoisInfo.creation_date?.split('T')[0] },
-                      { label: 'Expires', value: whoisInfo.expiration_date?.split('T')[0] },
+                      { label: 'Created', value: (whoisInfo.creation_date || '').toString().split('T')[0] },
+                      { label: 'Expires', value: (whoisInfo.expiration_date || '').toString().split('T')[0] },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex flex-col gap-1">
                         <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">{label}</span>
@@ -424,19 +390,19 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                       </div>
                     ))}
                   </div>
-                  {whoisInfo.name_servers && whoisInfo.name_servers.length > 0 && (
+                  {Array.isArray(whoisInfo.name_servers) && whoisInfo.name_servers.length > 0 && (
                     <div className="pt-4 border-t border-white/5">
                        <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest mb-2 block">Name Servers</span>
                        <div className="flex flex-wrap gap-2">
                           {whoisInfo.name_servers.slice(0, 3).map((ns, i) => (
-                            <span key={i} className="px-2 py-1 bg-cyber-blue/10 border border-cyber-blue/20 rounded text-[9px] font-mono text-cyber-blue">{ns.toLowerCase()}</span>
+                            <span key={i} className="px-2 py-1 bg-cyber-blue/10 border border-cyber-blue/20 rounded text-[9px] font-mono text-cyber-blue">{(ns || '').toString().toLowerCase()}</span>
                           ))}
                        </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <p className="text-gray-600 text-xs py-4 text-center">{whoisInfo.error || "WHOIS protection enabled."}</p>
+                <p className="text-gray-600 text-xs py-4 text-center">{whoisInfo?.error || "WHOIS protection enabled."}</p>
               )}
             </CyberCard>
           </div>
@@ -447,9 +413,9 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
               <div className="space-y-3">
                 {[
                   { label: 'Service Version', value: version, color: 'text-cyber-neon' },
-                  { label: 'Primary Platform', value: reconResults.headers.platform, color: 'text-white' },
-                  { label: 'Security Grade', value: reconResults.headers.security_grade, color: 'text-cyber-blue' },
-                  { label: 'Target URL', value: reconResults.headers.url, color: 'text-gray-400' },
+                  { label: 'Primary Platform', value: reconResults.headers?.platform, color: 'text-white' },
+                  { label: 'Security Grade', value: reconResults.headers?.security_grade, color: 'text-cyber-blue' },
+                  { label: 'Target URL', value: reconResults.headers?.url, color: 'text-gray-400' },
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5">
                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{item.label}</span>
@@ -464,7 +430,7 @@ const ReconView = ({ headerTitle, headerSubtitle }) => {
                 <div className="space-y-4">
                   <div className="flex flex-col">
                     <span className="text-[9px] font-bold text-gray-500 uppercase">Issuer</span>
-                    <span className="text-[11px] text-gray-300 font-mono break-all">{sslInfo.issuer.O || "Unknown"}</span>
+                    <span className="text-[11px] text-gray-300 font-mono break-all">{sslInfo.issuer?.O || "Unknown"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[9px] font-bold text-gray-500 uppercase">Expiry</span>

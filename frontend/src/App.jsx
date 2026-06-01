@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import ReconView from './pages/ReconView';
 import VulnAnalysisView from './pages/VulnAnalysisView';
-import ExploitationView from './pages/ExploitationView';
 import AttackPathView from './pages/AttackPathView';
 import AIAssistantView from './pages/AIAssistantView';
 import ReportGeneratorView from './pages/ReportGeneratorView';

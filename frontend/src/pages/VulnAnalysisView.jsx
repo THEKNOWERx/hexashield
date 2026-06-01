@@ -202,11 +202,7 @@ const Vulnerability = () => {
   }, [setVulnerabilities]);
 
   const handleExecuteExploit = (vuln) => {
-    setSelectedTarget({
-      target: vuln.target || '127.0.0.1',
-      name: vuln.name,
-      severity: vuln.severity
-    });
+    setSelectedTarget(vuln);
     setExploitModalOpen(true);
   };
 

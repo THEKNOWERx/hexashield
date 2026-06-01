@@ -1,4 +1,4 @@
-import { LayoutDashboard, Shield, Search, Network, AlertTriangle, FileText, Settings, LogOut, BookOpen, Crosshair } from 'lucide-react';
+import { LayoutDashboard, Shield, Search, Network, AlertTriangle, FileText, Settings, LogOut, BookOpen, Crosshair, Zap } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 

@@ -16,6 +16,7 @@ import GlobalHeader from '../components/GlobalHeader';
 
 import { vulnService, attackPathService, nexusService } from '../services/apiClient';
 import { useSecurity } from '../context/SecurityContext';
+import { useNavigate } from 'react-router-dom';
 
 const SEVERITY_STYLES = {
   CRITICAL: 'bg-cyber-alert/15 text-cyber-alert border-cyber-alert/30',
@@ -242,7 +243,131 @@ const Dashboard = ({ headerTitle = "Security Overview", headerSubtitle = "Risk p
           </div>
         </div>
       </div>
+
+      <FindingDetailModal
+        isOpen={selectedFinding !== null}
+        onClose={() => setSelectedFinding(null)}
+        finding={selectedFinding}
+      />
     </div>
+  );
+};
+
+const FindingDetailModal = ({ isOpen, onClose, finding }) => {
+  const navigate = useNavigate();
+  if (!finding) return null;
+
+  const severity = (finding.severity || 'Medium').toUpperCase();
+  const severityColors = {
+    CRITICAL: 'text-cyber-alert border-cyber-alert/30 bg-cyber-alert/5 shadow-[0_0_15px_rgba(255,0,60,0.1)]',
+    HIGH: 'text-cyber-warning border-cyber-warning/30 bg-cyber-warning/5',
+    MEDIUM: 'text-yellow-400 border-yellow-500/30 bg-yellow-500/5',
+    LOW: 'text-cyber-blue border-cyber-blue/30 bg-cyber-blue/5',
+  };
+
+  const cvssScore = parseFloat(finding.cvss) || 5.0;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-3xl bg-cyber-black border border-cyber-border rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] z-10"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-cyber-border bg-cyber-surface/50">
+              <div className="flex items-center gap-3">
+                <span className={`px-2.5 py-1 rounded-md border text-xs font-semibold ${severityColors[severity] || severityColors.MEDIUM}`}>
+                  {severity}
+                </span>
+                <span className="text-xs font-mono text-gray-500">
+                  {finding.cve_id && finding.cve_id !== 'N/A' ? finding.cve_id : `PORT: ${finding.port || '—'}`}
+                </span>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">{finding.name}</h3>
+                <div className="flex flex-wrap gap-4 text-xs font-mono text-gray-500">
+                  <span>TARGET: <strong className="text-cyber-blue">{finding.target || '—'}</strong></span>
+                  <span>CVSS SCORE: <strong className="text-white">{cvssScore.toFixed(1)}</strong></span>
+                </div>
+              </div>
+
+              <div className="h-px bg-white/5" />
+
+              {/* Description */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-cyber-blue uppercase tracking-wider">Description & Impact</h4>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  {finding.description || "No description provided for this vulnerability."}
+                </p>
+              </div>
+
+              {/* Vector and Remediation Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-red-950/15 border border-red-500/20 rounded-xl space-y-2">
+                  <h4 className="text-xs font-bold text-cyber-alert uppercase tracking-wider">Attack Vector</h4>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    {finding.vector || "Exploitation of the service port via custom inputs to execute arbitrary commands."}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-emerald-950/15 border border-emerald-500/20 rounded-xl space-y-2">
+                  <h4 className="text-xs font-bold text-cyber-neon uppercase tracking-wider">Remediation</h4>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    {finding.remediation || "Apply input filters, patch the software to the latest version, or restrict network access to this port."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Framework Intelligence */}
+              <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-3">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Framework Mapping</h4>
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-gray-500 block">OWASP Category</span>
+                    <span className="font-mono text-white">{finding.owasp || finding.owasp_category || 'A03:2021-Injection'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 block">MITRE ATT&CK</span>
+                    <span className="font-mono text-white">{finding.mitre || finding.mitre_id || 'T1190'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-cyber-border bg-cyber-surface/30 flex justify-end">
+              <button
+                onClick={onClose}
+                className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-xs font-medium text-white transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

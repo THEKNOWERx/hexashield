@@ -44,28 +44,20 @@ const IntelligenceDoughnut = ({ findings = [] }) => {
   const total = findings.length;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-cyber-warning" />
-          <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">Risk Distribution</h4>
-        </div>
-        <Activity size={16} className="text-cyber-warning opacity-50" />
-      </div>
-
-      <div className="relative flex-1 flex items-center justify-center p-4">
-        <div className="w-full h-full max-h-48">
+    <div className="flex flex-col h-full justify-between">
+      <div className="relative flex-1 flex items-center justify-center p-2">
+        <div className="w-full h-full max-h-32">
           <Doughnut data={data} options={options} />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-3xl font-black font-mono tracking-tighter">{total}</span>
+          <span className="text-2xl font-black font-mono tracking-tighter">{total}</span>
           <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Total</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mt-8 border-t border-white/5 pt-6">
+      <div className="grid grid-cols-2 gap-2 mt-2 border-t border-white/5 pt-3">
         {Object.entries(counts).map(([label, count]) => (
-          <div key={label} className="flex items-center gap-3">
+          <div key={label} className="flex items-center gap-2">
              <div className={`w-1.5 h-1.5 rounded-full ${
                label === 'Critical' ? 'bg-cyber-alert' : 
                label === 'High' ? 'bg-cyber-warning' : 

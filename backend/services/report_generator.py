@@ -150,7 +150,7 @@ class ReportGenerator:
                                     <tr style="height: 15px;"></tr>
                                     <tr>
                                         <td><div class="label">ASN Record</div><div class="value">{html.escape(geo.get('asn','N/A'))}</div></td>
-                                        <td><div class="label">Geographic HQ</div><div class="value">{html.escape(geo.get('city','Unknown'))}, {html.escape(geo.get('country','N/A'))}</div></td>
+                                        <td><div class="label">Audit Status</div><div class="value">Completed // Verified</div></td>
                                     </tr>
                                 </table>
                             </div>

@@ -2,162 +2,398 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>HexaShield Security Audit Report</title>
     <style>
         @page {
             size: A4;
-            margin: 0;
+            margin: 20mm 15mm 20mm 15mm;
         }
+        
         body {
             font-family: 'Helvetica', sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: #050505;
+            color: #e0e0e0;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .cover-page {
+            page-break-after: always;
+            text-align: left;
+            padding-top: 50px;
+        }
+
+        .logo-text {
+            font-size: 32pt;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+
+        .logo-accent {
+            color: #0047FF;
+        }
+
+        .cover-subtitle {
+            font-size: 12pt;
+            color: #888888;
+            letter-spacing: 4px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .cover-divider {
+            height: 3px;
+            background-color: #0047FF;
+            margin: 40px 0;
+            width: 100%;
+        }
+
+        .meta-table {
+            width: 100%;
+            margin-top: 150px;
+            border-collapse: collapse;
+        }
+
+        .meta-table td {
+            padding: 8px 0;
+            border-bottom: 1px solid #141416;
+            font-size: 10pt;
+        }
+
+        .meta-label {
+            color: #666666;
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .meta-value {
             color: #ffffff;
         }
-        .header-cover {
-            background-color: #0047FF;
-            height: 300px;
-            padding: 80px;
-            color: white;
-            position: relative;
-        }
-        .header-cover h1 {
-            font-size: 48px;
-            margin: 0;
-            letter-spacing: -2px;
-            font-style: italic;
-            text-transform: uppercase;
-        }
-        .header-cover p {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-top: 20px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-        }
-        .content {
-            padding: 60px 80px;
-        }
+
         .section-title {
-            font-size: 24px;
-            border-bottom: 2px solid #0047FF;
-            padding-bottom: 15px;
-            margin-bottom: 40px;
+            font-size: 16pt;
+            font-weight: bold;
             color: #0047FF;
+            border-bottom: 1px solid #141416;
+            padding-bottom: 8px;
+            margin-top: 30px;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
-        .severity-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 10px;
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .summary-table th {
+            background-color: #0a0a0b;
+            color: #888888;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #141416;
         }
-        .crit { background-color: #ff003c; color: white; }
-        .high { background-color: #ffb800; color: black; }
-        .med { background-color: #0070ff; color: white; }
+
+        .summary-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #141416;
+            font-size: 9pt;
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .crit { background-color: #ff003c; color: #ffffff; }
+        .high { background-color: #ffb800; color: #000000; }
+        .med { background-color: #0070ff; color: #ffffff; }
+        .low { background-color: #39ff14; color: #000000; }
 
         .finding-card {
             background-color: #0a0a0b;
             border: 1px solid #141416;
-            margin-bottom: 30px;
-            padding: 30px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
-        .finding-id { font-family: 'Courier', monospace; font-size: 10px; color: #666; margin-bottom: 10px; }
-        .finding-title { font-size: 18px; margin-bottom: 15px; }
-        
-        .ai-metrics-grid {
-            display: table;
+
+        .finding-header {
             width: 100%;
-            margin-top: 40px;
+            border-collapse: collapse;
+            margin-bottom: 10px;
         }
+
+        .finding-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .finding-cve {
+            font-family: monospace;
+            font-size: 9pt;
+            color: #666666;
+            text-align: right;
+        }
+
+        .ai-metrics-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
         .ai-metric-box {
-            display: table-cell;
             width: 50%;
             padding: 20px;
             border: 1px solid #141416;
             background-color: #0a0a0b;
+            text-align: center;
         }
-        .metric-val { font-size: 32px; color: #39FF14; font-weight: bold; margin-bottom: 5px; }
-        .metric-lbl { font-size: 10px; color: #666; text-transform: uppercase; }
 
-        .footer {
-            position: fixed;
-            bottom: 40px;
-            left: 80px;
-            right: 80px;
-            font-size: 9px;
-            color: #444;
-            border-top: 1px solid #141416;
-            padding-top: 20px;
+        .metric-val {
+            font-size: 24pt;
+            color: #39FF14;
+            font-weight: bold;
+        }
+
+        .metric-lbl {
+            font-size: 8pt;
+            color: #666666;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .charts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        .chart-cell {
+            width: 50%;
+            padding: 10px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .chart-img {
+            width: 100%;
+            border: 1px solid #141416;
+            background-color: #ffffff;
+            padding: 8px;
+        }
+
+        .chart-title {
+            font-size: 9pt;
+            color: #888888;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="header-cover">
-        <h1>HEXASHIELD<br/>AUDIT REPORT</h1>
-        <p>INTELLIGENCE BRIEFING // SEC-ARCH-PROTO</p>
-        <div style="position: absolute; bottom: 80px; right: 80px; text-align: right;">
-            <span style="font-size: 10px; opacity: 0.5;">HASH: {{ audit_hash }}</span><br/>
-            <span style="font-size: 12px;">DATED: {{ date }}</span>
+
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <div style="margin-top: 100px;">
+            <div class="logo-text">HEXA<span class="logo-accent">SHIELD</span></div>
+            <div class="cover-subtitle">Security Assessment & Neural Triage Report</div>
         </div>
+        <div class="cover-divider"></div>
+        
+        <table class="meta-table">
+            <tr>
+                <td class="meta-label">TARGET AUDIT</td>
+                <td class="meta-value">{{ target }}</td>
+            </tr>
+            <tr>
+                <td class="meta-label">REPORT ID</td>
+                <td class="meta-value">{{ scan_id }}</td>
+            </tr>
+            <tr>
+                <td class="meta-label">GENERATION DATE</td>
+                <td class="meta-value">{{ date }}</td>
+            </tr>
+            <tr>
+                <td class="meta-label">INTEGRITY HASH</td>
+                <td class="meta-value">{{ audit_hash }}</td>
+            </tr>
+            <tr>
+                <td class="meta-label">TOTAL VULNERABILITIES</td>
+                <td class="meta-value">{{ total_vulns }} Exposures Identified</td>
+            </tr>
+        </table>
     </div>
 
-    <div class="content">
-        <div class="section-title">I. Executive Risk Matrix</div>
-        <div style="margin-bottom: 60px;">
-            <p style="font-size: 14px; line-height: 1.6; color: #888;">
-                The following assessment provides a high-fidelity overview of the security posture for target <strong>{{ target }}</strong>. 
-                Utilizing neural risk scoring and synchronized exploit intelligence, our engine has identified 
-                <strong>{{ findings|length }}</strong> unique exposure vectors.
-            </p>
+    <!-- Section I: Executive Summary -->
+    <div class="section-title">I. Executive Risk Matrix</div>
+    <p style="font-size: 10pt; color: #a0a0a0; margin-bottom: 20px;">
+        This document details the cybersecurity posture of target <strong>{{ target }}</strong>. 
+        Using socket-level fingerprinting, automated port interrogation, and Random Forest risk scoring, our neural engine has analyzed the threat surface.
+    </p>
+
+    <!-- Infrastructure Overlays / Fingerprints -->
+    <h3 style="font-size: 11pt; color: #0047FF; margin-top: 30px; border-bottom: 1px solid #141416; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">
+        Infrastructure Service Fingerprints
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px;">
+        <tr>
+            <td style="padding: 8px 0; color: #666666; font-size: 9pt; width: 30%; font-weight: bold; border-bottom: 1px solid #141416;">Detected Version:</td>
+            <td style="padding: 8px 0; color: #39ff14; font-size: 9pt; font-family: monospace; border-bottom: 1px solid #141416;">{{ recon.headers.version if recon.headers and recon.headers.version else 'Unknown' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: #666666; font-size: 9pt; font-weight: bold; border-bottom: 1px solid #141416;">Server Type:</td>
+            <td style="padding: 8px 0; color: #ffffff; font-size: 9pt; font-family: monospace; border-bottom: 1px solid #141416;">{{ recon.headers.headers.Server if recon.headers and recon.headers.headers and recon.headers.headers.Server else 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; color: #666666; font-size: 9pt; font-weight: bold; border-bottom: 1px solid #141416;">Powered By:</td>
+            <td style="padding: 8px 0; color: #ffffff; font-size: 9pt; font-family: monospace; border-bottom: 1px solid #141416;">{{ recon.headers.headers['X-Powered-By'] if recon.headers and recon.headers.headers and recon.headers.headers['X-Powered-By'] else 'N/A' }}</td>
+        </tr>
+    </table>
+
+    <div style="page-break-before: always;"></div>
+
+    <!-- Section II: Infrastructure Service Discovery -->
+    <div class="section-title">II. Infrastructure Service Discovery</div>
+    <p style="font-size: 10pt; color: #a0a0a0; margin-bottom: 20px;">
+        Network Service Mapping & Asset Fingerprinting records for active open socket communication ports.
+    </p>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Port / Protocol</th>
+                <th style="width: 25%;">Service</th>
+                <th style="width: 35%;">Platform / Version</th>
+                <th style="width: 15%; text-align: right;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in ports %}
+            <tr>
+                <td style="font-family: monospace; font-weight: bold; color: #0070ff; font-size: 9pt;">{{ p.port }}/{{ (p.protocol|default('tcp'))|upper }}</td>
+                <td style="font-weight: bold; color: #ffffff; font-size: 9pt;">{{ (p.service|default('—'))|upper }}</td>
+                <td style="font-family: monospace; color: #888888; font-size: 8.5pt;">{{ p.version|default(p.product|default('Standard Service')) }}</td>
+                <td style="text-align: right;">
+                    <span style="color: #39ff14; font-weight: bold; font-size: 8.5pt; text-transform: uppercase;">Open</span>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not ports %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #666; padding: 20px;">No active ports discovered in this scan.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <div style="page-break-before: always;"></div>
+
+    <!-- Section III: Vulnerability Index -->
+    <div class="section-title">III. Vulnerability Index</div>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th style="width: 45%;">Exposure Vector</th>
+                <th style="width: 20%; text-align: center;">CVSS Score</th>
+                <th style="width: 20%; text-align: center;">Severity</th>
+                <th style="width: 15%; text-align: center;">Exploit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in findings %}
+            <tr>
+                <td><strong>{{ f.name }}</strong><br/><span style="font-size: 8pt; color: #666;">{{ f.cve_id if f.cve_id else 'N/A' }}</span></td>
+                <td style="text-align: center; font-weight: bold; color: #ffffff;">{{ f.cvss }}</td>
+                <td style="text-align: center;">
+                    <span class="severity-badge {{ 'crit' if f.severity|lower == 'critical' else 'high' if f.severity|lower == 'high' else 'med' if f.severity|lower == 'medium' else 'low' }}">
+                        {{ f.severity }}
+                    </span>
+                </td>
+                <td style="text-align: center; color: {{ '#ff003c' if f.exploit_available == 'Yes' else '#666' }}; font-weight: bold;">
+                    {{ f.exploit_available }}
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not findings %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #666;">No vulnerability indicators discovered on target.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <div style="page-break-before: always;"></div>
+
+    <!-- Section IV: Detailed Findings -->
+    <div class="section-title">IV. Tactical Findings Details</div>
+    {% for f in findings %}
+    <div class="finding-card">
+        <table class="finding-header">
+            <tr>
+                <td class="finding-title">{{ f.name }}</td>
+                <td class="finding-cve">{{ f.cve_id if f.cve_id else 'HE-ID-' + loop.index|string }}</td>
+            </tr>
+        </table>
+        <p style="font-size: 9.5pt; color: #b0b0b0; margin: 10px 0;">{{ f.description }}</p>
+        <div style="margin-top: 15px; font-size: 9pt; color: #0047FF; font-weight: bold; border-top: 1px solid #141416; padding-top: 10px;">
+            REMEDIATION ACTION: <span style="color: #ffffff; font-weight: normal;">{{ f.remediation }}</span>
         </div>
+    </div>
+    {% endfor %}
 
-        <div class="section-title">II. Tactical Findings</div>
-        {% for f in findings %}
-        <div class="finding-card">
-            <div class="finding-id">{{ f.cve_id if f.cve_id else 'HE-ID-' + loop.index|string }}</div>
-            <div class="finding-title">
-                {{ f.name }} 
-                <span class="severity-badge {{ 'crit' if f.severity|lower == 'critical' else 'high' if f.severity|lower == 'high' else 'med' }}">
-                    {{ f.severity }}
-                </span>
-            </div>
-            <p style="font-size: 12px; line-height: 1.5; color: #aaa;">{{ f.description }}</p>
-            <div style="margin-top: 20px; font-size: 10px; color: #0047FF;">
-                REMEDIATION: {{ f.remediation }}
-            </div>
-        </div>
-        {% endfor %}
+    <div style="page-break-before: always;"></div>
 
-        <div style="page-break-before: always;"></div>
+    <!-- Section V: Neural Validation -->
+    <div class="section-title">V. Neural Accuracy Validation</div>
+    <p style="font-size: 10pt; color: #a0a0a0; margin-bottom: 25px;">
+        Model validation metrics using a Random Forest classifier with stratified cross-validation on a 2500-sample dataset.
+    </p>
 
-        <div class="section-title">III. Neural Accuracy Validation</div>
-        <p style="font-size: 12px; color: #888; margin-bottom: 30px;">
-            Final model evaluation using Random Forest architecture with stratified cross-validation.
-        </p>
-        <div class="ai-metrics-grid">
-            <div class="ai-metric-box">
+    <table class="ai-metrics-grid">
+        <tr>
+            <td class="ai-metric-box" style="border-right: none;">
                 <div class="metric-val">{{ ai_stats.ai_accuracy }}%</div>
-                <div class="metric-lbl">Model Precision Baseline</div>
-            </div>
-            <div class="ai-metric-box" style="border-left: none;">
+                <div class="metric-lbl">Model Accuracy (Recall Baseline)</div>
+            </td>
+            <td class="ai-metric-box">
                 <div class="metric-val">97.2%</div>
                 <div class="metric-lbl">Inference Reliability</div>
-            </div>
-        </div>
+            </td>
+        </tr>
+    </table>
 
-        <div style="margin-top: 60px; text-align: center;">
-            <div style="font-size: 10px; color: #444; margin-bottom: 20px;">DIAGNOSTIC CURVE ANALYTICS</div>
+    {% if training_curve or confusion_matrix %}
+    <!-- Side by side diagnostic images using table layout (perfect for xhtml2pdf) -->
+    <table class="charts-table">
+        <tr>
             {% if training_curve %}
-            <img src="{{ training_curve }}" style="width: 100%; border: 1px solid #141416; padding: 20px; background-color: white;" />
+            <td class="chart-cell">
+                <div class="chart-title">Model Loss/Accuracy Curves</div>
+                <img src="{{ training_curve }}" class="chart-img" />
+            </td>
             {% endif %}
-        </div>
-    </div>
+            {% if confusion_matrix %}
+            <td class="chart-cell">
+                <div class="chart-title">Confusion Matrix (2500 Samples)</div>
+                <img src="{{ confusion_matrix }}" class="chart-img" />
+            </td>
+            {% endif %}
+        </tr>
+    </table>
+    {% endif %}
 
-    <div class="footer">
-        CONFIDENTIAL DOCUMENT // HEXASHIELD NEURAL SOC // PAGE 1/2
-    </div>
 </body>
 </html>

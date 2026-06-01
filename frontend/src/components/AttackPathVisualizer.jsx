@@ -70,10 +70,21 @@ const AttackPathVisualizer = ({ scanId }) => {
     // Node circles with neon glow
     node.append("circle")
       .attr("r", d => d.type === 'Entry' || d.type === 'Host' ? 12 : 8)
-      .attr("fill", d => d.type === 'Entry' ? '#0047ff' : (d.type === 'Impact' ? '#ff003c' : (d.type === 'Vulnerability' ? '#f97316' : '#39ff14')))
+      .attr("fill", d => {
+        if (d.type === 'Entry') return '#0047ff';
+        if (d.type === 'Host') return '#39ff14';
+        if (d.type === 'Service') return '#06b6d4';
+        if (d.type === 'Vulnerability') return '#f97316';
+        if (d.type === 'Impact') return '#ff003c';
+        if (d.type === 'Objective') return '#b91c1c';
+        return '#64748b';
+      })
       .attr("stroke", "#000")
       .attr("stroke-width", 1.5)
-      .style("filter", d => `drop-shadow(0 0 5px ${d.color || '#39ff14'})`);
+      .style("filter", d => {
+        const color = d.type === 'Entry' ? '#0047ff' : (d.type === 'Host' ? '#39ff14' : (d.type === 'Service' ? '#06b6d4' : (d.type === 'Vulnerability' ? '#f97316' : (d.type === 'Impact' ? '#ff003c' : (d.type === 'Objective' ? '#b91c1c' : '#64748b')))));
+        return `drop-shadow(0 0 5px ${color})`;
+      });
 
     // Node labels
     node.append("text")
@@ -141,91 +152,107 @@ const AttackPathVisualizer = ({ scanId }) => {
          </div>
       </div>
 
-      {/* NODE INTELLIGENCE PANEL */}
-      {selectedNode && (
-        <motion.div 
-          initial={{ x: 300 }}
-          animate={{ x: 0 }}
-          className="absolute top-0 right-0 h-full w-80 bg-[#0a0a0b] border-l border-white/10 p-8 shadow-2xl overflow-y-auto"
-        >
-           <button onClick={() => setSelectedNode(null)} className="mb-8 text-gray-500 hover:text-white transition-colors">
-              <ChevronRight size={20} />
-           </button>
+       {/* NODE INTELLIGENCE PANEL */}
+       {selectedNode && (
+         <motion.div 
+           initial={{ x: 300 }}
+           animate={{ x: 0 }}
+           className="absolute top-0 right-0 h-full w-80 bg-[#0a0a0b] border-l border-white/10 p-8 shadow-2xl overflow-y-auto"
+         >
+            <button onClick={() => setSelectedNode(null)} className="mb-8 text-gray-500 hover:text-white transition-colors">
+               <ChevronRight size={20} />
+            </button>
 
-           <div className="flex items-center gap-4 mb-6">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedNode.color || '#39ff14' }} />
-              <h4 className="text-sm font-semibold text-white">{selectedNode.label}</h4>
-           </div>
+            <div className="flex items-center gap-4 mb-6">
+               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedNode.type === 'Entry' ? '#0047ff' : (selectedNode.type === 'Host' ? '#39ff14' : (selectedNode.type === 'Service' ? '#06b6d4' : (selectedNode.type === 'Vulnerability' ? '#f97316' : (selectedNode.type === 'Impact' ? '#ff003c' : (selectedNode.type === 'Objective' ? '#b91c1c' : '#64748b'))))) }} />
+               <h4 className="text-sm font-semibold text-white">{selectedNode.label}</h4>
+            </div>
 
-           <div className="space-y-6">
-              <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
-                 <span className="block text-xs font-medium text-gray-500 mb-2">Node Classification</span>
-                 <span className="text-xs font-semibold text-cyber-blue">{selectedNode.type}</span>
+            <div className="space-y-6">
+               <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
+                  <span className="block text-xs font-medium text-gray-500 mb-2">Node Classification</span>
+                  <span className="text-xs font-semibold text-cyber-blue">{selectedNode.type}</span>
+               </div>
+
+               {selectedNode.cvss && (
+                 <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
+                    <div className="flex justify-between items-center mb-2">
+                       <span className="text-xs font-medium text-gray-500">Risk Projection</span>
+                       <span className="text-xs font-semibold text-cyber-alert">{selectedNode.risk}</span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                       <div className="h-full bg-cyber-alert" style={{ width: `${selectedNode.cvss * 10}%` }} />
+                    </div>
+                 </div>
+               )}
+
+               {selectedNode.mitre && (
+                 <div className="p-4 bg-cyber-blue/10 border border-cyber-blue/30 rounded-xl">
+                    <span className="block text-xs font-medium text-cyber-blue mb-1">MITRE ATT&CK</span>
+                    <span className="text-xs font-semibold text-white">{selectedNode.mitre}</span>
+                 </div>
+               )}
+
+               {selectedNode.tool && (
+                 <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
+                    <span className="block text-xs font-medium text-gray-500 mb-1">Tool Employed</span>
+                    <span className="text-xs font-semibold text-cyan-400">{selectedNode.tool}</span>
+                 </div>
+               )}
+            </div>
+
+            {selectedNode.command && (
+              <div className="mt-6 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">Execution Command</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(selectedNode.command)}
+                    className="text-[9px] font-mono text-cyber-blue hover:text-white cursor-pointer"
+                  >
+                    [COPY]
+                  </button>
+                </div>
+                <div className="font-mono text-[9px] bg-black/60 p-3 rounded-lg border border-white/5 text-gray-300 break-all select-all font-bold">
+                  {selectedNode.command}
+                </div>
               </div>
+            )}
 
-              {selectedNode.cvss && (
-                <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
-                   <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-medium text-gray-500">Risk Projection</span>
-                      <span className="text-xs font-semibold text-cyber-alert">{selectedNode.risk}</span>
-                   </div>
-                   <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-cyber-alert" style={{ width: `${selectedNode.cvss * 10}%` }} />
-                   </div>
+            {selectedNode.terminal_output && (
+              <div className="mt-6 space-y-1">
+                <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest">DIAGNOSTIC FEED</span>
+                <div className="font-mono text-[9px] text-emerald-500/80 bg-black/60 p-3 rounded-lg border border-emerald-500/10 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto font-bold">
+                  <span className="text-white/40">HEXASHIELD_LOG$</span> output_stream:<br/>
+                  <span className="text-emerald-400 font-medium">{selectedNode.terminal_output}</span>
                 </div>
-              )}
+              </div>
+            )}
+         </motion.div>
+       )}
 
-              {selectedNode.mitre && (
-                <div className="p-4 bg-cyber-blue/10 border border-cyber-blue/30 rounded-xl">
-                   <span className="block text-xs font-medium text-cyber-blue mb-1">MITRE ATT&CK</span>
-                   <span className="text-xs font-semibold text-white">{selectedNode.mitre}</span>
-                </div>
-              )}
-
-              {selectedNode.source && (
-                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                   <span className="block text-xs font-medium text-orange-500 mb-1">Exploit-DB Record</span>
-                   <span className="text-[10px] font-semibold text-white font-mono">{selectedNode.source}</span>
-                </div>
-              )}
-           </div>
-
-           {/* TASK 6: SAFE EXPLOIT PREVIEW */}
-           {selectedNode.type === 'Exploit' && (
-             <div className="mt-12 pt-8 border-t border-white/5">
-                <div className="flex items-center gap-3 mb-6">
-                   <Zap size={16} className="text-cyber-neon" />
-                   <span className="text-sm font-semibold text-cyber-neon">Preview</span>
-                </div>
-                <div className="bg-black/60 rounded-xl p-4 font-mono text-[10px] text-cyber-neon border border-cyber-neon/20 leading-relaxed">
-                   # PREVIEW ONLY - NON-EXECUTABLE<br/>
-                   msfconsole -q<br/>
-                   use {selectedNode.source}
-                </div>
-             </div>
-           )}
-        </motion.div>
-      )}
-
-      {/* LEGEND */}
-      <div className="absolute bottom-6 left-6 flex items-center gap-6 px-6 py-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full">
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#0047ff]" />
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Entry</span>
-         </div>
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#39ff14]" />
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Host</span>
-         </div>
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#f97316]" />
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Vuln</span>
-         </div>
-         <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#ff003c]" />
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Impact</span>
-         </div>
-      </div>
+       {/* LEGEND */}
+       <div className="absolute bottom-6 left-6 flex items-center gap-6 px-6 py-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full">
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-[#0047ff]" />
+             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Entry</span>
+          </div>
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-[#06b6d4]" />
+             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Port</span>
+          </div>
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-[#f97316]" />
+             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Vuln</span>
+          </div>
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-[#ff003c]" />
+             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Shell / Esc</span>
+          </div>
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 rounded-full bg-[#b91c1c]" />
+             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Objective</span>
+          </div>
+       </div>
     </div>
   );
 };
