@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 });
 
 // مثال API
-app.post("/api/login", (req, res) => {
+app.post("/login", (req, res) => {
   res.json({ message: "Login success ✅" });
 });
 
