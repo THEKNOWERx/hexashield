@@ -528,3 +528,4 @@ Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 76
 Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
 Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
 2026-05-31 10:50:20,974 - NexusOrchestrator - INFO - Workflow Success for google.com. 4 ports, 7 findings.
+2026-06-01 19:20:42,648 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
