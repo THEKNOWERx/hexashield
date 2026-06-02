@@ -3,31 +3,45 @@ const cors = require("cors");
 
 const app = express();
 
-// 🔥 CORS CONFIG (الأهم)
+// ✅ CORS (مهم جداً)
 app.use(cors({
-  origin: [
-    "https://hexashield-three.vercel.app", // رابط موقعك على Vercel
-    "http://localhost:5174" // للتطوير المحلي (اختياري)
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: "https://hexashield-three.vercel.app", // غيره لرابط موقعك
+  methods: ["GET", "POST"],
   credentials: true
 }));
 
-// Middleware
+// ✅ parsing JSON
 app.use(express.json());
 
-// Test route
+// ✅ test route
 app.get("/", (req, res) => {
   res.send("Backend is working 🚀");
 });
 
-// مثال API
+// ✅ API test
+app.get("/api", (req, res) => {
+  res.send("API is working 🚀");
+});
+
+// ✅ LOGIN API (الأهم)
 app.post("/api/login", (req, res) => {
-  res.json({ message: "Login success ✅" });
+  const { username, password } = req.body;
+
+  if (username === "admin" && password === "admin123") {
+    return res.json({
+      success: true,
+      message: "Login success ✅"
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: "Invalid credentials ❌"
+  });
 });
 
 // تشغيل السيرفر
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
