@@ -27,10 +27,10 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
-import { reportsService } from '../../../services/apiClient';
+import { reportsService } from '../../../../../services/apiClient';
 import { motion } from 'framer-motion';
-import AttackPathVisualizer from '../../../components/AttackPathVisualizer';
-import RiskScoreGauge from '../../../components/RiskScoreGauge';
+import AttackPathVisualizer from '../../../../../components/AttackPathVisualizer';
+import RiskScoreGauge from '../../../../../components/RiskScoreGauge';
 
 const ReportSection = ({ title, icon: Icon, children, sectionNumber, subtitle }) => (
   <section className="mb-12 print:mb-8 print:break-inside-avoid scroll-mt-24">

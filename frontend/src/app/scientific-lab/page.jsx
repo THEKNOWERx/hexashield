@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlaskConical, Binary, Cpu, BookOpen, Target, Zap, Activity, Info, ChevronRight, ExternalLink, GraduationCap, Microscope, Rocket, Loader2 } from 'lucide-react';
-import { aiService } from '../../services/apiClient';
-import CyberCard from '../../components/CyberCard';
-import GlobalHeader from '../../components/GlobalHeader';
+import { aiService } from '../../../services/apiClient';
+import CyberCard from '../../../components/CyberCard';
+import GlobalHeader from '../../../components/GlobalHeader';
 
 const MetricGauge = ({ label, value, color }) => (
   <div className="flex flex-col items-center gap-3">

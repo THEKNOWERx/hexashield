@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { BookOpen, Shield, ShieldCheck, Target, Activity, Code, Scale } from 'lucide-react';
-import GlobalHeader from '../../components/GlobalHeader';
+import GlobalHeader from '../../../components/GlobalHeader';
 
 const FrameworkCard = ({ title, desc, icon: Icon, points }) => (
   <div className="cyber-panel">

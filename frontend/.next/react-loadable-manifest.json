@@ -1,14 +1,25 @@
 {
-  "..\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
-    "id": "..\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 5139,
     "files": [
-      "static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js"
+      "static/chunks/139.e8e07991ffedd534.js"
     ]
   },
-  "components\\NeuralAttackGraph.jsx -> react-force-graph-2d": {
-    "id": "components\\NeuralAttackGraph.jsx -> react-force-graph-2d",
+  "..\\node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 1646,
     "files": [
-      "static/chunks/_app-pages-browser_node_modules_react-force-graph-2d_dist_react-force-graph-2d_mjs.js"
+      "static/chunks/646.a702bf538bb261ec.js"
+    ]
+  },
+  "app\\login\\page.jsx -> ../../services/apiClient": {
+    "id": 6536,
+    "files": []
+  },
+  "components\\NeuralAttackGraph.jsx -> react-force-graph-2d": {
+    "id": 1650,
+    "files": [
+      "static/chunks/305-9faa005d13020be6.js",
+      "static/chunks/650.70f51f3269168015.js"
     ]
   }
 }

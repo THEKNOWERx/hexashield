@@ -8,15 +8,15 @@ import {
   Target, Globe, Server, TrendingUp
 } from 'lucide-react';
 
-import StatCard from '../../components/StatCard';
-import NeuralAttackGraph from '../../components/NeuralAttackGraph';
-import VulnTrendChart from '../../components/VulnTrendChart';
-import ServiceRiskChart from '../../components/ServiceRiskChart';
-import IntelligenceDoughnut from '../../components/IntelligenceDoughnut';
-import GlobalHeader from '../../components/GlobalHeader';
+import StatCard from '../../../components/StatCard';
+import NeuralAttackGraph from '../../../components/NeuralAttackGraph';
+import VulnTrendChart from '../../../components/VulnTrendChart';
+import ServiceRiskChart from '../../../components/ServiceRiskChart';
+import IntelligenceDoughnut from '../../../components/IntelligenceDoughnut';
+import GlobalHeader from '../../../components/GlobalHeader';
 
-import { vulnService, attackPathService, nexusService } from '../../services/apiClient';
-import { useSecurity } from '../../context/SecurityContext';
+import { vulnService, attackPathService, nexusService } from '../../../services/apiClient';
+import { useSecurity } from '../../../context/SecurityContext';
 
 import { useRouter } from 'next/navigation';
 

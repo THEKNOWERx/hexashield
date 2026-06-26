@@ -4,10 +4,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Search, Shield, Zap, Activity, Loader2, Lock, Unlock, AlertTriangle, ExternalLink, RefreshCcw, History, Terminal } from 'lucide-react';
-import { scanService, reconService } from '../../services/apiClient';
-import { useNotification } from '../../components/NotificationSystem';
-import CyberCard from '../../components/CyberCard';
-import GlobalHeader from '../../components/GlobalHeader';
+import { scanService, reconService } from '../../../services/apiClient';
+import { useNotification } from '../../../components/NotificationSystem';
+import CyberCard from '../../../components/CyberCard';
+import GlobalHeader from '../../../components/GlobalHeader';
 
 const URLScannerView = ({ headerTitle, headerSubtitle }) => {
   const showNotification = useNotification();

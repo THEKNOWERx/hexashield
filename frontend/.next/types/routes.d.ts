@@ -3,19 +3,21 @@
 
 type AppRoutes = never
 type PageRoutes = never
-type LayoutRoutes = never
-type RedirectRoutes = never
+type LayoutRoutes = "/"
+type RedirectRoutes = "/"
 type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
 
 
 interface ParamMap {
+  "/": {}
 }
 
 
 export type ParamsOf<Route extends Routes> = ParamMap[Route]
 
 interface LayoutSlotMap {
+  "/": never
 }
 
 

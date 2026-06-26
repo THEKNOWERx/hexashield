@@ -1,0 +1,23 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
+  "/admin/page": "/admin",
+  "/nexus/tactical/page": "/nexus/tactical",
+  "/dashboard/page": "/dashboard",
+  "/nexus/intelligence/page": "/nexus/intelligence",
+  "/login/page": "/login",
+  "/attack-path/page": "/attack-path",
+  "/exploitation/page": "/exploitation",
+  "/nexus/protocol/page": "/nexus/protocol",
+  "/ai-assistant/page": "/ai-assistant",
+  "/reports/[id]/page": "/reports/[id]",
+  "/recon/page": "/recon",
+  "/url-scan/page": "/url-scan",
+  "/reports/page": "/reports",
+  "/settings/theme/page": "/settings/theme",
+  "/scan/page": "/scan",
+  "/register/page": "/register",
+  "/scientific-lab/page": "/scientific-lab",
+  "/vulnerabilities/page": "/vulnerabilities",
+  "/page": "/"
+}
