@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Zap, Activity, BookOpen, Terminal, ChevronRight, AlertTriangle, ShieldCheck, Cpu, Globe } from 'lucide-react';
-import { nexusService } from '../../../services/apiClient';
-import CyberCard from '../../../components/CyberCard';
-import GlobalHeader from '../../../components/GlobalHeader';
+import { nexusService } from '../../services/apiClient';
+import CyberCard from '../../components/CyberCard';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const NexusIntelligenceView = ({ initialTab = 'intelligence', headerTitle, headerSubtitle }) => {
   const [activeTab, setActiveTab] = useState(initialTab);

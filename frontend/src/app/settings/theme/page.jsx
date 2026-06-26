@@ -1,9 +1,9 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../../../../../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext';
 import { Palette, Shield, Zap, Layout, CheckCircle2 } from 'lucide-react';
-import GlobalHeader from '../../../../../components/GlobalHeader';
+import GlobalHeader from '../../../components/GlobalHeader';
 
 const ThemeOption = ({ mode, title, description, isSelected, onSelect, colorClass }) => {
   const swatchConfig = {

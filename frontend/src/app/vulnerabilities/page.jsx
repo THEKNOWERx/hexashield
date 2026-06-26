@@ -4,12 +4,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Shield, CheckCircle, Info, ExternalLink, ChevronDown, Loader2, Bug, Zap, ShieldAlert, Cpu, Terminal, Activity, FlaskConical, Play, Target, Copy, Check, Search, MapPin, Share2 } from 'lucide-react';
-import { vulnService, exploitService } from '../../../services/apiClient';
-import { useSecurity } from '../../../context/SecurityContext';
-import CyberCard from '../../../components/CyberCard';
-import BreachSimulator from '../../../components/BreachSimulator';
-import GlobalHeader from '../../../components/GlobalHeader';
-import VoiceBriefing from '../../../components/VoiceBriefing';
+import { vulnService, exploitService } from '../../services/apiClient';
+import { useSecurity } from '../../context/SecurityContext';
+import CyberCard from '../../components/CyberCard';
+import BreachSimulator from '../../components/BreachSimulator';
+import GlobalHeader from '../../components/GlobalHeader';
+import VoiceBriefing from '../../components/VoiceBriefing';
 
 
 import { useRouter } from 'next/navigation';

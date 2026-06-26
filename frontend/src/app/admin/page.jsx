@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { adminService } from '../../../services/apiClient';
+import { adminService } from '../../services/apiClient';
 import { Users, Shield, History, Cpu, Server, Activity, AlertCircle, Settings, Download, Trash2, UserPlus, Edit3, X, Check, Power } from 'lucide-react';
-import GlobalHeader from '../../../components/GlobalHeader';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const AVAILABLE_PERMISSIONS = [
   { path: '/dashboard', label: 'Dashboard' },

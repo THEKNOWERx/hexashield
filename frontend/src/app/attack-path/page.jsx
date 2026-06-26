@@ -3,9 +3,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Shield, Zap, AlertCircle, Loader2, Play, Pause, RotateCcw, Globe, Server, Cpu, Target, ChevronRight, Activity, Command } from 'lucide-react';
-import { attackPathService } from '../../../services/apiClient';
+import { attackPathService } from '../../services/apiClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import GlobalHeader from '../../../components/GlobalHeader';
+import GlobalHeader from '../../components/GlobalHeader';
 
 // Helper to resolve icon by node type and label
 const getIcon = (type, label) => {

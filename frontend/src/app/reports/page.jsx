@@ -3,12 +3,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Filter, Loader2, CheckCircle, DownloadCloud, Trash2, Shield } from 'lucide-react';
-import { vulnService, reportsService } from '../../../services/apiClient';
+import { vulnService, reportsService } from '../../services/apiClient';
 import { motion } from 'framer-motion';
 
 import { useRouter } from 'next/navigation';
 
-import GlobalHeader from '../../../components/GlobalHeader';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const ReportGeneratorView = ({ headerTitle, headerSubtitle }) => {
   const router = useRouter();

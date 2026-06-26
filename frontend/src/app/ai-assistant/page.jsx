@@ -2,9 +2,9 @@
  
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Terminal, Info, Volume2, Shield, Zap } from 'lucide-react';
-import { nexusService } from '../../../services/apiClient';
-import { useVoiceAssistant } from '../../../hooks/useVoiceAssistant';
-import GlobalHeader from '../../../components/GlobalHeader';
+import { nexusService } from '../../services/apiClient';
+import { useVoiceAssistant } from '../../hooks/useVoiceAssistant';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const AIAssistant = ({ isMonochrome, onToggleMonochrome, headerTitle, headerSubtitle }) => {
   const [messages, setMessages] = useState([

@@ -8,9 +8,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { Shield, Lock, User, ArrowRight, Activity, Cpu, Eye, EyeOff } from 'lucide-react';
-import { authService } from '../../../services/apiClient';
-import { useNotification } from '../../../components/NotificationSystem';
-import CyberCard from '../../../components/CyberCard';
+import { authService } from '../../services/apiClient';
+import { useNotification } from '../../components/NotificationSystem';
+import CyberCard from '../../components/CyberCard';
 
 const Login = () => {
   const showNotification = useNotification();

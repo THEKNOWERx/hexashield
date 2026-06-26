@@ -4,11 +4,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Network, Search, Shield, Zap, Play, Terminal, Cloud, Activity, Loader2, Cpu, Globe, AlertCircle, ChevronRight, ShieldCheck, Lock, Server, ExternalLink } from 'lucide-react';
-import { scanService } from '../../../services/apiClient';
-import { useSecurity } from '../../../context/SecurityContext';
-import { useNotification } from '../../../components/NotificationSystem';
-import CyberCard from '../../../components/CyberCard';
-import GlobalHeader from '../../../components/GlobalHeader';
+import { scanService } from '../../services/apiClient';
+import { useSecurity } from '../../context/SecurityContext';
+import { useNotification } from '../../components/NotificationSystem';
+import CyberCard from '../../components/CyberCard';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const ExpandablePortRow = ({ port: p }) => {
   const [isDeepDive, setIsDeepDive] = useState(false);
