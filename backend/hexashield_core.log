@@ -529,3 +529,45 @@ Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0,
 Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
 2026-05-31 10:50:20,974 - NexusOrchestrator - INFO - Workflow Success for google.com. 4 ports, 7 findings.
 2026-06-01 19:20:42,648 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-09 15:28:03,082 - NexusOrchestrator - INFO - Initiating Unified Workflow for Target: 8.8.8.8 [ScanID: 3]
+2026-06-09 15:28:03,100 - HexScanner - INFO - Starting DEEP native scan for 8.8.8.8
+2026-06-09 15:28:06,701 - NexusOrchestrator - INFO - Discovery phase complete. Identified 3 services.
+2026-06-09 15:28:06,701 - NexusOrchestrator - INFO - Analyzing 2 potential vulnerabilities via AI Risk Engine...
+2026-06-09 15:28:06,760 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-09 15:28:08,797 - neo4j.session - WARNING - Transaction failed and will be retried in 0.8290182916491777s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-09 15:28:13,663 - neo4j.session - WARNING - Transaction failed and will be retried in 1.0316691151898167s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-09 15:28:16,752 - NexusOrchestrator - INFO - Workflow Success for 8.8.8.8. 3 ports, 2 findings.
+2026-06-26 19:02:36,432 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-26 20:54:22,681 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-26 21:43:07,490 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-26 22:03:03,062 - HexaShieldAI - INFO - AIRiskEngine Initialized. Training Complete. Model Accuracy: 96.83%
+2026-06-26 22:21:39,034 - NexusOrchestrator - INFO - Initiating Unified Workflow for Target: google.com [ScanID: 1]
+2026-06-26 22:21:39,055 - HexScanner - INFO - Starting DEEP native scan for google.com
+2026-06-26 22:21:42,179 - NexusOrchestrator - INFO - Discovery phase complete. Identified 2 services.
+2026-06-26 22:21:43,763 - NexusOrchestrator - INFO - Analyzing 7 potential vulnerabilities via AI Risk Engine...
+2026-06-26 22:21:45,807 - neo4j.session - WARNING - Transaction failed and will be retried in 0.8646533466530114s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:21:50,735 - neo4j.session - WARNING - Transaction failed and will be retried in 1.1500628579392884s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:21:55,930 - neo4j.session - WARNING - Transaction failed and will be retried in 1.1328017990860686s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:22:01,125 - neo4j.session - WARNING - Transaction failed and will be retried in 1.1853340351579085s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:22:06,353 - neo4j.session - WARNING - Transaction failed and will be retried in 0.9558434750905652s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:22:11,338 - neo4j.session - WARNING - Transaction failed and will be retried in 0.8094427052948002s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:22:16,210 - neo4j.session - WARNING - Transaction failed and will be retried in 1.135429091858521s (Couldn't connect to localhost:7687 (resolved to ('[::1]:7687', '127.0.0.1:7687')):
+Timed out trying to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0))
+Timed out trying to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)))
+2026-06-26 22:22:19,421 - NexusOrchestrator - INFO - Workflow Success for google.com. 2 ports, 7 findings.

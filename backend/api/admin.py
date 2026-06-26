@@ -35,22 +35,57 @@ async def get_system_stats(current_user: str = Depends(get_current_user), db: Se
         }
     }
 
+import json
+from pydantic import BaseModel
+
+class StatusUpdate(BaseModel):
+    is_active: int
+
+class PermissionsUpdate(BaseModel):
+    permissions: list
+
 @router.get("/users", dependencies=[Depends(check_role(["admin"]))])
 async def get_users(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    """List all registered users with status and last login."""
+    """List all registered users with status and permissions."""
     users = db.query(User).all()
 
     result = []
     for u in users:
+        try:
+            perms = json.loads(u.permissions) if u.permissions else []
+        except:
+            perms = []
+            
         result.append({
             "id": u.id,
             "username": u.username,
             "email": u.email,
             "role": u.role,
-            "status": "Active",
+            "is_active": getattr(u, 'is_active', 1),
+            "permissions": perms,
             "last_login": "2026-03-11 05:12"
         })
     return result
+
+@router.put("/users/{user_id}/status", dependencies=[Depends(check_role(["admin"]))])
+async def update_user_status(user_id: int, status_update: StatusUpdate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.is_active = status_update.is_active
+    db.commit()
+    return {"message": "Status updated successfully"}
+
+@router.put("/users/{user_id}/permissions", dependencies=[Depends(check_role(["admin"]))])
+async def update_user_permissions(user_id: int, perms_update: PermissionsUpdate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.permissions = json.dumps(perms_update.permissions)
+    db.commit()
+    return {"message": "Permissions updated successfully"}
 
 @router.post("/system/maintenance", dependencies=[Depends(check_role(["admin"]))])
 async def trigger_maintenance(current_user: str = Depends(get_current_user)):

@@ -1,3 +1,4 @@
+"use client";
  
 import React from 'react';
 import { AlertCircle, ShieldAlert, Info, Loader2 } from 'lucide-react';

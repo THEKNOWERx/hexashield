@@ -69,9 +69,21 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+    if getattr(user, 'is_active', 1) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive. Please contact administrator.",
+        )
+        
+    import json
+    try:
+        permissions = json.loads(user.permissions) if getattr(user, 'permissions', None) else []
+    except:
+        permissions = []
 
     access_token = auth.create_access_token(
-        data={"sub": user.username, "role": user.role}
+        data={"sub": user.username, "role": user.role, "permissions": permissions, "is_active": getattr(user, 'is_active', 1)}
     )
     return {"access_token": access_token, "token_type": "bearer"}
 

@@ -1,15 +1,22 @@
-import { LayoutDashboard, Shield, Search, Network, AlertTriangle, FileText, Settings, LogOut, BookOpen, Crosshair, Zap } from 'lucide-react';
-import { NavLink, Link } from 'react-router-dom';
+"use client";
+import { LayoutDashboard, Shield, Search, Network, AlertTriangle, FileText, Settings, LogOut, BookOpen, Crosshair, Zap, FlaskConical } from 'lucide-react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
-const decodeRole = () => {
+const decodeToken = () => {
+  if (typeof window === 'undefined') return { role: 'analyst', username: 'operator', permissions: null };
   try {
     const token = localStorage.getItem('access_token');
-    if (!token) return { role: 'analyst', username: 'operator' };
+    if (!token) return { role: 'analyst', username: 'operator', permissions: null };
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return { role: payload.role || 'analyst', username: payload.sub || 'operator' };
+    return { 
+      role: payload.role || 'analyst', 
+      username: payload.sub || 'operator',
+      permissions: payload.permissions || null
+    };
   } catch {
-    return { role: 'analyst', username: 'operator' };
+    return { role: 'analyst', username: 'operator', permissions: null };
   }
 };
 
@@ -21,24 +28,40 @@ const ROLE_LABELS = {
 };
 
 const menuItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { name: 'Reconnaissance', icon: Search, path: '/recon' },
-  { name: 'Network Scan', icon: Network, path: '/scan' },
-  { name: 'Vulnerabilities', icon: AlertTriangle, path: '/vulnerabilities' },
-  { name: 'Attack Path', icon: Crosshair, path: '/attack-path' },
-  { name: 'Reports', icon: FileText, path: '/reports' },
-  { name: 'Framework', icon: BookOpen, path: '/about' },
-  { name: 'Admin Panel', icon: Settings, path: '/admin' },
+  { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', allowedRoles: ['admin', 'analyst', 'security_analyst'] },
+  { name: 'Reconnaissance', icon: Search, path: '/recon', allowedRoles: ['admin', 'analyst', 'security_analyst'] },
+  { name: 'Network Scan', icon: Network, path: '/scan', allowedRoles: ['admin', 'analyst', 'security_analyst'] },
+  { name: 'Vulnerabilities', icon: AlertTriangle, path: '/vulnerabilities', allowedRoles: ['admin', 'analyst', 'security_analyst'] },
+  { name: 'Scientific Lab', icon: FlaskConical, path: '/scientific-lab', allowedRoles: ['admin', 'student'] },
+  { name: 'Attack Path', icon: Crosshair, path: '/attack-path', allowedRoles: ['admin', 'analyst', 'security_analyst', 'student'] },
+  { name: 'Reports', icon: FileText, path: '/reports', allowedRoles: ['admin', 'analyst', 'security_analyst'] },
+  { name: 'Framework', icon: BookOpen, path: '/about', allowedRoles: ['admin', 'analyst', 'security_analyst', 'student'] },
+  { name: 'Admin Panel', icon: Settings, path: '/admin', allowedRoles: ['admin'] },
 ];
 
+import React, { useState, useEffect } from 'react';
+
 const Sidebar = () => {
-  const { role, username } = decodeRole();
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [userData, setUserData] = useState({ role: 'analyst', username: 'operator', permissions: null });
+
+  useEffect(() => {
+    setUserData(decodeToken());
+    setMounted(true);
+  }, []);
+
+  const { role, username, permissions } = userData;
   const initials = (username || 'OP').slice(0, 2).toUpperCase();
+
+  if (!mounted) {
+    return <aside className="w-64 h-screen bg-cyber-surface border-r border-white/[0.06] flex flex-col z-40" />;
+  }
 
   return (
     <aside className="w-64 h-screen bg-cyber-surface border-r border-white/[0.06] flex flex-col z-40">
       {/* Brand */}
-      <Link to="/" className="flex items-center gap-3 px-6 h-[72px] border-b border-white/[0.06] group">
+      <Link href="/" className="flex items-center gap-3 px-6 h-[72px] border-b border-white/[0.06] group">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyber-blue to-blue-600 flex items-center justify-center shadow-blue-glow">
           <Shield className="text-white" size={18} strokeWidth={2.5} />
         </div>
@@ -53,33 +76,31 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1 custom-scrollbar">
         <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-600">Operations</p>
-        {menuItems.map((item) => {
+        {menuItems.filter(item => {
+          if (permissions) return permissions.includes(item.path);
+          return !item.allowedRoles || item.allowedRoles.includes(role);
+        }).map((item) => {
           const Icon = item.icon;
+          const isActive = pathname === item.path;
           return (
-            <NavLink
+            <Link
               key={item.name}
-              to={item.path}
-              className={({ isActive }) =>
-                `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
-                  isActive
-                    ? 'bg-cyber-blue/10 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
-                }`
-              }
+              href={item.path}
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
+                isActive
+                  ? 'bg-cyber-blue/10 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+              }`}
             >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.span
-                      layoutId="nav-active"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-cyber-blue"
-                    />
-                  )}
-                  <Icon size={18} className={isActive ? 'text-cyber-blue' : 'text-gray-500'} strokeWidth={2} />
-                  <span>{item.name}</span>
-                </>
+              {isActive && (
+                <motion.span
+                  layoutId="nav-active"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-cyber-blue"
+                />
               )}
-            </NavLink>
+              <Icon size={18} className={isActive ? 'text-cyber-blue' : 'text-gray-500'} strokeWidth={2} />
+              <span>{item.name}</span>
+            </Link>
           );
         })}
       </nav>

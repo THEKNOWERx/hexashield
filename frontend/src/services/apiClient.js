@@ -1,15 +1,12 @@
  
 import axios from 'axios';
 
-// Dynamic API resolution to handle various dev environments (8000, 8001, etc.)
-const API_PORT = window.location.port === '5173' || window.location.port === '5174' || window.location.port === '5175' ? '8000' : (window.location.port || '8000');
-const hostname = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
-const API_BASE_URL = `http://${hostname}:${API_PORT}/api/`;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-console.log("[DEBUG] API Base URL set to:", API_BASE_URL);
+console.log("[DEBUG] API Base URL set to:", API_URL);
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_URL}/api/`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -84,11 +81,14 @@ export const vulnService = {
 
 export const aiService = {
   chat: (query, context) => apiClient.post('ai/chat', { query, context }),
+  getScientificLab: () => apiClient.get('ai/scientific/lab'),
 };
 
 export const adminService = {
   getStats: () => apiClient.get('admin/stats'),
   getUsers: () => apiClient.get('admin/users'),
+  updateStatus: (userId, isActive) => apiClient.put(`admin/users/${userId}/status`, { is_active: isActive }),
+  updatePermissions: (userId, permissions) => apiClient.put(`admin/users/${userId}/permissions`, { permissions }),
 };
 
 export const reportsService = {

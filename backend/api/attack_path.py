@@ -15,7 +15,7 @@ async def get_latest_attack_path(db: Session = Depends(get_db), current_user: st
         or db.query(Scan).order_by(Scan.id.desc()).first()
     )
     if not scan:
-        return {"graph": {"nodes": [], "links": []}, "predictive_analysis": {}, "metrics": {}}
+        raise HTTPException(status_code=404, detail="No active targets or scans found. Please run a Network Scan first to generate an attack path.")
     
     # Run the Intelligence Engine
     result = attack_path_service.generate_graph(scan)

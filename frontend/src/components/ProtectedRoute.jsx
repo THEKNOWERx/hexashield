@@ -1,5 +1,8 @@
+"use client";
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+
+// TODO: handle react-router-dom imports: Navigate, Outlet
+
 
 const parseJwt = (token) => {
   try {

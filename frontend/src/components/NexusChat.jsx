@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Cpu, Shield, AlertTriangle, Zap, StopCircle, Volume2 } from 'lucide-react';
 import { nexusService } from '../services/apiClient';

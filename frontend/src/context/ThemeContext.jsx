@@ -1,11 +1,15 @@
+"use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('hexa_theme_mode') || 'cyber';
-  });
+  const [themeMode, setThemeMode] = useState('cyber');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('hexa_theme_mode');
+    if (saved) setThemeMode(saved);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('hexa_theme_mode', themeMode);

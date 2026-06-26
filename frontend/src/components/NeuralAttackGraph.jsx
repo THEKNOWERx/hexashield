@@ -1,6 +1,9 @@
+"use client";
 import React, { useRef, useMemo } from 'react';
-import ForceGraph2D from 'react-force-graph-2d';
+import dynamic from 'next/dynamic';
 import { Globe } from 'lucide-react';
+
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
 const NeuralAttackGraph = ({ data, height = 600 }) => {
   const fgRef = useRef();

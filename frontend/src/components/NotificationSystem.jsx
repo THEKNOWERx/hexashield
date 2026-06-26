@@ -1,3 +1,4 @@
+"use client";
 ﻿/* eslint-disable no-unused-vars, react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';

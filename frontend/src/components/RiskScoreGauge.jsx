@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+"use client";
+
 import React from 'react';
 import { Shield } from 'lucide-react';
 import { motion } from 'framer-motion';

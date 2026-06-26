@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+"use client";
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, MapPin } from 'lucide-react';

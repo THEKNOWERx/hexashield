@@ -1,13 +1,16 @@
+"use client";
 import { Bell, User, Palette, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { notificationsService } from '../services/apiClient';
 import NotificationDropdown from './NotificationDropdown';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigate } from 'react-router-dom';
+
+import { useRouter } from 'next/navigation';
+
 
 const GlobalHeader = ({ title, subtitle }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { themeMode } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
